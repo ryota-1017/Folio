@@ -1,0 +1,7 @@
+<resources>
+    <style name="Theme.Folio" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="android:windowBackground">@color/folio_bg</item>
+        <item name="android:statusBarColor">@color/folio_bg</item>
+        <item name="android:navigationBarColor">@color/folio_bg</item>
+    </style>
+</resources>

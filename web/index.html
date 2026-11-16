@@ -1,0 +1,182 @@
+﻿<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Folio — Digital Planner</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect x='6' y='6' width='52' height='52' rx='16' fill='%233D352E'/%3E%3Crect x='14' y='12' width='38' height='40' rx='6' fill='%23FAF8F4'/%3E%3Cpath d='M10 18h4v5h-4a2 2 0 0 1-2-2v-1a2 2 0 0 1 2-2zm0 9h4v5h-4a2 2 0 0 1-2-2v-1a2 2 0 0 1 2-2zm0 9h4v5h-4a2 2 0 0 1-2-2v-1a2 2 0 0 1 2-2z' fill='%23D8C3A5'/%3E%3Cline x1='33' y1='12' x2='33' y2='52' stroke='%23D6D0C6' stroke-width='1.5'/%3E%3Crect x='19' y='19' width='9' height='9' rx='2' fill='none' stroke='%23231F1C' stroke-width='2'/%3E%3Cline x1='38' y1='21' x2='47' y2='21' stroke='%236E665E' stroke-width='2' stroke-linecap='round'/%3E%3Cline x1='38' y1='27' x2='47' y2='27' stroke='%236E665E' stroke-width='2' stroke-linecap='round'/%3E%3Cline x1='38' y1='33' x2='44' y2='33' stroke='%236E665E' stroke-width='2' stroke-linecap='round'/%3E%3Cpath d='M41 12v10l-3-2-3 2V12z' fill='%23B83B2E'/%3E%3C/svg%3E" />
+  <meta name="theme-color" content="#FAF8F4" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="Folio" />
+  <link rel="manifest" href="/manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="/icon.svg" />
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      background-color: #DAD2C5;
+      color: #231F1C;
+      font-family: 'Inter', 'Segoe UI', 'Hiragino Kaku Gothic ProN', 'Yu Gothic UI', sans-serif;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+    }
+
+    .planner-cover {
+      background: radial-gradient(circle at 20% 15%, #E6DFD3 0%, #D5CCC0 55%, #C6BCB0 100%);
+    }
+
+    .planner-sheet {
+      background: linear-gradient(180deg, #FCFBF8 0%, #F7F3EC 100%);
+      box-shadow:
+        -10px 0 28px -6px rgba(35, 31, 28, 0.14),
+        0 24px 54px -14px rgba(35, 31, 28, 0.22),
+        0 6px 14px -4px rgba(35, 31, 28, 0.08),
+        inset 0 1.5px 0 rgba(255, 255, 255, 0.95);
+    }
+
+    .index-tab {
+      background: linear-gradient(180deg, #EFEAE1 0%, #E3DDD2 100%);
+      color: #635B52;
+      border-top: 1px solid rgba(255, 255, 255, 0.85);
+      border-bottom: 1px solid rgba(35, 31, 28, 0.08);
+      border-left: 1px solid rgba(255, 255, 255, 0.55);
+      box-shadow:
+        -4px 4px 10px -2px rgba(35, 31, 28, 0.10),
+        inset 1px 1px 0 rgba(255, 255, 255, 0.65);
+      transition: all 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .index-tab:hover {
+      background: linear-gradient(180deg, #F7F3EC 0%, #ECE6DC 100%);
+      color: #231F1C;
+      transform: translateX(-3px);
+    }
+    .index-tab-active {
+      background: linear-gradient(90deg, #FCFBF8 0%, #F9F6F0 100%);
+      color: #231F1C;
+      font-weight: 700;
+      box-shadow:
+        -6px 4px 14px -2px rgba(35, 31, 28, 0.14),
+        inset 1px 1.5px 0 rgba(255, 255, 255, 0.95);
+      z-index: 30;
+      transform: translateX(-6px);
+    }
+
+    .day-tile {
+      background: linear-gradient(180deg, #FFFFFF 0%, #F9F6F0 100%);
+      border: 1px solid rgba(214, 208, 198, 0.65);
+      box-shadow:
+        0 3px 10px -3px rgba(35, 31, 28, 0.06),
+        0 1px 3px rgba(35, 31, 28, 0.03),
+        inset 0 1px 0 rgba(255, 255, 255, 0.95);
+      transition: transform 0.18s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.18s ease, background 0.18s ease;
+    }
+    .day-tile:hover {
+      background: linear-gradient(180deg, #FFFFFF 0%, #F4EFE6 100%);
+      transform: translateY(-2px);
+      box-shadow:
+        0 10px 20px -6px rgba(35, 31, 28, 0.12),
+        0 3px 6px -2px rgba(35, 31, 28, 0.06),
+        inset 0 1px 0 rgba(255, 255, 255, 1);
+    }
+
+    .day-tile-slot {
+      background-color: rgba(235, 230, 221, 0.25);
+    }
+
+    .soft-card-3d {
+      background: linear-gradient(180deg, #FFFFFF 0%, #F8F4EC 100%);
+      border: 1px solid rgba(214, 208, 198, 0.65);
+      box-shadow:
+        0 8px 22px -6px rgba(35, 31, 28, 0.08),
+        0 2px 6px -1px rgba(35, 31, 28, 0.04),
+        inset 0 1.5px 0 rgba(255, 255, 255, 0.95);
+    }
+
+    .pill-track {
+      background-color: #EAE4DA;
+      box-shadow:
+        inset 0 2px 5px rgba(35, 31, 28, 0.09),
+        0 1px 0 rgba(255, 255, 255, 0.8);
+    }
+
+    .pill-thumb {
+      background: linear-gradient(180deg, #FFFFFF 0%, #F7F3EC 100%);
+      box-shadow:
+        0 3px 8px -1px rgba(35, 31, 28, 0.14),
+        inset 0 1px 0 rgba(255, 255, 255, 0.95);
+    }
+
+    .grid-hairline {
+      border-color: #E2DCD2;
+    }
+
+    .today-cell-frame {
+      background: linear-gradient(180deg, #FFFDF9 0%, #F6EFE3 100%) !important;
+      border: 2.5px solid #2A231D !important;
+      box-shadow:
+        0 10px 24px -6px rgba(35, 31, 28, 0.18),
+        0 3px 8px -2px rgba(35, 31, 28, 0.08),
+        inset 0 1.5px 0 rgba(255, 255, 255, 0.95) !important;
+      z-index: 10;
+    }
+
+    .paper-ruled {
+      background-image: repeating-linear-gradient(
+        to bottom,
+        transparent,
+        transparent 35px,
+        #E6E1D8 35px,
+        #E6E1D8 36px
+      );
+      line-height: 36px;
+    }
+    .paper-dots {
+      background-image: radial-gradient(#CBC4B9 1px, transparent 1px);
+      background-size: 20px 20px;
+      line-height: 30px;
+    }
+
+    .m3-fab {
+      box-shadow:
+        0 14px 28px -6px rgba(35, 31, 28, 0.28),
+        0 6px 12px -3px rgba(35, 31, 28, 0.14),
+        inset 0 1.5px 0 rgba(255, 255, 255, 0.25);
+    }
+    .m3-fab-light {
+      background: linear-gradient(180deg, #FFFFFF 0%, #F2ECE2 100%);
+      box-shadow:
+        0 12px 26px -6px rgba(35, 31, 28, 0.20),
+        0 4px 10px -2px rgba(35, 31, 28, 0.10),
+        inset 0 1.5px 0 rgba(255, 255, 255, 0.95);
+    }
+    .m3-fab-dark {
+      background: linear-gradient(180deg, #564D43 0%, #3A322B 100%);
+      box-shadow:
+        0 14px 28px -6px rgba(35, 31, 28, 0.34),
+        0 6px 12px -3px rgba(35, 31, 28, 0.18),
+        inset 0 1.5px 0 rgba(255, 255, 255, 0.22);
+    }
+
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #D0C9BE; border-radius: 9999px; }
+    .hide-scrollbar::-webkit-scrollbar { display: none; }
+    .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  </style>
+</head>
+<body class="planner-cover text-[#231F1C] antialiased">
+  <div id="app" class="flex h-screen w-full p-2 md:p-4 overflow-hidden box-border"></div>
+
+    <script src="/s1.js"></script>
+  <script src="/s2.js"></script>
+  <script src="/s3.js"></script>
+  <script src="/s4.js"></script>
+  <script src="/s5.js"></script>
+  <script src="/r1.js"></script>
+  <script src="/r2.js"></script>
+  <script src="/r3.js"></script>
+  <script src="/r4.js"></script>
+</body>
+</html>

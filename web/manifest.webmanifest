@@ -1,0 +1,17 @@
+{
+  "name": "Folio — Digital Planner",
+  "short_name": "Folio",
+  "description": "Material Design 3ベースの大学生向けデジタル手帳・時間割プランナー",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#DAD2C5",
+  "theme_color": "#FAF8F4",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
