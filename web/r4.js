@@ -15,14 +15,14 @@ ${m}
 `;
 }).join('');
 const mobileMonthStripHtml = isPortrait ? `
-<div class="px-3 pb-2 shrink-0">
-<div class="grid grid-cols-12 gap-1 p-1 rounded-2xl pill-track">
+<div class="px-3 pb-1.5 shrink-0">
+<div class="flex items-center overflow-x-auto hide-scrollbar gap-1 p-1 rounded-2xl pill-track">
 ${Array.from({ length: 12 }, (_, idx) => {
 const m = idx + 1;
 const active = m === state.currentMonth;
 return `
 <button type="button" onclick="selectMonth(${m})" title="${m}月"
-class="h-7 rounded-xl text-xs font-semibold flex items-center justify-center transition-all ${
+class="min-w-[34px] flex-1 h-7 rounded-xl text-xs font-semibold flex items-center justify-center transition-all shrink-0 ${
 active ? 'pill-thumb text-[#231F1C]' : 'text-[#6E665E]'
 }">
 ${m}
@@ -49,19 +49,19 @@ ${ICONS.keyboard_arrow_down}
 </nav>
 ` : ''}
 <div class="flex-1 planner-sheet ${isPortrait ? 'rounded-[24px]' : 'rounded-[32px]'} flex flex-col h-full overflow-hidden relative z-20 border border-white/70">
-<header class="${isPortrait ? 'px-3.5 pt-3 pb-1.5' : 'px-6 pt-5 pb-2.5'} flex items-center justify-between shrink-0">
-<div class="flex items-center ${isPortrait ? 'gap-2' : 'gap-3'}">
+<header class="${isPortrait ? 'px-3 pt-2.5 pb-1.5' : 'px-6 pt-5 pb-2.5'} flex items-center justify-between shrink-0 gap-2">
+<div class="flex items-center ${isPortrait ? 'gap-2' : 'gap-3'} min-w-0">
 ${state.appMode === 'calendar' && state.selectedDate ? `
 <button type="button" onclick="selectDate(null)" title="月間カレンダーに戻る"
-class="${isPortrait ? 'w-9 h-9' : 'mr-1 w-10 h-10'} rounded-full pill-thumb hover:scale-105 flex items-center justify-center text-[#231F1C] transition">
+class="${isPortrait ? 'w-8 h-8' : 'mr-1 w-10 h-10'} rounded-full pill-thumb hover:scale-105 flex items-center justify-center text-[#231F1C] transition shrink-0">
 ${ICONS.arrow_back}
 </button>
 ` : ''}
 <span class="${isPortrait ? 'text-3xl' : 'text-4xl md:text-5xl'} font-bold tracking-tighter leading-none text-[#231F1C]">
 ${state.currentMonth}
 </span>
-<div class="flex flex-col justify-center">
-<span class="${isPortrait ? 'text-xs' : 'text-sm md:text-base'} font-semibold leading-tight text-[#231F1C]">
+<div class="flex flex-col justify-center min-w-0">
+<span class="${isPortrait ? 'text-xs' : 'text-sm md:text-base'} font-semibold leading-tight text-[#231F1C] truncate">
 ${MONTH_NAMES_EN[state.currentMonth - 1]}
 </span>
 <div class="flex items-center gap-0.5 mt-0.5 text-xs text-[#5C554D]">
@@ -77,7 +77,7 @@ ${ICONS.chevron_right}
 </div>
 </div>
 </div>
-<div class="flex items-center ${isPortrait ? 'gap-1.5' : 'gap-3'}">
+<div class="flex items-center ${isPortrait ? 'gap-1' : 'gap-2.5'} shrink-0">
 <div class="inline-flex items-center pill-track p-1 rounded-full gap-0.5">
 <button type="button" onclick="setAppMode('calendar')" title="カレンダーモード"
 class="${isPortrait ? 'w-8 h-7' : 'w-10 h-8'} rounded-full flex items-center justify-center transition-all ${
@@ -96,15 +96,31 @@ state.appMode === 'university'
 ${ICONS.school}
 </button>
 </div>
+<button type="button" onclick="openModal('search')" title="予定を検索"
+class="${isPortrait ? 'w-8 h-8' : 'w-10 h-10'} rounded-full pill-thumb hover:scale-105 flex items-center justify-center text-[#231F1C] transition">
+${ICONS.search}
+</button>
+${isPortrait ? `
+<button type="button" onclick="${state.driveAccessToken ? 'handleSyncClick()' : 'handleGoogleLoginClick()'}" title="${state.driveAccessToken ? 'Googleと同期' : 'Googleでログイン'}"
+class="w-8 h-8 rounded-full pill-thumb flex items-center justify-center transition ${
+state.driveSyncStatus === 'synced' && state.driveAccessToken
+? 'text-[#244E32]'
+: state.driveSyncStatus === 'error'
+? 'text-[#B83B2E]'
+: 'text-[#224363]'
+} ${state.driveSyncStatus === 'syncing' ? 'animate-spin' : ''}">
+${state.driveAccessToken ? (state.driveSyncStatus === 'synced' ? ICONS.cloud_done : ICONS.sync) : ICONS.login}
+</button>
+` : `
 <div class="inline-flex items-center pill-track p-1 rounded-full gap-0.5">
 <button type="button" onclick="handleGoogleLoginClick()" title="${state.driveAccessToken ? 'Googleログイン済（クリックでアカウント切替）' : 'Googleでログイン'}"
-class="${isPortrait ? 'w-8 h-7' : 'w-9 h-8'} rounded-full flex items-center justify-center transition-all ${
+class="w-9 h-8 rounded-full flex items-center justify-center transition-all ${
 state.driveAccessToken ? 'pill-thumb text-[#244E32]' : 'text-[#224363] hover:text-[#1A334D]'
 }">
 ${state.driveAccessToken ? ICONS.account_circle : ICONS.login}
 </button>
 <button type="button" onclick="handleSyncClick()" title="${state.driveAccessToken ? (state.driveSyncStatus === 'synced' ? '同期済・自動同期ON（クリックで今すぐ再同期）' : 'Googleカレンダーと今すぐ同期') : 'Googleと同期（要ログイン）'}"
-class="${isPortrait ? 'w-8 h-7' : 'w-9 h-8'} rounded-full flex items-center justify-center transition-all ${
+class="w-9 h-8 rounded-full flex items-center justify-center transition-all ${
 state.driveSyncStatus === 'synced' && state.driveAccessToken
 ? 'pill-thumb text-[#244E32]'
 : state.driveSyncStatus === 'error'
@@ -114,8 +130,9 @@ state.driveSyncStatus === 'synced' && state.driveAccessToken
 ${state.driveSyncStatus === 'synced' && state.driveAccessToken ? ICONS.cloud_done : ICONS.sync}
 </button>
 </div>
+`}
 <button type="button" onclick="openModal('sync')" title="API・連携設定"
-class="${isPortrait ? 'w-9 h-9' : 'w-10 h-10'} rounded-full pill-thumb hover:scale-105 flex items-center justify-center text-[#231F1C] transition">
+class="${isPortrait ? 'w-8 h-8' : 'w-10 h-10'} rounded-full pill-thumb hover:scale-105 flex items-center justify-center text-[#231F1C] transition">
 ${ICONS.tune}
 </button>
 </div>
@@ -131,7 +148,7 @@ ${state.aiBannerMessage ? `
 </div>
 ` : ''}
 ${sheetBodyHtml}
-<div class="fixed ${isPortrait ? 'bottom-4 right-4 gap-2.5' : 'bottom-7 right-7 gap-3'} z-30 flex items-center">
+<div class="fixed ${isPortrait ? 'bottom-3.5 right-3.5 gap-2' : 'bottom-7 right-7 gap-3'} z-30 flex items-center">
 <button type="button" onclick="jumpToToday()" title="今日へ移動"
 class="${isPortrait ? 'p-3' : 'p-3.5'} rounded-full m3-fab-light text-[#231F1C] border border-white/90 flex items-center justify-center transition-transform hover:-translate-y-0.5 active:scale-95">
 ${ICONS.today}

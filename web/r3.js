@@ -1,11 +1,13 @@
 function renderModalHtml() {
 let modalHtml = "";
 if (state.modal === 'add') {
+const editingItem = state.editingItemId ? state.items.find(x => x.id === state.editingItemId) : null;
+const defaultDate = editingItem ? editingItem.date : (state.selectedDate || state.selectedMobileDay || TODAY_STR);
 modalHtml = `
 <div onclick="if(event.target===this) closeModal()" class="fixed inset-0 z-50 bg-[#231F1C]/35 backdrop-blur-xs flex items-center justify-center p-4">
 <div class="w-full max-w-md soft-card-3d rounded-[32px] p-6 m3-fab">
 <div class="flex items-center justify-between pb-4 border-b grid-hairline">
-<h3 class="text-base font-bold text-[#231F1C]">新規スケジュール追加</h3>
+<h3 class="text-base font-bold text-[#231F1C]">${editingItem ? 'スケジュール編集' : '新規スケジュール追加'}</h3>
 <button type="button" onclick="closeModal()" title="閉じる"
 class="w-9 h-9 rounded-full pill-thumb hover:scale-105 flex items-center justify-center transition">
 ${ICONS.close}
@@ -14,23 +16,23 @@ ${ICONS.close}
 <form onsubmit="submitNewItem(event)" class="mt-4 space-y-4 text-xs">
 <div>
 <label class="block font-semibold text-[#5C554D] mb-1.5">タイトル</label>
-<input id="new-title" type="text" required placeholder="予定のタイトルを入力"
+<input id="new-title" type="text" required value="${editingItem ? editingItem.title.replace(/"/g, '&quot;') : ''}" placeholder="予定のタイトルを入力"
 class="w-full px-4 py-3 rounded-2xl bg-[#EFECE6] shadow-inner text-sm text-[#231F1C] focus:outline-none focus:ring-2 focus:ring-[#5C554D]" />
 </div>
 <div class="grid grid-cols-3 gap-2.5">
 <div>
 <label class="block font-semibold text-[#5C554D] mb-1.5">日付</label>
-<input id="new-date" type="date" value="${state.selectedDate || TODAY_STR}"
+<input id="new-date" type="date" value="${defaultDate}"
 class="w-full px-3 py-2.5 rounded-2xl bg-[#EFECE6] shadow-inner text-[#231F1C] focus:outline-none focus:ring-2 focus:ring-[#5C554D]" />
 </div>
 <div>
 <label class="block font-semibold text-[#5C554D] mb-1.5">開始時間</label>
-<input id="new-start" type="time" value="10:00"
+<input id="new-start" type="time" value="${editingItem && editingItem.startTime ? editingItem.startTime : '10:00'}"
 class="w-full px-3 py-2.5 rounded-2xl bg-[#EFECE6] shadow-inner text-[#231F1C] focus:outline-none focus:ring-2 focus:ring-[#5C554D]" />
 </div>
 <div>
 <label class="block font-semibold text-[#5C554D] mb-1.5">終了時間</label>
-<input id="new-end" type="time" value="11:30"
+<input id="new-end" type="time" value="${editingItem && editingItem.endTime ? editingItem.endTime : '11:30'}"
 class="w-full px-3 py-2.5 rounded-2xl bg-[#EFECE6] shadow-inner text-[#231F1C] focus:outline-none focus:ring-2 focus:ring-[#5C554D]" />
 </div>
 </div>
@@ -54,7 +56,7 @@ ${ICONS[st.icon]}
 <div>
 <label class="block font-semibold text-[#5C554D] mb-1.5">メモ</label>
 <textarea id="new-memo" rows="3" placeholder="場所や持ち物、詳細メモを入力"
-class="w-full p-3.5 rounded-2xl bg-[#EFECE6] shadow-inner text-xs text-[#231F1C] resize-none focus:outline-none focus:ring-2 focus:ring-[#5C554D]"></textarea>
+class="w-full p-3.5 rounded-2xl bg-[#EFECE6] shadow-inner text-xs text-[#231F1C] resize-none focus:outline-none focus:ring-2 focus:ring-[#5C554D]">${editingItem && editingItem.memo ? editingItem.memo : ''}</textarea>
 </div>
 <div class="pt-1 flex justify-end">
 <button type="submit" title="保存"
@@ -68,7 +70,7 @@ ${ICONS.check}
 `;
 } else if (state.modal === 'course' && state.activeCourseSlot) {
 const course = state.courses.find(c => c.dayOfWeek === state.activeCourseSlot.dayOfWeek && c.period === state.activeCourseSlot.period);
-const dayLabel = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'][state.activeCourseSlot.dayOfWeek];
+const dayLabel = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][state.activeCourseSlot.dayOfWeek] || 'Day';
 modalHtml = `
 <div onclick="if(event.target===this) closeModal()" class="fixed inset-0 z-50 bg-[#231F1C]/35 backdrop-blur-xs flex items-center justify-center p-4">
 <div class="w-full max-w-md soft-card-3d rounded-[32px] p-6 m3-fab">
@@ -208,6 +210,93 @@ ${ICONS.check}
 </button>
 </div>
 </form>
+</div>
+</div>
+`;
+} else if (state.modal === 'search') {
+const q = (state.searchQuery || '').trim().toLowerCase();
+const matchedItems = q
+? state.items.filter(it =>
+(it.title || '').toLowerCase().includes(q) ||
+(it.memo || '').toLowerCase().includes(q) ||
+(it.location || '').toLowerCase().includes(q)
+).slice(0, 30)
+: [];
+modalHtml = `
+<div onclick="if(event.target===this) closeModal()" class="fixed inset-0 z-50 bg-[#231F1C]/35 backdrop-blur-xs flex items-center justify-center p-4">
+<div class="w-full max-w-md soft-card-3d rounded-[32px] p-6 m3-fab flex flex-col max-h-[80vh]">
+<div class="flex items-center justify-between pb-3 border-b grid-hairline shrink-0">
+<h3 class="text-base font-bold text-[#231F1C]">予定・ノート検索</h3>
+<button type="button" onclick="closeModal()" title="閉じる" class="w-9 h-9 rounded-full pill-thumb hover:scale-105 flex items-center justify-center transition">${ICONS.close}</button>
+</div>
+<div class="mt-3 shrink-0">
+<input type="text" value="${(state.searchQuery || '').replace(/"/g, '&quot;')}" oninput="setSearchQuery(this.value)" placeholder="授業名・レポート・キーワードを入力..." autofocus
+class="w-full px-4 py-2.5 rounded-2xl bg-[#EFECE6] shadow-inner text-sm text-[#231F1C] focus:outline-none focus:ring-2 focus:ring-[#5C554D]" />
+</div>
+<div class="mt-3 flex-1 overflow-y-auto space-y-2 pr-1">
+${!q ? '<div class="text-xs text-[#8C847A] py-8 text-center">キーワードを入力すると1年分の同期済み予定から検索します</div>' :
+matchedItems.length === 0 ? '<div class="text-xs text-[#8C847A] py-8 text-center">一致する予定が見つかりませんでした</div>' :
+matchedItems.map(it => {
+const st = CATEGORY_STYLES[it.category] || CATEGORY_STYLES.personal;
+return `
+<button type="button" onclick="closeModal(); selectDate('${it.date}');" class="w-full text-left p-3 rounded-2xl bg-[#F4EFE7] hover:bg-[#ECE5DA] border border-[#E5DFD5] transition flex items-center justify-between gap-2">
+<div class="min-w-0">
+<div class="text-xs font-bold text-[#231F1C] truncate">${it.title}</div>
+<div class="text-[11px] text-[#6E665E] mt-0.5">${it.date} ${it.startTime || '終日'}</div>
+</div>
+<span class="px-2 py-0.5 rounded-full text-[10px] font-semibold shrink-0 ${st.bg} ${st.text}">${st.label}</span>
+</button>
+`;
+}).join('')}
+</div>
+</div>
+</div>
+`;
+} else if (state.modal === 'timetable_audit') {
+const info = state.timetableDebugInfo || { included: [], skipped: [], rangeStart: '', rangeEnd: '' };
+modalHtml = `
+<div onclick="if(event.target===this) closeModal()" class="fixed inset-0 z-50 bg-[#231F1C]/35 backdrop-blur-xs flex items-center justify-center p-4">
+<div class="w-full max-w-lg soft-card-3d rounded-[32px] p-6 m3-fab flex flex-col max-h-[82vh]">
+<div class="flex items-center justify-between pb-3 border-b grid-hairline shrink-0">
+<div>
+<h3 class="text-base font-bold text-[#231F1C]">授業の自動反映・未反映確認</h3>
+<div class="text-[11px] text-[#6E665E]">対象期間: ${info.rangeStart || '-'} 〜 ${info.rangeEnd || '-'}（月〜土）</div>
+</div>
+<div class="flex items-center gap-2">
+<button type="button" onclick="reanalyzeTimetable()" title="直近3週間を再分析" class="px-3 h-8 rounded-full pill-thumb text-xs font-semibold text-[#231F1C] flex items-center gap-1">${ICONS.sync}<span>再分析</span></button>
+<button type="button" onclick="closeModal()" title="閉じる" class="w-9 h-9 rounded-full pill-thumb flex items-center justify-center">${ICONS.close}</button>
+</div>
+</div>
+<div class="mt-3 flex-1 overflow-y-auto space-y-4 pr-1 text-xs">
+<div>
+<div class="font-bold text-[#244E32] mb-1.5">時間割に反映済み（${info.included.length}件）</div>
+<div class="space-y-1.5">
+${info.included.length > 0 ? info.included.map(inc => `
+<div class="p-2.5 rounded-2xl bg-[#E5EFE8]/70 border border-[#C6DFCD] flex items-center justify-between gap-2">
+<div>
+<span class="font-bold text-[#244E32]">${inc.dayLabel}</span>
+<span class="ml-1.5 font-semibold text-[#231F1C]">${inc.name}</span>
+</div>
+<span class="text-[11px] text-[#244E32] shrink-0">${inc.time || ''}（${inc.count}回）</span>
+</div>
+`).join('') : '<div class="text-[#8C847A] py-2">自動反映された授業はありません</div>'}
+</div>
+</div>
+<div>
+<div class="font-bold text-[#8C2D25] mb-1.5">未反映・除外された予定（${info.skipped.length}件）</div>
+<div class="space-y-1.5">
+${info.skipped.length > 0 ? info.skipped.map(sk => `
+<div class="p-2.5 rounded-2xl bg-[#F4EFE7] border border-[#E5DFD5] flex items-center justify-between gap-2">
+<div class="min-w-0">
+<div class="font-bold text-[#231F1C] truncate">${sk.item.title}</div>
+<div class="text-[11px] text-[#6E665E]">${sk.item.date} ${sk.item.startTime || ''} ・ ${sk.reason}</div>
+</div>
+<button type="button" onclick="addSkippedToTimetable('${sk.item.id}')" class="px-2.5 py-1 rounded-full bg-[#231F1C] text-white text-[11px] font-semibold shrink-0 hover:opacity-90">追加</button>
+</div>
+`).join('') : '<div class="text-[#8C847A] py-2">未反映の授業予定はありません</div>'}
+</div>
+</div>
+</div>
 </div>
 </div>
 `;

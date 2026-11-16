@@ -175,6 +175,46 @@ const slotSuggestion = freeSlots.slice(0, 2).join(' と ');
 state.uniAiAdvice = `直近の締切「${urgent.title}（${urgent.date}）」があります。空きコマ（${slotSuggestion || '放課後'}）の90分を使って進めるのがおすすめです。`;
 render();
 };
+window.openEditItemModal = (id) => {
+const it = state.items.find(x => x.id === id);
+if (!it) return;
+state.editingItemId = id;
+state.newCategory = it.category || 'personal';
+state.modal = 'add';
+render();
+};
+window.addSkippedToTimetable = (itemId) => {
+const it = state.items.find(x => x.id === itemId);
+if (!it || !it.date) return;
+const [y, m, d] = it.date.split('-').map(Number);
+const dow = Math.min(5, (new Date(y, m - 1, d).getDay() + 6) % 7);
+let targetPeriod = 1;
+for (let p = 1; p <= UNIVERSITY_PERIODS.length; p++) {
+if (!state.courses.find(c => c.dayOfWeek === dow && c.period === p)) {
+targetPeriod = p;
+break;
+}
+}
+state.activeCourseSlot = { dayOfWeek: dow, period: targetPeriod };
+state.courses.push({
+id: 'c-' + Date.now(),
+dayOfWeek: dow,
+period: targetPeriod,
+timeLabel: it.startTime || '',
+name: cleanCourseTitle(it.title),
+room: extractRoomFromItems([it]),
+instructor: extractInstructorFromMemo(it.memo),
+credits: 2,
+evaluation: '未反映予定から手動追加',
+attended: 1,
+absent: 0,
+late: 0,
+isManual: true
+});
+state.aiBannerMessage = `「${cleanCourseTitle(it.title)}」を時間割に追加しました。`;
+analyzeTimetableFromRecentWeeks(false);
+render();
+};
 window.submitNewItem = async (e) => {
 e.preventDefault();
 const title = document.getElementById('new-title').value.trim();
@@ -183,6 +223,43 @@ const start = document.getElementById('new-start').value || '10:00';
 const end = document.getElementById('new-end').value || '11:00';
 const memo = document.getElementById('new-memo').value.trim();
 if (!title) return;
+if (state.editingItemId) {
+const idx = state.items.findIndex(x => x.id === state.editingItemId);
+if (idx >= 0) {
+const prev = state.items[idx];
+state.items[idx] = {
+...prev,
+date,
+title,
+startTime: start,
+endTime: end,
+category: state.newCategory || 'personal',
+memo: memo || undefined
+};
+const updated = state.items[idx];
+state.editingItemId = null;
+state.modal = null;
+render();
+if (state.driveAccessToken && updated.gcalEventId) {
+try {
+await fetch(`https://www.googleapis.com/calendar/v3/calendars/primary/events/${encodeURIComponent(updated.gcalEventId)}`, {
+method: 'PATCH',
+headers: {
+Authorization: `Bearer ${state.driveAccessToken}`,
+'Content-Type': 'application/json'
+},
+body: JSON.stringify({
+summary: title,
+description: memo || '',
+start: { dateTime: `${date}T${start}:00+09:00` },
+end: { dateTime: `${date}T${end}:00+09:00` }
+})
+});
+} catch (err) {}
+}
+return;
+}
+}
 const newItem = {
 id: 'new-' + Date.now(),
 date,

@@ -27,16 +27,23 @@ currentYear: _now.getFullYear(),
 currentMonth: _now.getMonth() + 1,
 appMode: 'calendar',
 selectedDate: null,
+selectedMobileDay: TODAY_STR,
 mobileDailyTab: 'schedule',
 mobileUniTab: 'timetable',
+uniSelectedDay: Math.min(5, (_now.getDay() + 6) % 7),
+uniGridMobile: false,
 paperStyle: 'ruled',
 modal: null,
 activeCourseSlot: null,
 editingCourseMode: false,
+editingItemId: null,
 newCategory: 'personal',
+categoryFilter: 'all',
+searchQuery: '',
 aiBannerMessage: null,
 aiLoading: false,
 uniAiAdvice: null,
+timetableDebugInfo: { included: [], skipped: [], rangeStart: '', rangeEnd: '' },
 geminiApiKey: localStorage.getItem(API_KEY_STORAGE) || '',
 googleClientId: localStorage.getItem(CLIENT_ID_STORAGE) || '',
 driveAccessToken: null,
@@ -169,36 +176,58 @@ if (firstLine) return firstLine.slice(0, 32);
 return '詳細なし';
 }
 function analyzeTimetableFromRecentWeeks(showBanner = false) {
+const dayLabels = ['月', '火', '水', '木', '金', '土'];
+const start21 = shiftDate(TODAY_STR, -21);
+const end21 = TODAY_STR;
+const next21 = shiftDate(TODAY_STR, 21);
 const collectInRange = (startStr, endStr) => state.items.filter(it => {
 if (!it.date || !it.startTime || it.category !== 'class') return false;
 if (it.date < startStr || it.date > endStr) return false;
-if (/登校|下校|移動|自習|宿題|HR|LHR|行事|鑑賞/.test(it.title || '')) return false;
 const [y, m, d] = it.date.split('-').map(Number);
 const dow = (new Date(y, m - 1, d).getDay() + 6) % 7;
-return dow >= 0 && dow <= 4;
+return dow >= 0 && dow <= 5;
 });
-let targetItems = collectInRange(shiftDate(TODAY_STR, -21), TODAY_STR);
-if (targetItems.length === 0) {
-targetItems = collectInRange(TODAY_STR, shiftDate(TODAY_STR, 21));
+let usedStart = start21;
+let usedEnd = end21;
+let allClassItems = collectInRange(start21, end21);
+if (allClassItems.length === 0) {
+usedStart = TODAY_STR;
+usedEnd = next21;
+allClassItems = collectInRange(TODAY_STR, next21);
 }
-if (targetItems.length === 0) return 0;
+const skipped = [];
+const targetItems = [];
+allClassItems.forEach(it => {
+const t = it.title || '';
+if (/登校|下校|移動|HR|LHR/.test(t)) {
+skipped.push({ item: it, reason: '登下校・HR等のため除外' });
+return;
+}
+if (/自習|宿題|行事|鑑賞/.test(t)) {
+skipped.push({ item: it, reason: '自習・行事等のため自動除外（手動追加可）' });
+return;
+}
+targetItems.push(it);
+});
+if (targetItems.length === 0) {
+state.timetableDebugInfo = { included: [], skipped, rangeStart: usedStart, rangeEnd: usedEnd };
+return 0;
+}
 const slotMap = new Map();
 targetItems.forEach(it => {
 const [y, m, d] = it.date.split('-').map(Number);
 const dow = (new Date(y, m - 1, d).getDay() + 6) % 7;
 const mins = timeToMinutes(it.startTime);
-const bucket = Math.round(mins / 20) * 20;
+const bucket = Math.round(mins / 15) * 15;
 const key = `${dow}-${bucket}`;
 if (!slotMap.has(key)) slotMap.set(key, { dow, bucket, items: [] });
 slotMap.get(key).items.push(it);
 });
-let entries = Array.from(slotMap.values());
-const repeated = entries.filter(e => e.items.length >= 2);
-if (repeated.length > 0) entries = repeated;
+const entries = Array.from(slotMap.values());
 const distinctBuckets = Array.from(new Set(entries.map(e => e.bucket))).sort((a, b) => a - b);
 const clusters = [];
 distinctBuckets.forEach(b => {
-if (clusters.length === 0 || b - clusters[clusters.length - 1].center > 25) {
+if (clusters.length === 0 || b - clusters[clusters.length - 1].center > 30) {
 clusters.push({ center: b, buckets: [b] });
 } else {
 clusters[clusters.length - 1].buckets.push(b);
@@ -211,11 +240,18 @@ cl.buckets.forEach(b => bucketToPeriod.set(b, idx + 1));
 const manualCourses = state.courses.filter(c => c.isManual);
 const occupied = new Set(manualCourses.map(c => `${c.dayOfWeek}-${c.period}`));
 const autoCourses = [];
+const included = [];
 entries.forEach(e => {
 const period = bucketToPeriod.get(e.bucket);
-if (!period) return;
+if (!period) {
+skipped.push({ item: e.items[0], reason: `時限枠(${UNIVERSITY_PERIODS.length}限)超過のため未反映` });
+return;
+}
 const slotKey = `${e.dow}-${period}`;
-if (occupied.has(slotKey)) return;
+if (occupied.has(slotKey)) {
+skipped.push({ item: e.items[0], reason: `${dayLabels[e.dow]}${period}限が既存枠と重複` });
+return;
+}
 occupied.add(slotKey);
 const freq = new Map();
 e.items.forEach(it => {
@@ -223,13 +259,18 @@ const name = cleanCourseTitle(it.title);
 if (!freq.has(name)) freq.set(name, { count: 0, sample: it });
 freq.get(name).count++;
 });
-const best = Array.from(freq.entries()).sort((a, b) => b[1].count - a[1].count)[0];
+const sortedNames = Array.from(freq.entries()).sort((a, b) => b[1].count - a[1].count);
+const best = sortedNames[0];
 if (!best) return;
 const [bestName, info] = best;
-autoCourses.push({
+sortedNames.slice(1).forEach(([altName, altInfo]) => {
+skipped.push({ item: altInfo.sample, reason: `${dayLabels[e.dow]}${period}限は「${bestName}」を優先` });
+});
+const courseObj = {
 id: `auto-${e.dow}-${period}`,
 dayOfWeek: e.dow,
 period,
+timeLabel: info.sample.startTime || '',
 name: bestName,
 room: extractRoomFromItems(e.items),
 instructor: extractInstructorFromMemo(info.sample.memo),
@@ -239,15 +280,27 @@ attended: e.items.length,
 absent: 0,
 late: 0,
 isAuto: true
+};
+autoCourses.push(courseObj);
+included.push({ dayLabel: `${dayLabels[e.dow]}${period}限`, name: bestName, count: e.items.length, time: info.sample.startTime });
 });
-});
+state.timetableDebugInfo = { included, skipped, rangeStart: usedStart, rangeEnd: usedEnd };
 if (autoCourses.length === 0) return 0;
 state.courses = [...manualCourses, ...autoCourses];
 if (showBanner) {
-state.aiBannerMessage = `直近3週間の予定を分析し、${autoCourses.length}コマの授業を時間割に反映しました。`;
+state.aiBannerMessage = `直近3週間の予定（月〜土）を分析し、${autoCourses.length}コマの授業を時間割に反映しました。`;
 }
 return autoCourses.length;
 }
+window.reanalyzeTimetable = () => {
+analyzeTimetableFromRecentWeeks(true);
+render();
+};
+window.setSelectedMobileDay = (dateStr) => { state.selectedMobileDay = dateStr; render(); };
+window.setUniSelectedDay = (d) => { state.uniSelectedDay = d; render(); };
+window.toggleUniGridMobile = () => { state.uniGridMobile = !state.uniGridMobile; render(); };
+window.setCategoryFilter = (cat) => { state.categoryFilter = cat; render(); };
+window.setSearchQuery = (q) => { state.searchQuery = q; render(); };
 window.setAppMode = (mode) => {
 state.appMode = mode;
 if (mode === 'university') analyzeTimetableFromRecentWeeks(true);
@@ -273,11 +326,22 @@ window.jumpToToday = () => {
 state.currentYear = _now.getFullYear();
 state.currentMonth = _now.getMonth() + 1;
 state.appMode = 'calendar';
-state.selectedDate = TODAY_STR;
+state.selectedMobileDay = TODAY_STR;
+if (!isPortraitLayout() || state.selectedDate) state.selectedDate = TODAY_STR;
 render();
 };
-window.openModal = (m) => { state.modal = m; render(); };
-window.closeModal = () => { state.modal = null; state.activeCourseSlot = null; state.editingCourseMode = false; render(); };
+window.openModal = (m) => {
+if (m === 'add') state.editingItemId = null;
+state.modal = m;
+render();
+};
+window.closeModal = () => {
+state.modal = null;
+state.activeCourseSlot = null;
+state.editingCourseMode = false;
+state.editingItemId = null;
+render();
+};
 window.closeBanner = () => { state.aiBannerMessage = null; render(); };
 window.selectNewCategory = (cat) => {
 state.newCategory = cat;
