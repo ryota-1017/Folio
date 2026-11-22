@@ -99,45 +99,100 @@ const filterFn = (it) => state.categoryFilter === 'all' || it.category === state
 if (!state.selectedDate) {
 const weeks = getCalendarWeeks(state.currentYear, state.currentMonth);
 if (isPortrait) {
+if (state.mobileHomeView === 'agenda') {
+const monthPrefix = `${state.currentYear}-${String(state.currentMonth).padStart(2, '0')}`;
+const monthItems = state.items
+.filter(it => it.date && it.date.startsWith(monthPrefix) && filterFn(it))
+.sort((a, b) => a.date.localeCompare(b.date) || timeToMinutes(a.startTime) - timeToMinutes(b.startTime));
+const byDate = new Map();
+monthItems.forEach(it => {
+if (!byDate.has(it.date)) byDate.set(it.date, []);
+byDate.get(it.date).push(it);
+});
+const agendaHtml = byDate.size > 0
+? Array.from(byDate.entries()).map(([dStr, list]) => {
+const isToday = dStr === TODAY_STR;
+return `
+<div class="space-y-1.5">
+<div class="flex items-center justify-between px-1 pt-1">
+<button type="button" onclick="selectDate('${dStr}')" class="flex items-center gap-1.5 text-left">
+<span class="text-xs font-bold ${isToday ? 'px-2 py-0.5 rounded-full bg-[#231F1C] text-white' : 'text-[#231F1C]'}">${dStr.slice(5).replace('-', '/')}</span>
+<span class="text-[11px] font-medium text-[#6E665E]">${getDayName(dStr).split('・')[1] || ''}</span>
+</button>
+<button type="button" onclick="selectDate('${dStr}')" class="text-[11px] font-semibold text-[#5C554D] hover:underline">ノート</button>
+</div>
+<div class="space-y-1.5">${renderGroupedScheduleListHtml(list, dStr)}</div>
+</div>
+`;
+}).join('')
+: `<div class="py-12 text-center text-xs text-[#8C847A]">${state.currentMonth}月の予定はありません</div>`;
+sheetBodyHtml = `
+<div class="flex-1 flex flex-col overflow-hidden px-3 pb-2 pt-0.5 gap-2">
+<div class="flex items-center justify-between gap-2 shrink-0">
+<span class="text-xs font-bold text-[#5C554D]">${state.currentMonth}月のスケジュール一覧</span>
+<div class="inline-flex items-center pill-track p-0.5 rounded-full gap-0.5">
+${[
+{ id: 'all', label: '全' },
+{ id: 'class', label: '学' },
+{ id: 'deadline', label: '塾' },
+{ id: 'parttime', label: '私' }
+].map(f => `
+<button type="button" onclick="setCategoryFilter('${f.id}')"
+class="px-2 h-6 rounded-full text-[10px] font-semibold transition-all ${
+state.categoryFilter === f.id ? 'pill-thumb text-[#231F1C]' : 'text-[#6E665E]'
+}">${f.label}</button>
+`).join('')}
+</div>
+</div>
+<div class="flex-1 min-h-0 overflow-y-auto space-y-3 pb-20 pr-0.5">${agendaHtml}</div>
+</div>
+`;
+} else {
 const activeDay = state.selectedMobileDay || TODAY_STR;
 const mobileRowsHtml = weeks.map(w => {
 const cellsHtml = w.days.map((cell, cIdx) => {
 if (!cell.dateStr) {
-return `<div class="h-10 rounded-xl day-tile-slot"></div>`;
+return `<div class="rounded-xl day-tile-slot"></div>`;
 }
-const dayItems = state.items.filter(it => it.date === cell.dateStr && filterFn(it));
-const dots = [];
-const seenCats = new Set();
-dayItems.forEach(it => {
-if (!seenCats.has(it.category) && dots.length < 4) {
-seenCats.add(it.category);
-dots.push((CATEGORY_STYLES[it.category] || CATEGORY_STYLES.personal).dot);
-}
+const dayItems = state.items
+.filter(it => it.date === cell.dateStr && filterFn(it))
+.sort((a, b) => timeToMinutes(a.startTime) - timeToMinutes(b.startTime));
+const classItems = dayItems.filter(it => it.category === 'class');
+const otherItems = dayItems.filter(it => it.category !== 'class');
+const cellChips = [...otherItems.filter(it => !it.startTime), ...otherItems.filter(it => Boolean(it.startTime))];
+if (classItems.length > 0) {
+cellChips.push({
+id: 'school-group-' + cell.dateStr,
+title: classItems.length === 1 ? cleanCourseTitle(classItems[0].title) : `学校(${classItems.length})`,
+category: 'class'
 });
+}
 const isToday = cell.dateStr === TODAY_STR;
 const isSelected = cell.dateStr === activeDay;
 const hasNote = Boolean(state.notes[cell.dateStr] && state.notes[cell.dateStr].trim());
 const numColor = cIdx === 5 ? 'text-[#2B5B84]' : cIdx === 6 ? 'text-[#B83B2E]' : 'text-[#231F1C]';
 return `
-<button type="button" onclick="setSelectedMobileDay('${cell.dateStr}')"
-class="h-10 rounded-xl flex flex-col items-center justify-between py-1 px-0.5 transition-all relative ${
-isSelected
-? 'bg-[#231F1C] text-white shadow-md scale-[1.03] z-10'
-: isToday
-? 'today-cell-frame'
-: 'day-tile'
-}">
-<span class="text-xs leading-none ${isSelected ? 'text-white font-bold' : `${numColor} ${isToday ? 'font-bold' : 'font-semibold'}`}">
+<div onclick="setSelectedMobileDay('${cell.dateStr}')"
+class="rounded-xl p-1 flex flex-col overflow-hidden min-h-0 cursor-pointer transition-all relative ${
+isToday ? 'today-cell-frame' : 'day-tile'
+} ${isSelected && !isToday ? 'ring-2 ring-[#231F1C] z-10' : isSelected && isToday ? 'ring-2 ring-[#8C2D25]' : ''}">
+<div class="flex items-center justify-between shrink-0 mb-0.5">
+<span class="text-[11px] leading-none ${numColor} ${isToday || isSelected ? 'font-bold' : 'font-semibold'}">
 ${cell.dayNumber}
 </span>
-<div class="flex items-center justify-center gap-0.5 min-h-[5px]">
-${dots.map(dotCls => `<span class="w-1.5 h-1.5 rounded-full ${isSelected ? 'bg-[#F2E6CE]' : dotCls}"></span>`).join('')}
-${hasNote ? `<span class="w-1.5 h-1.5 rounded-full ${isSelected ? 'bg-white' : 'bg-[#6D5E4C]'}"></span>` : ''}
+${hasNote ? `<span class="text-[8px] font-bold text-[#6D5E4C]">記</span>` : ''}
 </div>
-</button>
+<div class="flex-1 min-h-0 overflow-hidden space-y-0.5">
+${cellChips.slice(0, 2).map(ch => {
+const st = CATEGORY_STYLES[ch.category] || CATEGORY_STYLES.personal;
+return `<div class="px-1 py-[1px] rounded text-[9px] leading-[1.15] font-medium ${st.bg} ${st.text} line-clamp-2 break-all">${escapeHtml(ch.title)}</div>`;
+}).join('')}
+${cellChips.length > 2 ? `<div class="text-[8px] text-[#6E665E] text-right leading-none">+${cellChips.length - 2}</div>` : ''}
+</div>
+</div>
 `;
 }).join('');
-return `<div class="grid grid-cols-7 gap-1">${cellsHtml}</div>`;
+return `<div class="grid grid-cols-7 gap-1 flex-1 min-h-0">${cellsHtml}</div>`;
 }).join('');
 
 const activeItems = state.items
@@ -145,18 +200,18 @@ const activeItems = state.items
 .sort((a, b) => timeToMinutes(a.startTime) - timeToMinutes(b.startTime));
 
 sheetBodyHtml = `
-<div class="flex-1 flex flex-col overflow-hidden px-3 pb-2 pt-0.5 gap-2">
-<div class="shrink-0 space-y-1">
-<div class="grid grid-cols-7 gap-1 py-1 rounded-xl bg-[#EFEAE1]/70 border border-white/60 shadow-inner">
+<div class="flex-1 flex flex-col overflow-hidden px-3 pb-2 pt-0.5 gap-1.5">
+<div class="flex-[1.25] min-h-0 flex flex-col gap-1">
+<div class="grid grid-cols-7 gap-1 py-1 rounded-xl bg-[#EFEAE1]/70 border border-white/60 shadow-inner shrink-0">
 ${WEEKDAY_HEADERS.map(h => `<div class="text-center text-[11px] font-semibold ${h.color}">${h.ja}</div>`).join('')}
 </div>
-<div class="space-y-1">${mobileRowsHtml}</div>
+<div class="flex-1 min-h-0 flex flex-col gap-1">${mobileRowsHtml}</div>
 </div>
 <div class="flex items-center justify-between gap-2 shrink-0 pt-1 border-t grid-hairline">
-<div class="flex items-center gap-1.5 min-w-0">
+<button type="button" onclick="selectDate('${activeDay}')" class="flex items-center gap-1.5 min-w-0 text-left">
 <span class="text-sm font-bold text-[#231F1C] truncate">${activeDay.replace(/-/g, '.')}</span>
 <span class="text-[11px] font-medium text-[#6E665E] shrink-0">${getDayName(activeDay).split('・')[1] || ''}</span>
-</div>
+</button>
 <div class="flex items-center gap-1.5 shrink-0">
 <div class="inline-flex items-center pill-track p-0.5 rounded-full gap-0.5">
 ${[
@@ -181,11 +236,12 @@ ${ICONS.subject}
 <div class="flex-1 min-h-0 overflow-y-auto space-y-2 pb-20 pr-0.5">
 ${activeItems.length > 0
 ? renderGroupedScheduleListHtml(activeItems, activeDay)
-: `<div class="py-10 text-center text-xs text-[#8C847A]">この日の予定はありません</div>`
+: `<div class="py-6 text-center text-xs text-[#8C847A]">この日の予定はありません</div>`
 }
 </div>
 </div>
 `;
+}
 } else {
 const rowsHtml = weeks.map((w, rIdx) => {
 const isLastRow = rIdx === weeks.length - 1;

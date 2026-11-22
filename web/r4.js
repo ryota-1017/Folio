@@ -170,6 +170,12 @@ ${state.aiBannerMessage ? `
 </div>
 ` : ''}
 <div class="fixed ${isPortrait ? 'bottom-3.5 right-3.5 gap-2' : 'bottom-7 right-7 gap-3'} z-30 flex items-center">
+${isPortrait && state.appMode === 'calendar' && !state.selectedDate ? `
+<button type="button" onclick="toggleMobileHomeView()" title="${state.mobileHomeView === 'calendar' ? 'スケジュール順表示に切替' : 'カレンダー表示に切替'}"
+class="p-3 rounded-full m3-fab-light text-[#231F1C] border border-white/90 flex items-center justify-center transition-transform hover:-translate-y-0.5 active:scale-95">
+${state.mobileHomeView === 'calendar' ? ICONS.list_alt : ICONS.calendar_month}
+</button>
+` : ''}
 <button type="button" onclick="jumpToToday()" title="今日へ移動"
 class="${isPortrait ? 'p-3' : 'p-3.5'} rounded-full m3-fab-light text-[#231F1C] border border-white/90 flex items-center justify-center transition-transform hover:-translate-y-0.5 active:scale-95">
 ${ICONS.today}
