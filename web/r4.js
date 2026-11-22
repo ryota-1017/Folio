@@ -1,7 +1,9 @@
 function render() {
 saveState();
+syncToastTimer();
 const root = document.getElementById('app');
 const isPortrait = isPortraitLayout();
+const statusInfo = getNextStatusSummary();
 const steppedTabsHtml = Array.from({ length: 12 }, (_, idx) => {
 const m = idx + 1;
 const active = m === state.currentMonth;
@@ -138,16 +140,35 @@ ${ICONS.tune}
 </div>
 </header>
 ${mobileMonthStripHtml}
-${state.aiBannerMessage ? `
-<div class="${isPortrait ? 'mx-3 mb-1.5 px-3 py-1.5' : 'mx-6 mb-2 px-4 py-2'} rounded-2xl bg-gradient-to-b from-[#F2E6CE] to-[#E5D6B8] shadow-sm border border-white/60 text-[#231F1C] flex items-center justify-between text-xs font-medium">
-<div class="flex items-center gap-2">
-<span>${ICONS.auto_awesome}</span>
-<span>${state.aiBannerMessage}</span>
-</div>
-<button type="button" onclick="closeBanner()" title="閉じる" class="w-6 h-6 rounded-full hover:bg-black/5 flex items-center justify-center">${ICONS.close}</button>
+${(statusInfo.nextEvent || statusInfo.nextDeadline || state.isOffline) ? `
+<div class="${isPortrait ? 'px-3 pb-1' : 'px-6 pb-1.5'} flex items-center gap-1.5 overflow-x-auto hide-scrollbar shrink-0 text-[11px]">
+${state.isOffline ? `<span class="px-2.5 py-0.5 rounded-full bg-[#F9E4E2] text-[#8C2D25] font-semibold shrink-0">オフライン表示中</span>` : ''}
+${statusInfo.nextEvent ? `
+<button type="button" onclick="openItemDetail('${statusInfo.nextEvent.id}')" class="px-2.5 py-0.5 rounded-full bg-[#EFEAE1] hover:bg-[#E5DFD5] text-[#231F1C] font-medium flex items-center gap-1.5 shrink-0 transition">
+<span class="w-1.5 h-1.5 rounded-full bg-[#366B47]"></span>
+<span class="font-bold">次 ${statusInfo.nextEvent.startTime}</span>
+<span class="truncate max-w-[140px]">${escapeHtml(statusInfo.nextEvent.title)}</span>
+<span class="text-[#366B47] font-semibold">(${statusInfo.nextDiffText})</span>
+</button>
+` : ''}
+${statusInfo.nextDeadline ? `
+<button type="button" onclick="openItemDetail('${statusInfo.nextDeadline.id}')" class="px-2.5 py-0.5 rounded-full bg-[#E5EDF5] hover:bg-[#D8E5F2] text-[#224363] font-medium flex items-center gap-1.5 shrink-0 transition">
+<span class="w-1.5 h-1.5 rounded-full bg-[#2B5B84]"></span>
+<span class="font-bold">締切</span>
+<span class="truncate max-w-[140px]">${escapeHtml(statusInfo.nextDeadline.title)}</span>
+<span class="font-semibold">(${statusInfo.deadlineBadge})</span>
+</button>
+` : ''}
 </div>
 ` : ''}
 ${sheetBodyHtml}
+${state.aiBannerMessage ? `
+<div class="fixed top-3 left-1/2 -translate-x-1/2 z-50 max-w-[92vw] sm:max-w-md px-4 py-2 rounded-full bg-[#231F1C]/92 text-[#FAF8F4] shadow-lg border border-white/15 flex items-center gap-2.5 text-xs font-medium pointer-events-auto">
+<span class="text-[#F2E6CE] shrink-0">${ICONS.auto_awesome}</span>
+<span class="truncate">${escapeHtml(state.aiBannerMessage)}</span>
+<button type="button" onclick="closeBanner()" title="閉じる" class="w-5 h-5 rounded-full hover:bg-white/15 flex items-center justify-center shrink-0">${ICONS.close}</button>
+</div>
+` : ''}
 <div class="fixed ${isPortrait ? 'bottom-3.5 right-3.5 gap-2' : 'bottom-7 right-7 gap-3'} z-30 flex items-center">
 <button type="button" onclick="jumpToToday()" title="今日へ移動"
 class="${isPortrait ? 'p-3' : 'p-3.5'} rounded-full m3-fab-light text-[#231F1C] border border-white/90 flex items-center justify-center transition-transform hover:-translate-y-0.5 active:scale-95">

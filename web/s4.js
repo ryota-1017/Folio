@@ -51,7 +51,7 @@ return;
 }
 const tokenClient = google.accounts.oauth2.initTokenClient({
 client_id: cid,
-scope: 'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/calendar.events',
+scope: 'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/calendar.events openid email profile',
 callback: async (resp) => {
 if (resp.error || !resp.access_token) {
 if (!silent) {
@@ -67,6 +67,25 @@ state.driveAccessToken = resp.access_token;
 localStorage.setItem(TOKEN_STORAGE, resp.access_token);
 localStorage.setItem(TOKEN_EXP_STORAGE, String(expiresAt));
 localStorage.setItem(LOGGED_IN_STORAGE, '1');
+try {
+const profRes = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+headers: { Authorization: `Bearer ${resp.access_token}` }
+});
+if (profRes.ok) {
+const prof = await profRes.json();
+if (prof.email) {
+state.googleAccountEmail = prof.email;
+localStorage.setItem(EMAIL_STORAGE, prof.email);
+state.accountLinks[prof.email] = {
+email: prof.email,
+name: prof.name || prof.email,
+clientId: cid,
+updatedAt: new Date().toISOString()
+};
+localStorage.setItem(ACCOUNT_LINKS_STORAGE, JSON.stringify(state.accountLinks));
+}
+}
+} catch (e) {}
 if (state.modal === 'sync') state.modal = null;
 await syncWithGoogleDrive(silent);
 }
@@ -78,6 +97,10 @@ const title = ev.summary || '';
 const colorId = ev.colorId;
 if (state.categoryOverrides && state.categoryOverrides[title]) {
 return state.categoryOverrides[title];
+}
+if (Array.isArray(state.customCategoryRules)) {
+const matchedRule = state.customCategoryRules.find(r => r.keyword && title.includes(r.keyword));
+if (matchedRule) return matchedRule.category;
 }
 if (/睡眠|就寝|起床|仮眠|休憩|風呂|入浴|食事|朝食|昼食|夕食|朝ご飯|昼ご飯|夜ご飯|身支度|ルーティン/.test(title)) {
 return 'personal';
@@ -197,6 +220,12 @@ const remoteData = await dlRes.json();
 if (remoteData.notes) state.notes = { ...remoteData.notes, ...state.notes };
 if (Array.isArray(remoteData.courses) && remoteData.courses.length) state.courses = remoteData.courses;
 if (Array.isArray(remoteData.completedItemIds)) state.completedItemIds = remoteData.completedItemIds;
+if (Array.isArray(remoteData.customCategoryRules) && !state.customCategoryRules.length) state.customCategoryRules = remoteData.customCategoryRules;
+if (remoteData.categoryOverrides && typeof remoteData.categoryOverrides === 'object') state.categoryOverrides = { ...remoteData.categoryOverrides, ...state.categoryOverrides };
+if (remoteData.accountLinks && typeof remoteData.accountLinks === 'object') {
+state.accountLinks = { ...remoteData.accountLinks, ...state.accountLinks };
+localStorage.setItem(ACCOUNT_LINKS_STORAGE, JSON.stringify(state.accountLinks));
+}
 }
 await uploadToGoogleDrive(true);
 } else {
@@ -248,6 +277,10 @@ items: state.items,
 notes: state.notes,
 courses: state.courses,
 completedItemIds: state.completedItemIds,
+customCategoryRules: state.customCategoryRules,
+categoryOverrides: state.categoryOverrides,
+accountLinks: state.accountLinks,
+googleClientId: state.googleClientId,
 paperStyle: state.paperStyle,
 updatedAt: new Date().toISOString()
 }, null, 2);

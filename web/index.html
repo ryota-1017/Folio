@@ -178,5 +178,12 @@
   <script src="/r2.js"></script>
   <script src="/r3.js"></script>
   <script src="/r4.js"></script>
+  <script>
+    if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js').catch(() => {});
+      });
+    }
+  </script>
 </body>
 </html>

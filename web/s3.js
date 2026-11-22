@@ -320,9 +320,47 @@ items: state.items,
 notes: state.notes,
 courses: state.courses,
 completedItemIds: state.completedItemIds,
+customCategoryRules: state.customCategoryRules,
+categoryOverrides: state.categoryOverrides,
 paperStyle: state.paperStyle
 });
 }
+window.addCustomCategoryRule = () => {
+const kwEl = document.getElementById('rule-keyword-input');
+const catEl = document.getElementById('rule-category-select');
+const kw = kwEl ? kwEl.value.trim() : '';
+const cat = catEl ? catEl.value : 'personal';
+if (!kw) return;
+state.customCategoryRules = state.customCategoryRules.filter(r => r.keyword !== kw);
+state.customCategoryRules.unshift({ keyword: kw, category: cat });
+state.items.forEach(it => {
+if ((it.title || '').includes(kw) && !(state.categoryOverrides && state.categoryOverrides[it.title])) {
+it.category = cat;
+}
+});
+if (kwEl) kwEl.value = '';
+state.aiBannerMessage = `「${kw}」の自動分類ルールを追加しました。`;
+render();
+};
+window.removeCustomCategoryRule = (idx) => {
+state.customCategoryRules.splice(idx, 1);
+render();
+};
+window.selectLinkedAccount = (email) => {
+const link = state.accountLinks && state.accountLinks[email];
+if (!link || !link.clientId) return;
+state.googleClientId = link.clientId;
+state.googleAccountEmail = email;
+localStorage.setItem(CLIENT_ID_STORAGE, link.clientId);
+localStorage.setItem(EMAIL_STORAGE, email);
+window.connectGoogleDrive(false, '');
+};
+window.removeLinkedAccount = (email) => {
+if (!state.accountLinks) return;
+delete state.accountLinks[email];
+localStorage.setItem(ACCOUNT_LINKS_STORAGE, JSON.stringify(state.accountLinks));
+render();
+};
 function scheduleDriveSync() {
 if (!state.driveAccessToken) return;
 const currentPayload = buildSyncPayloadString();

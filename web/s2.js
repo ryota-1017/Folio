@@ -21,6 +21,8 @@ const CLIENT_ID_STORAGE = 'folio_google_client_id';
 const TOKEN_STORAGE = 'folio_drive_token';
 const TOKEN_EXP_STORAGE = 'folio_drive_token_exp';
 const LOGGED_IN_STORAGE = 'folio_google_logged_in';
+const EMAIL_STORAGE = 'folio_google_email';
+const ACCOUNT_LINKS_STORAGE = 'folio_account_links';
 const DRIVE_FILE_NAME = 'folio-planner-data.json';
 const state = {
 currentYear: _now.getFullYear(),
@@ -42,6 +44,7 @@ schoolDayModalDate: null,
 newCategory: 'personal',
 categoryFilter: 'all',
 categoryOverrides: {},
+customCategoryRules: [],
 searchQuery: '',
 aiBannerMessage: null,
 aiLoading: false,
@@ -49,6 +52,9 @@ uniAiAdvice: null,
 timetableDebugInfo: { included: [], skipped: [], rangeStart: '', rangeEnd: '' },
 geminiApiKey: localStorage.getItem(API_KEY_STORAGE) || '',
 googleClientId: localStorage.getItem(CLIENT_ID_STORAGE) || '',
+googleAccountEmail: localStorage.getItem(EMAIL_STORAGE) || '',
+accountLinks: (() => { try { return JSON.parse(localStorage.getItem(ACCOUNT_LINKS_STORAGE) || '{}') || {}; } catch (e) { return {}; } })(),
+isOffline: typeof navigator !== 'undefined' ? !navigator.onLine : false,
 driveAccessToken: null,
 driveFileId: null,
 driveSyncStatus: 'disconnected',
@@ -396,6 +402,102 @@ state.schoolDayModalDate = null;
 render();
 };
 window.closeBanner = () => { state.aiBannerMessage = null; render(); };
+let _toastTimer = null;
+let _lastToastMsg = null;
+function syncToastTimer() {
+if (state.aiBannerMessage && state.aiBannerMessage !== _lastToastMsg) {
+_lastToastMsg = state.aiBannerMessage;
+clearTimeout(_toastTimer);
+_toastTimer = setTimeout(() => {
+state.aiBannerMessage = null;
+_lastToastMsg = null;
+render();
+}, 3500);
+} else if (!state.aiBannerMessage) {
+_lastToastMsg = null;
+clearTimeout(_toastTimer);
+}
+}
+function getNextStatusSummary() {
+const now = new Date();
+const nowMins = now.getHours() * 60 + now.getMinutes();
+const todayUpcoming = state.items
+.filter(it => it.date === TODAY_STR && it.startTime && !it.isTransit && timeToMinutes(it.startTime) >= nowMins)
+.sort((a, b) => timeToMinutes(a.startTime) - timeToMinutes(b.startTime));
+const nextEvent = todayUpcoming[0] || null;
+let nextDiffText = '';
+if (nextEvent) {
+const diffMins = timeToMinutes(nextEvent.startTime) - nowMins;
+nextDiffText = diffMins === 0 ? 'まもなく' : diffMins < 60 ? `あと${diffMins}分` : `あと${Math.floor(diffMins / 60)}時間${diffMins % 60 > 0 ? (diffMins % 60) + '分' : ''}`;
+}
+const nextDeadline = state.items
+.filter(it => it.category === 'deadline' && !state.completedItemIds.includes(it.id) && it.date >= TODAY_STR)
+.sort((a, b) => a.date.localeCompare(b.date))[0] || null;
+let deadlineBadge = '';
+if (nextDeadline) {
+const d = daysUntil(TODAY_STR, nextDeadline.date);
+deadlineBadge = d === 0 ? '今日' : `あと${d}日`;
+}
+return { nextEvent, nextDiffText, nextDeadline, deadlineBadge };
+}
+function getPrepPickupItems() {
+const limitStr = shiftDate(TODAY_STR, 7);
+const results = [];
+state.items
+.filter(it => it.date >= TODAY_STR && it.date <= limitStr)
+.sort((a, b) => a.date.localeCompare(b.date) || timeToMinutes(a.startTime) - timeToMinutes(b.startTime))
+.forEach(it => {
+const plain = formatMemoText(it.memo);
+const text = `${it.title || ''}\n${plain}`;
+if (it.hasPrepAlert || /持ち物|持参|用意|小テスト|テスト|提出|締切|予習|復習|宿題|課題/.test(text)) {
+const lines = plain.split('\n').filter(l => /持ち物|持参|用意|小テスト|テスト|提出|締切|予習|復習|宿題|課題/.test(l));
+results.push({
+item: it,
+snippet: lines[0] || plain.split('\n')[0] || '詳細を確認'
+});
+}
+});
+return results.slice(0, 8);
+}
+window.addEventListener('online', () => {
+state.isOffline = false;
+render();
+if (state.driveAccessToken) syncWithGoogleDrive(true);
+});
+window.addEventListener('offline', () => {
+state.isOffline = true;
+render();
+});
+let _touchStartX = 0;
+let _touchStartY = 0;
+let _touchIgnore = false;
+window.addEventListener('touchstart', (e) => {
+if (e.touches.length !== 1 || state.modal) { _touchIgnore = true; return; }
+const el = e.target;
+if (el && el.closest && el.closest('input, textarea, select, .hide-scrollbar')) { _touchIgnore = true; return; }
+_touchIgnore = false;
+_touchStartX = e.touches[0].clientX;
+_touchStartY = e.touches[0].clientY;
+}, { passive: true });
+window.addEventListener('touchend', (e) => {
+if (_touchIgnore || e.changedTouches.length !== 1 || state.modal) return;
+const dx = e.changedTouches[0].clientX - _touchStartX;
+const dy = e.changedTouches[0].clientY - _touchStartY;
+if (Math.abs(dx) < 64 || Math.abs(dx) < Math.abs(dy) * 1.5) return;
+if (state.appMode === 'calendar') {
+if (state.selectedDate) {
+moveDay(dx < 0 ? 1 : -1);
+} else {
+const delta = dx < 0 ? 1 : -1;
+let nm = state.currentMonth + delta;
+let ny = state.currentYear;
+if (nm < 1) { nm = 12; ny--; }
+if (nm > 12) { nm = 1; ny++; }
+state.currentYear = ny;
+selectMonth(nm);
+}
+}
+}, { passive: true });
 window.selectNewCategory = (cat) => {
 state.newCategory = cat;
 document.querySelectorAll('[data-cat-btn]').forEach(btn => {

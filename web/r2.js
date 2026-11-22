@@ -167,6 +167,28 @@ ${ICONS.auto_awesome}
 ${state.uniAiAdvice || '右上のボタンを押すと、時間割の空きコマと課題リストを照合して学習計画を提案します。'}
 </p>
 </div>
+${(() => {
+const pickups = getPrepPickupItems();
+return `
+<div class="p-4 rounded-2xl bg-[#F4EFE7] border border-[#E5DFD5] shadow-sm">
+<div class="flex items-center justify-between mb-2">
+<h3 class="text-sm font-bold text-[#231F1C]">要予習・持ち物ピックアップ</h3>
+<span class="text-[11px] font-semibold text-[#6E665E]">直近7日間</span>
+</div>
+${pickups.length > 0 ? `<div class="space-y-1.5">
+${pickups.map(p => `
+<button type="button" onclick="openItemDetail('${p.item.id}')" class="w-full text-left p-2.5 rounded-xl bg-white/90 hover:bg-white border border-[#E5DFD5] transition flex items-start justify-between gap-2">
+<div class="min-w-0">
+<div class="text-xs font-bold text-[#231F1C] truncate">${escapeHtml(p.item.title)}</div>
+<div class="text-[11px] text-[#5C554D] truncate mt-0.5">${escapeHtml(p.snippet)}</div>
+</div>
+<span class="text-[10px] font-semibold text-[#8C2D25] shrink-0">${p.item.date.slice(5).replace('-', '/')}</span>
+</button>
+`).join('')}
+</div>` : '<div class="text-xs text-[#8C847A] py-2">直近7日間の持ち物・小テスト等のメモはありません</div>'}
+</div>
+`;
+})()}
 </section>
 `;
 

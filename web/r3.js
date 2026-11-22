@@ -148,14 +148,15 @@ ${[
 </div>
 `;
 } else if (state.modal === 'sync') {
+const linkedAccounts = Object.values(state.accountLinks || {});
 modalHtml = `
 <div onclick="if(event.target===this) closeModal()" class="fixed inset-0 z-50 bg-[#231F1C]/35 backdrop-blur-xs flex items-center justify-center p-4">
-<div class="w-full max-w-md soft-card-3d rounded-[32px] p-6 m3-fab">
-<div class="flex items-center justify-between pb-4 border-b grid-hairline">
+<div class="w-full max-w-md soft-card-3d rounded-[32px] p-6 m3-fab flex flex-col max-h-[86vh]">
+<div class="flex items-center justify-between pb-4 border-b grid-hairline shrink-0">
 <h3 class="text-base font-bold text-[#231F1C]">Google カレンダー / API 連携設定</h3>
 <button type="button" onclick="closeModal()" title="閉じる" class="w-9 h-9 rounded-full pill-thumb hover:scale-105 flex items-center justify-center transition">${ICONS.close}</button>
 </div>
-<form onsubmit="saveSettings(event)" class="mt-4 space-y-4 text-xs">
+<form onsubmit="saveSettings(event)" class="mt-4 space-y-4 text-xs flex-1 overflow-y-auto pr-1">
 <div>
 <label class="block font-semibold text-[#5C554D] mb-1.5">Gemini API キー</label>
 <input id="settings-gemini-key" type="password" value="${state.geminiApiKey}" placeholder="AIzaSy..."
@@ -163,9 +164,9 @@ class="w-full px-3.5 py-2.5 rounded-2xl bg-[#EFECE6] shadow-inner text-[#231F1C]
 </div>
 <div>
 <div class="flex items-center justify-between mb-1.5">
-<label class="font-semibold text-[#5C554D]">Google OAuth クライアントID（カレンダー・Drive同期）</label>
+<label class="font-semibold text-[#5C554D]">Google OAuth クライアントID</label>
 <span class="text-[11px] font-semibold ${state.driveSyncStatus === 'synced' ? 'text-[#244E32]' : 'text-[#6E665E]'}">
-${state.driveSyncStatus === 'synced' ? `同期済 ${state.driveLastSynced || ''}` : '未接続'}
+${state.driveSyncStatus === 'synced' ? `${state.googleAccountEmail ? state.googleAccountEmail + ' ・ ' : ''}同期済 ${state.driveLastSynced || ''}` : '未接続'}
 </span>
 </div>
 <div class="flex items-center gap-2">
@@ -186,7 +187,50 @@ ${ICONS.logout}
 </button>
 ` : ''}
 </div>
-<p class="text-[11px] text-[#6E665E] mt-1">一度Googleでログインすると自動で同期されます。リンクボタンで他端末にもクライアントIDを引き継げます。</p>
+<p class="text-[11px] text-[#6E665E] mt-1">ログインするとGoogleアカウントとクライアントIDが自動連結され、次回からログインだけで同期できます。</p>
+</div>
+${linkedAccounts.length > 0 ? `
+<div class="pt-2 border-t grid-hairline">
+<div class="font-semibold text-[#5C554D] mb-1.5">連結済みGoogleアカウント（ワンタップ同期）</div>
+<div class="space-y-1.5">
+${linkedAccounts.map(acc => `
+<div class="p-2.5 rounded-2xl bg-[#F4EFE7] border border-[#E5DFD5] flex items-center justify-between gap-2">
+<button type="button" onclick="selectLinkedAccount('${escapeHtml(acc.email)}')" class="text-left min-w-0 flex-1">
+<div class="font-bold text-[#231F1C] truncate">${escapeHtml(acc.email)}</div>
+<div class="text-[10px] text-[#6E665E] truncate">ID: ${escapeHtml(acc.clientId)}</div>
+</button>
+<button type="button" onclick="removeLinkedAccount('${escapeHtml(acc.email)}')" title="連結を解除" class="w-7 h-7 rounded-full hover:bg-black/5 flex items-center justify-center text-[#8C2D25] shrink-0">${ICONS.close}</button>
+</div>
+`).join('')}
+</div>
+</div>
+` : ''}
+<div class="pt-2 border-t grid-hairline">
+<div class="font-semibold text-[#5C554D] mb-1.5">自動カテゴリー分類ルール（キーワード指定）</div>
+<div class="flex items-center gap-1.5 mb-2">
+<input id="rule-keyword-input" type="text" placeholder="例: 睡眠, 塾, 部活"
+class="flex-1 px-3 py-2 rounded-xl bg-[#EFECE6] shadow-inner text-[#231F1C] focus:outline-none" />
+<select id="rule-category-select" class="px-2.5 py-2 rounded-xl bg-[#EFECE6] shadow-inner text-[#231F1C] focus:outline-none">
+<option value="personal">行事・その他</option>
+<option value="class">学校・授業</option>
+<option value="deadline">塾・重要手続</option>
+<option value="parttime">プライベート</option>
+</select>
+<button type="button" onclick="addCustomCategoryRule()" class="px-3 py-2 rounded-xl bg-[#231F1C] text-white font-semibold shrink-0">追加</button>
+</div>
+${state.customCategoryRules && state.customCategoryRules.length > 0 ? `
+<div class="flex flex-wrap gap-1.5">
+${state.customCategoryRules.map((r, idx) => {
+const rSt = CATEGORY_STYLES[r.category] || CATEGORY_STYLES.personal;
+return `
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold ${rSt.bg} ${rSt.text}">
+<span>${escapeHtml(r.keyword)} → ${rSt.label}</span>
+<button type="button" onclick="removeCustomCategoryRule(${idx})" class="hover:opacity-70 ml-0.5">×</button>
+</span>
+`;
+}).join('')}
+</div>
+` : '<div class="text-[11px] text-[#8C847A]">カスタムルールは未登録です</div>'}
 </div>
 <div class="pt-2 border-t grid-hairline">
 <div class="font-semibold text-[#5C554D] mb-2">データバックアップ（JSON）</div>

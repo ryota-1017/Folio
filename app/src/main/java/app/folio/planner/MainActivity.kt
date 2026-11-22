@@ -2,8 +2,11 @@ package app.folio.planner
 
 import android.annotation.SuppressLint
 import android.app.Dialog
+import android.content.Context
 import android.content.Intent
 import android.graphics.Color
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import android.net.Uri
 import android.os.Bundle
 import android.os.Message
@@ -114,7 +117,7 @@ class MainActivity : AppCompatActivity() {
             setSupportMultipleWindows(true)
             loadWithOverviewMode = true
             useWideViewPort = true
-            cacheMode = WebSettings.LOAD_DEFAULT
+            cacheMode = if (isNetworkAvailable()) WebSettings.LOAD_DEFAULT else WebSettings.LOAD_CACHE_ELSE_NETWORK
             userAgentString = buildCleanUserAgent(userAgentString)
         }
 
@@ -203,6 +206,13 @@ class MainActivity : AppCompatActivity() {
         dialog.setOnDismissListener {
             popup.destroy()
         }
+    }
+
+    private fun isNetworkAvailable(): Boolean {
+        val cm = getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager ?: return false
+        val network = cm.activeNetwork ?: return false
+        val caps = cm.getNetworkCapabilities(network) ?: return false
+        return caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
     }
 
     private fun buildCleanUserAgent(rawUa: String): String {

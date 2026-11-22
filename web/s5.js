@@ -29,6 +29,7 @@ if (Array.isArray(saved.courses)) state.courses = saved.courses.filter(c => !sam
 if (Array.isArray(saved.completedItemIds)) state.completedItemIds = saved.completedItemIds;
 if (typeof saved.showCompletedDeadlines === 'boolean') state.showCompletedDeadlines = saved.showCompletedDeadlines;
 if (saved.categoryOverrides && typeof saved.categoryOverrides === 'object') state.categoryOverrides = saved.categoryOverrides;
+if (Array.isArray(saved.customCategoryRules)) state.customCategoryRules = saved.customCategoryRules;
 if (saved.paperStyle) state.paperStyle = saved.paperStyle;
 state.items.forEach(it => {
 if (it.title && state.categoryOverrides[it.title]) {
@@ -59,6 +60,7 @@ courses: state.courses,
 completedItemIds: state.completedItemIds,
 showCompletedDeadlines: state.showCompletedDeadlines,
 categoryOverrides: state.categoryOverrides,
+customCategoryRules: state.customCategoryRules,
 paperStyle: state.paperStyle
 }));
 scheduleDriveSync();
