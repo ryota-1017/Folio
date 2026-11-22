@@ -25,6 +25,13 @@ jobs:
         with:
           gradle-version: 8.10.2
 
+      - name: Normalize Keystore Alias
+        run: |
+          OLD_ALIAS=$(keytool -list -keystore app/folio-signing.p12 -storetype PKCS12 -storepass folioandroid | grep -i "PrivateKeyEntry" | head -n1 | cut -d',' -f1 | xargs)
+          if [ -n "$OLD_ALIAS" ] && [ "$OLD_ALIAS" != "folio" ]; then
+            keytool -changealias -keystore app/folio-signing.p12 -storetype PKCS12 -storepass folioandroid -alias "$OLD_ALIAS" -destalias folio -keypass folioandroid
+          fi
+
       - name: Build Debug APK
         run: gradle assembleDebug --no-daemon -PversionCode=${{ github.run_number }} -PversionName=1.0.${{ github.run_number }}
 

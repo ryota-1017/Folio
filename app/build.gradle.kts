@@ -15,8 +15,22 @@ android {
         versionName = (project.findProperty("versionName") as String?) ?: "1.0.0"
     }
 
+    signingConfigs {
+        create("folioFixed") {
+            storeFile = file("folio-signing.p12")
+            storePassword = "folioandroid"
+            storeType = "PKCS12"
+            keyAlias = "folio"
+            keyPassword = "folioandroid"
+        }
+    }
+
     buildTypes {
+        debug {
+            signingConfig = signingConfigs.getByName("folioFixed")
+        }
         release {
+            signingConfig = signingConfigs.getByName("folioFixed")
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
