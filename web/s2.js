@@ -31,6 +31,7 @@ appMode: 'calendar',
 selectedDate: null,
 selectedMobileDay: TODAY_STR,
 mobileHomeView: 'calendar',
+showPastAgenda: false,
 mobileDailyTab: 'schedule',
 mobileUniTab: 'timetable',
 uniSelectedDay: Math.min(5, (_now.getDay() + 6) % 7),
@@ -370,7 +371,12 @@ if (mode === 'university') analyzeTimetableFromRecentWeeks(true);
 render();
 };
 window.setMobileDailyTab = (t) => { state.mobileDailyTab = t; render(); };
-window.toggleMobileHomeView = () => { state.mobileHomeView = state.mobileHomeView === 'calendar' ? 'agenda' : 'calendar'; render(); };
+window.toggleMobileHomeView = () => {
+state.mobileHomeView = state.mobileHomeView === 'calendar' ? 'agenda' : 'calendar';
+state.showPastAgenda = false;
+render();
+};
+window.togglePastAgenda = () => { state.showPastAgenda = !state.showPastAgenda; render(); };
 window.setMobileUniTab = (t) => { state.mobileUniTab = t; render(); };
 window.selectDate = (dateStr) => { state.selectedDate = dateStr || null; render(); };
 function isPortraitLayout() {

@@ -101,16 +101,21 @@ const weeks = getCalendarWeeks(state.currentYear, state.currentMonth);
 if (isPortrait) {
 if (state.mobileHomeView === 'agenda') {
 const monthPrefix = `${state.currentYear}-${String(state.currentMonth).padStart(2, '0')}`;
+const anchorDay = (state.selectedMobileDay && state.selectedMobileDay.startsWith(monthPrefix))
+? state.selectedMobileDay
+: (TODAY_STR.startsWith(monthPrefix) ? TODAY_STR : `${monthPrefix}-01`);
 const monthItems = state.items
 .filter(it => it.date && it.date.startsWith(monthPrefix) && filterFn(it))
 .sort((a, b) => a.date.localeCompare(b.date) || timeToMinutes(a.startTime) - timeToMinutes(b.startTime));
+const upcomingItems = monthItems.filter(it => it.date >= anchorDay);
+const pastItems = monthItems.filter(it => it.date < anchorDay);
+const buildAgendaGroupsHtml = (itemsList) => {
 const byDate = new Map();
-monthItems.forEach(it => {
+itemsList.forEach(it => {
 if (!byDate.has(it.date)) byDate.set(it.date, []);
 byDate.get(it.date).push(it);
 });
-const agendaHtml = byDate.size > 0
-? Array.from(byDate.entries()).map(([dStr, list]) => {
+return Array.from(byDate.entries()).map(([dStr, list]) => {
 const isToday = dStr === TODAY_STR;
 return `
 <div class="space-y-1.5">
@@ -124,13 +129,29 @@ return `
 <div class="space-y-1.5">${renderGroupedScheduleListHtml(list, dStr)}</div>
 </div>
 `;
-}).join('')
+}).join('');
+};
+const upcomingHtml = upcomingItems.length > 0
+? buildAgendaGroupsHtml(upcomingItems)
+: `<div class="py-8 text-center text-xs text-[#8C847A]">${anchorDay.slice(5).replace('-', '/')}以降の予定はありません</div>`;
+const pastSectionHtml = pastItems.length > 0 ? `
+<div class="pt-2 border-t grid-hairline space-y-2">
+<button type="button" onclick="togglePastAgenda()"
+class="w-full py-2 px-3 rounded-2xl bg-[#EFEAE1]/80 hover:bg-[#E7E0D4] text-[11px] font-semibold text-[#5C554D] flex items-center justify-between transition">
+<span>${anchorDay.slice(5).replace('-', '/')}より前の予定（${pastItems.length}件）</span>
+<span>${state.showPastAgenda ? '閉じる' : '表示する'}</span>
+</button>
+${state.showPastAgenda ? `<div class="space-y-3 opacity-85">${buildAgendaGroupsHtml(pastItems)}</div>` : ''}
+</div>
+` : '';
+const agendaHtml = monthItems.length > 0
+? `${upcomingHtml}${pastSectionHtml}`
 : `<div class="py-12 text-center text-xs text-[#8C847A]">${state.currentMonth}月の予定はありません</div>`;
 sheetBodyHtml = `
 <div class="flex-1 flex flex-col overflow-hidden px-3 pb-2 pt-0.5 gap-2">
 <div class="flex items-center justify-between gap-2 shrink-0">
-<span class="text-xs font-bold text-[#5C554D]">${state.currentMonth}月のスケジュール一覧</span>
-<div class="inline-flex items-center pill-track p-0.5 rounded-full gap-0.5">
+<span class="text-xs font-bold text-[#5C554D] truncate">${anchorDay.slice(5).replace('-', '/')}〜の予定</span>
+<div class="inline-flex items-center pill-track p-0.5 rounded-full gap-0.5 shrink-0">
 ${[
 { id: 'all', label: '全' },
 { id: 'class', label: '学' },
