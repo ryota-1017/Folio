@@ -76,14 +76,25 @@ tokenClient.requestAccessToken({ prompt: promptMode });
 function classifyGcalEvent(ev) {
 const title = ev.summary || '';
 const colorId = ev.colorId;
-if (/【塾】|フリーステップ|【立教大推薦】|出願|志願票|受験票|納金/.test(title)) return 'deadline';
-if (/【学校】|登校|下校|自習|宿題|HR|LHR|英語|国語|古典|日本史|体育|授業|講義|ゼミ/.test(title)) return 'class';
-if (/【プライベート】|外食|バイト|シフト/.test(title)) return 'parttime';
+if (state.categoryOverrides && state.categoryOverrides[title]) {
+return state.categoryOverrides[title];
+}
+if (/睡眠|就寝|起床|仮眠|休憩|風呂|入浴|食事|朝食|昼食|夕食|朝ご飯|昼ご飯|夜ご飯|身支度|ルーティン/.test(title)) {
+return 'personal';
+}
+if (/【塾】|フリーステップ|【立教大推薦】|出願|志願票|受験票|納金|模試|面談|課題|締切|レポート|提出|テスト|試験|小テスト|quiz/i.test(title)) {
+return 'deadline';
+}
+if (/【学校】|登校|下校|自習|宿題|HR|LHR|授業|講義|ゼミ|補講|ホームルーム|^(?:英語|国語|古典|現代文|漢文|日本史|世界史|地理|数学|物理|化学|生物|地学|体育|保健|情報|美術|音楽|家庭)/.test(title)) {
+return 'class';
+}
+if (/【プライベート】|外食|バイト|シフト|遊び|映画|旅行|買い物/.test(title)) {
+return 'parttime';
+}
 if (colorId === '11') return 'class';
 if (colorId === '9') return 'deadline';
 if (colorId === '2') return 'parttime';
 if (colorId === '8') return 'personal';
-if (/課題|締切|レポート|提出|テスト|試験|quiz/i.test(title)) return 'deadline';
 return 'personal';
 }
 async function readGoogleApiError(res) {

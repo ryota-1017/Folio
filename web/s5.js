@@ -28,7 +28,15 @@ state.notes = cleanedNotes;
 if (Array.isArray(saved.courses)) state.courses = saved.courses.filter(c => !sampleCourseIds.has(c.id));
 if (Array.isArray(saved.completedItemIds)) state.completedItemIds = saved.completedItemIds;
 if (typeof saved.showCompletedDeadlines === 'boolean') state.showCompletedDeadlines = saved.showCompletedDeadlines;
+if (saved.categoryOverrides && typeof saved.categoryOverrides === 'object') state.categoryOverrides = saved.categoryOverrides;
 if (saved.paperStyle) state.paperStyle = saved.paperStyle;
+state.items.forEach(it => {
+if (it.title && state.categoryOverrides[it.title]) {
+it.category = state.categoryOverrides[it.title];
+} else if (/睡眠|就寝|起床|仮眠|休憩|風呂|入浴|食事|朝食|昼食|夕食|朝ご飯|昼ご飯|夜ご飯|身支度|ルーティン/.test(it.title || '')) {
+it.category = 'personal';
+}
+});
 }
 const savedToken = localStorage.getItem(TOKEN_STORAGE);
 const savedExp = Number(localStorage.getItem(TOKEN_EXP_STORAGE) || '0');
@@ -50,6 +58,7 @@ notes: state.notes,
 courses: state.courses,
 completedItemIds: state.completedItemIds,
 showCompletedDeadlines: state.showCompletedDeadlines,
+categoryOverrides: state.categoryOverrides,
 paperStyle: state.paperStyle
 }));
 scheduleDriveSync();

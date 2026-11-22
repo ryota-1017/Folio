@@ -1,8 +1,9 @@
 function renderScheduleCardHtml(it) {
 const st = CATEGORY_STYLES[it.category] || CATEGORY_STYLES.personal;
+const formattedMemo = formatMemoText(it.memo);
 return `
-<div class="group relative rounded-[20px] p-3.5 sm:p-4 transition-all soft-card-3d hover:-translate-y-0.5 flex items-start gap-3 sm:gap-4">
-<div class="w-14 sm:w-16 shrink-0 pt-0.5 text-right">
+<div onclick="openItemDetail('${it.id}')" class="group relative rounded-[20px] p-3 sm:p-4 transition-all soft-card-3d hover:-translate-y-0.5 flex items-start gap-3 sm:gap-4 cursor-pointer">
+<div class="w-12 sm:w-16 shrink-0 pt-0.5 text-right">
 <div class="text-xs sm:text-sm font-bold text-[#231F1C]">${it.startTime || '終日'}</div>
 ${it.endTime ? `<div class="text-[11px] sm:text-xs text-[#6E665E] mt-0.5">${it.endTime}</div>` : ''}
 </div>
@@ -18,25 +19,77 @@ ${(it.hasPrepAlert || (it.memo && /小テスト|提出|締切|※要予習/.test
 ` : ''}
 </div>
 <div class="flex items-center gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition shrink-0">
-<button type="button" onclick="openEditItemModal('${it.id}')" title="編集"
+<button type="button" onclick="event.stopPropagation(); openEditItemModal('${it.id}')" title="編集"
 class="w-7 h-7 rounded-full hover:bg-black/5 flex items-center justify-center text-[#5C554D] transition">
 ${ICONS.edit}
 </button>
-<button type="button" onclick="deleteItem('${it.id}')" title="削除"
+<button type="button" onclick="event.stopPropagation(); deleteItem('${it.id}')" title="削除"
 class="w-7 h-7 rounded-full hover:bg-black/5 flex items-center justify-center text-[#8C2D25] transition">
 ${ICONS.delete}
 </button>
 </div>
 </div>
-<div class="text-sm sm:text-base font-bold text-[#231F1C] mt-1 leading-snug">${it.title}</div>
-${it.memo ? `
-<p class="mt-1.5 text-xs text-[#4A443E] leading-relaxed bg-[#F4EFE7] px-3 py-2 rounded-2xl border border-[#E5DFD5] break-words">
-${it.memo}
-</p>
+<div class="text-sm sm:text-base font-bold text-[#231F1C] mt-1 leading-snug">${escapeHtml(it.title)}</div>
+${formattedMemo ? `
+<p class="mt-1.5 text-xs text-[#4A443E] leading-relaxed bg-[#F4EFE7] px-3 py-2 rounded-2xl border border-[#E5DFD5] whitespace-pre-wrap line-clamp-2 break-words">${escapeHtml(formattedMemo)}</p>
 ` : ''}
 </div>
 </div>
 `;
+}
+
+function renderSchoolGroupCardHtml(classItems, targetDate) {
+const st = CATEGORY_STYLES.class;
+const sorted = [...classItems].sort((a, b) => timeToMinutes(a.startTime) - timeToMinutes(b.startTime));
+const firstStart = sorted.find(it => it.startTime)?.startTime || '';
+const lastEnd = [...sorted].reverse().find(it => it.endTime || it.startTime);
+const endStr = lastEnd ? (lastEnd.endTime || lastEnd.startTime || '') : '';
+const hasAlert = sorted.some(it => it.hasPrepAlert || (it.memo && /小テスト|提出|締切|※要予習/.test(it.memo)));
+const previewNames = sorted
+.filter(it => !it.isTransit && !/登校|下校|移動/.test(it.title || ''))
+.slice(0, 4)
+.map(it => cleanCourseTitle(it.title))
+.join(' ・ ');
+return `
+<div onclick="openSchoolDayModal('${targetDate}')" class="group relative rounded-[20px] p-3 sm:p-4 transition-all soft-card-3d hover:-translate-y-0.5 flex items-start gap-3 sm:gap-4 cursor-pointer">
+<div class="w-12 sm:w-16 shrink-0 pt-0.5 text-right">
+<div class="text-xs sm:text-sm font-bold text-[#231F1C]">${firstStart || '学校'}</div>
+${endStr ? `<div class="text-[11px] sm:text-xs text-[#6E665E] mt-0.5">${endStr}</div>` : ''}
+</div>
+<div class="w-1.5 self-stretch rounded-full ${st.dot}"></div>
+<div class="flex-1 min-w-0">
+<div class="flex items-center justify-between gap-2">
+<div class="flex items-center gap-1.5 flex-wrap">
+<span class="inline-block px-2.5 py-0.5 rounded-full text-[11px] font-semibold shadow-sm ${st.bg} ${st.text}">
+${st.label}
+</span>
+${hasAlert ? `<span class="inline-block px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#F9E4E2] text-[#8C2D25]">要予習・提出</span>` : ''}
+</div>
+<span class="text-[11px] font-semibold text-[#8C2D25] shrink-0">詳細を見る</span>
+</div>
+<div class="text-sm sm:text-base font-bold text-[#231F1C] mt-1 leading-snug">学校（${sorted.length}件）</div>
+${previewNames ? `<div class="mt-1 text-xs text-[#6E665E] truncate">${escapeHtml(previewNames)}</div>` : ''}
+</div>
+</div>
+`;
+}
+
+function renderGroupedScheduleListHtml(dayItems, targetDate) {
+const classItems = dayItems.filter(it => it.category === 'class');
+const otherItems = dayItems.filter(it => it.category !== 'class');
+const entries = otherItems.map(it => ({
+sortMins: timeToMinutes(it.startTime),
+html: renderScheduleCardHtml(it)
+}));
+if (classItems.length > 0) {
+const firstClass = [...classItems].sort((a, b) => timeToMinutes(a.startTime) - timeToMinutes(b.startTime))[0];
+entries.push({
+sortMins: timeToMinutes(firstClass.startTime),
+html: renderSchoolGroupCardHtml(classItems, targetDate)
+});
+}
+entries.sort((a, b) => a.sortMins - b.sortMins);
+return entries.map(e => e.html).join('');
 }
 
 function renderCalendarBody(isPortrait) {
@@ -50,7 +103,7 @@ const activeDay = state.selectedMobileDay || TODAY_STR;
 const mobileRowsHtml = weeks.map(w => {
 const cellsHtml = w.days.map((cell, cIdx) => {
 if (!cell.dateStr) {
-return `<div class="h-11 rounded-xl day-tile-slot"></div>`;
+return `<div class="h-10 rounded-xl day-tile-slot"></div>`;
 }
 const dayItems = state.items.filter(it => it.date === cell.dateStr && filterFn(it));
 const dots = [];
@@ -67,7 +120,7 @@ const hasNote = Boolean(state.notes[cell.dateStr] && state.notes[cell.dateStr].t
 const numColor = cIdx === 5 ? 'text-[#2B5B84]' : cIdx === 6 ? 'text-[#B83B2E]' : 'text-[#231F1C]';
 return `
 <button type="button" onclick="setSelectedMobileDay('${cell.dateStr}')"
-class="h-11 rounded-xl flex flex-col items-center justify-between py-1 px-0.5 transition-all relative ${
+class="h-10 rounded-xl flex flex-col items-center justify-between py-1 px-0.5 transition-all relative ${
 isSelected
 ? 'bg-[#231F1C] text-white shadow-md scale-[1.03] z-10'
 : isToday
@@ -77,7 +130,7 @@ isSelected
 <span class="text-xs leading-none ${isSelected ? 'text-white font-bold' : `${numColor} ${isToday ? 'font-bold' : 'font-semibold'}`}">
 ${cell.dayNumber}
 </span>
-<div class="flex items-center justify-center gap-0.5 min-h-[6px]">
+<div class="flex items-center justify-center gap-0.5 min-h-[5px]">
 ${dots.map(dotCls => `<span class="w-1.5 h-1.5 rounded-full ${isSelected ? 'bg-[#F2E6CE]' : dotCls}"></span>`).join('')}
 ${hasNote ? `<span class="w-1.5 h-1.5 rounded-full ${isSelected ? 'bg-white' : 'bg-[#6D5E4C]'}"></span>` : ''}
 </div>
@@ -127,7 +180,7 @@ ${ICONS.subject}
 </div>
 <div class="flex-1 min-h-0 overflow-y-auto space-y-2 pb-20 pr-0.5">
 ${activeItems.length > 0
-? activeItems.map(renderScheduleCardHtml).join('')
+? renderGroupedScheduleListHtml(activeItems, activeDay)
 : `<div class="py-10 text-center text-xs text-[#8C847A]">この日の予定はありません</div>`
 }
 </div>
@@ -162,6 +215,7 @@ id: 'school-group-' + cell.dateStr,
 title: classItems.length === 1 ? classItems[0].title : `学校（${classItems.length}件）`,
 startTime: '',
 category: 'class',
+isSchoolGroup: true,
 hasPrepAlert: classItems.some(it => it.hasPrepAlert || (it.memo && /小テスト|提出|締切|※要予習/.test(it.memo)))
 });
 }
@@ -171,11 +225,12 @@ const numColor = cIdx === 5 ? 'text-[#2B5B84]' : cIdx === 6 ? 'text-[#B83B2E]' :
 const renderEventChip = (it) => {
 const st = CATEGORY_STYLES[it.category] || CATEGORY_STYLES.personal;
 const transitCls = (it.isTransit || /登校|下校|移動/.test(it.title)) ? 'opacity-55' : '';
+const clickAttr = it.isSchoolGroup ? `onclick="event.stopPropagation(); openSchoolDayModal('${cell.dateStr}')"` : '';
 return `
-<div class="px-1.5 py-[1px] rounded-full text-[11px] leading-tight truncate flex items-center gap-1 shrink-0 shadow-xs border border-white/60 ${st.bg} ${st.text} ${transitCls}">
+<div ${clickAttr} class="px-1.5 py-[1px] rounded-full text-[11px] leading-tight truncate flex items-center gap-1 shrink-0 shadow-xs border border-white/60 ${st.bg} ${st.text} ${transitCls}">
 <span class="w-1.5 h-1.5 rounded-full shrink-0 ${st.dot}"></span>
 ${it.startTime ? `<span class="font-semibold opacity-80">${it.startTime}</span>` : ''}
-<span class="truncate">${it.title}</span>
+<span class="truncate">${escapeHtml(it.title)}</span>
 </div>
 `;
 };
@@ -220,45 +275,68 @@ const dayItems = state.items
 .filter(it => it.date === target)
 .sort((a, b) => timeToMinutes(a.startTime) - timeToMinutes(b.startTime));
 const scheduleCardsHtml = dayItems.length > 0
-? dayItems.map(renderScheduleCardHtml).join('')
+? renderGroupedScheduleListHtml(dayItems, target)
 : `<div class="h-full flex flex-col items-center justify-center text-center py-16 text-[#8C847A]"><p class="text-sm font-medium">この日の予定はまだ登録されていません</p></div>`;
+
+const mobileDailySwitchHtml = isPortrait ? `
+<div class="inline-flex items-center pill-track p-0.5 rounded-full gap-0.5 shrink-0">
+<button type="button" onclick="setMobileDailyTab('schedule')" title="予定一覧"
+class="px-2.5 h-7 rounded-full text-[11px] font-semibold flex items-center gap-1 transition-all ${
+state.mobileDailyTab === 'schedule' ? 'pill-thumb text-[#231F1C]' : 'text-[#6E665E]'
+}">
+${ICONS.event}
+<span>予定</span>
+</button>
+<button type="button" onclick="setMobileDailyTab('note')" title="Daily Note"
+class="px-2.5 h-7 rounded-full text-[11px] font-semibold flex items-center gap-1 transition-all ${
+state.mobileDailyTab === 'note' ? 'pill-thumb text-[#231F1C]' : 'text-[#6E665E]'
+}">
+${ICONS.subject}
+<span>ノート</span>
+</button>
+</div>
+` : '';
+
 const schedulePaneHtml = `
 <section class="${isPortrait ? 'p-3.5 rounded-[24px] flex-1' : 'p-5 rounded-[28px]'} flex flex-col overflow-hidden soft-card-3d">
-<div class="flex items-center justify-between pb-3 mb-3 border-b grid-hairline">
-<div class="flex items-center gap-2">
+<div class="flex items-center justify-between pb-2.5 mb-2.5 border-b grid-hairline gap-2">
+<div class="flex items-center gap-1.5 min-w-0">
 <button type="button" onclick="moveDay(-1)" title="前日"
-class="w-9 h-9 rounded-full pill-thumb hover:scale-105 flex items-center justify-center transition">
+class="w-8 h-8 sm:w-9 sm:h-9 rounded-full pill-thumb hover:scale-105 flex items-center justify-center transition shrink-0">
 ${ICONS.chevron_left}
 </button>
-<div class="px-2">
-<div class="${isPortrait ? 'text-lg' : 'text-xl'} font-bold tracking-tight text-[#231F1C]">${target.replace(/-/g, '.')}</div>
-<div class="text-xs font-medium text-[#6E665E]">${getDayName(target)}</div>
+<div class="px-1 min-w-0">
+<div class="${isPortrait ? 'text-base' : 'text-xl'} font-bold tracking-tight text-[#231F1C] truncate">${target.replace(/-/g, '.')}</div>
+<div class="text-[11px] sm:text-xs font-medium text-[#6E665E] truncate">${getDayName(target)}</div>
 </div>
 <button type="button" onclick="moveDay(1)" title="翌日"
-class="w-9 h-9 rounded-full pill-thumb hover:scale-105 flex items-center justify-center transition">
+class="w-8 h-8 sm:w-9 sm:h-9 rounded-full pill-thumb hover:scale-105 flex items-center justify-center transition shrink-0">
 ${ICONS.chevron_right}
 </button>
 </div>
+${mobileDailySwitchHtml}
 </div>
-<div class="flex-1 overflow-y-auto space-y-3 pr-1 pb-20">
+<div class="flex-1 overflow-y-auto space-y-2.5 pr-1 pb-20">
 ${scheduleCardsHtml}
 </div>
 </section>
 `;
+
 const notePaneHtml = `
 <section class="${isPortrait ? 'p-3.5 rounded-[24px] flex-1' : 'p-5 rounded-[28px]'} flex flex-col overflow-hidden soft-card-3d">
-<div class="flex items-center justify-between pb-3 mb-3 border-b grid-hairline">
-<div>
-<div class="text-base font-bold text-[#231F1C]">Daily Note</div>
-<div class="text-xs text-[#6E665E]">自由記述メモ・講義ノート</div>
+<div class="flex items-center justify-between pb-2.5 mb-2.5 border-b grid-hairline gap-2">
+<div class="min-w-0">
+<div class="text-sm sm:text-base font-bold text-[#231F1C] truncate">${isPortrait ? target.replace(/-/g, '.') + ' ノート' : 'Daily Note'}</div>
+<div class="text-[11px] sm:text-xs text-[#6E665E] truncate">自由記述メモ・講義ノート</div>
 </div>
-<div class="flex items-center gap-2">
+<div class="flex items-center gap-1.5 shrink-0">
+${mobileDailySwitchHtml}
 <button type="button" onclick="togglePaperStyle()" title="罫線 / ドット方眼 切替"
-class="w-9 h-9 rounded-full pill-thumb hover:scale-105 flex items-center justify-center text-[#4A443E] transition">
+class="w-8 h-8 sm:w-9 sm:h-9 rounded-full pill-thumb hover:scale-105 flex items-center justify-center text-[#4A443E] transition">
 ${state.paperStyle === 'ruled' ? ICONS.grid_4x4 : ICONS.subject}
 </button>
 <button type="button" onclick="aiExtractFromNote()" title="メモから予定を抽出"
-class="w-9 h-9 rounded-full bg-gradient-to-b from-[#F2E6CE] to-[#E2D3B5] shadow-md hover:scale-105 text-[#231F1C] flex items-center justify-center transition ${state.aiLoading ? 'animate-pulse' : ''}">
+class="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-gradient-to-b from-[#F2E6CE] to-[#E2D3B5] shadow-md hover:scale-105 text-[#231F1C] flex items-center justify-center transition ${state.aiLoading ? 'animate-pulse' : ''}">
 ${ICONS.auto_awesome}
 </button>
 </div>
@@ -274,25 +352,7 @@ state.paperStyle === 'ruled' ? 'paper-ruled' : 'paper-dots'
 `;
 if (isPortrait) {
 sheetBodyHtml = `
-<div class="flex-1 flex flex-col gap-2.5 px-3 pb-3 pt-1 overflow-hidden">
-<div class="flex justify-center shrink-0">
-<div class="inline-flex items-center pill-track p-1 rounded-full gap-1">
-<button type="button" onclick="setMobileDailyTab('schedule')" title="予定一覧"
-class="px-4 h-8 rounded-full text-xs font-semibold flex items-center gap-1.5 transition-all ${
-state.mobileDailyTab === 'schedule' ? 'pill-thumb text-[#231F1C]' : 'text-[#6E665E]'
-}">
-${ICONS.event}
-<span>予定</span>
-</button>
-<button type="button" onclick="setMobileDailyTab('note')" title="Daily Note"
-class="px-4 h-8 rounded-full text-xs font-semibold flex items-center gap-1.5 transition-all ${
-state.mobileDailyTab === 'note' ? 'pill-thumb text-[#231F1C]' : 'text-[#6E665E]'
-}">
-${ICONS.subject}
-<span>ノート</span>
-</button>
-</div>
-</div>
+<div class="flex-1 flex flex-col px-3 pb-3 pt-1 overflow-hidden">
 ${state.mobileDailyTab === 'schedule' ? schedulePaneHtml : notePaneHtml}
 </div>
 `;

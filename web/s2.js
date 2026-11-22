@@ -37,8 +37,11 @@ modal: null,
 activeCourseSlot: null,
 editingCourseMode: false,
 editingItemId: null,
+detailItemId: null,
+schoolDayModalDate: null,
 newCategory: 'personal',
 categoryFilter: 'all',
+categoryOverrides: {},
 searchQuery: '',
 aiBannerMessage: null,
 aiLoading: false,
@@ -301,6 +304,54 @@ window.setUniSelectedDay = (d) => { state.uniSelectedDay = d; render(); };
 window.toggleUniGridMobile = () => { state.uniGridMobile = !state.uniGridMobile; render(); };
 window.setCategoryFilter = (cat) => { state.categoryFilter = cat; render(); };
 window.setSearchQuery = (q) => { state.searchQuery = q; render(); };
+function escapeHtml(str) {
+return String(str || '')
+.replace(/&/g, '&amp;')
+.replace(/</g, '&lt;')
+.replace(/>/g, '&gt;')
+.replace(/"/g, '&quot;');
+}
+function formatMemoText(raw) {
+if (!raw) return '';
+return String(raw)
+.replace(/<\s*br\s*\/?>/gi, '\n')
+.replace(/<\/\s*(?:p|div|li|tr|h[1-6])\s*>/gi, '\n')
+.replace(/<\s*li[^>]*>/gi, '・')
+.replace(/<[^>]+>/g, '')
+.replace(/&nbsp;/gi, ' ')
+.replace(/&amp;/gi, '&')
+.replace(/&lt;/gi, '<')
+.replace(/&gt;/gi, '>')
+.replace(/&quot;/gi, '"')
+.replace(/&#39;/gi, "'")
+.replace(/\r\n/g, '\n')
+.replace(/\n{3,}/g, '\n\n')
+.trim();
+}
+window.openItemDetail = (id) => {
+state.detailItemId = id;
+state.modal = 'detail';
+render();
+};
+window.openSchoolDayModal = (dateStr) => {
+state.schoolDayModalDate = dateStr;
+state.modal = 'school_day';
+render();
+};
+window.changeItemCategory = (id, newCat) => {
+const target = state.items.find(x => x.id === id);
+if (!target) return;
+target.category = newCat;
+if (target.title) {
+state.categoryOverrides[target.title] = newCat;
+state.items.forEach(it => {
+if (it.title === target.title) it.category = newCat;
+});
+}
+const st = CATEGORY_STYLES[newCat] || CATEGORY_STYLES.personal;
+state.aiBannerMessage = `「${target.title}」を「${st.label}」に変更しました（今後の同期でも記憶されます）。`;
+render();
+};
 window.setAppMode = (mode) => {
 state.appMode = mode;
 if (mode === 'university') analyzeTimetableFromRecentWeeks(true);
@@ -340,6 +391,8 @@ state.modal = null;
 state.activeCourseSlot = null;
 state.editingCourseMode = false;
 state.editingItemId = null;
+state.detailItemId = null;
+state.schoolDayModalDate = null;
 render();
 };
 window.closeBanner = () => { state.aiBannerMessage = null; render(); };
