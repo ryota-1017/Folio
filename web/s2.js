@@ -57,6 +57,9 @@ googleClientId: localStorage.getItem(CLIENT_ID_STORAGE) || '',
 googleAccountEmail: localStorage.getItem(EMAIL_STORAGE) || '',
 accountLinks: (() => { try { return JSON.parse(localStorage.getItem(ACCOUNT_LINKS_STORAGE) || '{}') || {}; } catch (e) { return {}; } })(),
 isOffline: typeof navigator !== 'undefined' ? !navigator.onLine : false,
+needsRelogin: false,
+swUpdateReady: false,
+notificationsEnabled: localStorage.getItem('folio_notifications') === '1',
 driveAccessToken: null,
 driveFileId: null,
 driveSyncStatus: 'disconnected',
@@ -65,6 +68,7 @@ items: [],
 notes: {},
 courses: [],
 completedItemIds: [],
+trashItems: [],
 showCompletedDeadlines: true
 };
 function timeToMinutes(t) {
@@ -274,8 +278,14 @@ const sortedNames = Array.from(freq.entries()).sort((a, b) => b[1].count - a[1].
 const best = sortedNames[0];
 if (!best) return;
 const [bestName, info] = best;
-sortedNames.slice(1).forEach(([altName, altInfo]) => {
+const altCourses = sortedNames.slice(1).map(([altName, altInfo]) => {
 skipped.push({ item: altInfo.sample, reason: `${dayLabels[e.dow]}${period}限は「${bestName}」を優先` });
+return {
+name: altName,
+room: extractRoomFromItems([altInfo.sample]),
+instructor: extractInstructorFromMemo(altInfo.sample.memo),
+timeLabel: altInfo.sample.startTime || ''
+};
 });
 const courseObj = {
 id: `auto-${e.dow}-${period}`,
@@ -290,7 +300,8 @@ evaluation: 'カレンダー直近3週間から自動反映',
 attended: e.items.length,
 absent: 0,
 late: 0,
-isAuto: true
+isAuto: true,
+altCourses
 };
 autoCourses.push(courseObj);
 included.push({ dayLabel: `${dayLabels[e.dow]}${period}限`, name: bestName, count: e.items.length, time: info.sample.startTime });
@@ -378,7 +389,19 @@ render();
 };
 window.togglePastAgenda = () => { state.showPastAgenda = !state.showPastAgenda; render(); };
 window.setMobileUniTab = (t) => { state.mobileUniTab = t; render(); };
-window.selectDate = (dateStr) => { state.selectedDate = dateStr || null; render(); };
+window.selectDate = (dateStr) => {
+state.selectedDate = dateStr || null;
+if (dateStr && window.history && window.history.pushState) {
+try { window.history.pushState({ folioView: 'daily', dateStr }, ''); } catch (e) {}
+}
+render();
+};
+window.addEventListener('popstate', () => {
+if (state.modal) { closeModal(); return; }
+if (state.selectedDate) { state.selectedDate = null; render(); return; }
+if (state.appMode === 'university') { state.appMode = 'calendar'; render(); return; }
+if (state.mobileHomeView === 'agenda') { state.mobileHomeView = 'calendar'; render(); }
+});
 function isPortraitLayout() {
 return window.innerWidth < window.innerHeight || window.innerWidth < 768;
 }
@@ -487,7 +510,7 @@ let _touchIgnore = false;
 window.addEventListener('touchstart', (e) => {
 if (e.touches.length !== 1 || state.modal) { _touchIgnore = true; return; }
 const el = e.target;
-if (el && el.closest && el.closest('input, textarea, select, .hide-scrollbar')) { _touchIgnore = true; return; }
+if (el && el.closest && el.closest('input, textarea, select, button, a, .hide-scrollbar')) { _touchIgnore = true; return; }
 _touchIgnore = false;
 _touchStartX = e.touches[0].clientX;
 _touchStartY = e.touches[0].clientY;
@@ -496,7 +519,7 @@ window.addEventListener('touchend', (e) => {
 if (_touchIgnore || e.changedTouches.length !== 1 || state.modal) return;
 const dx = e.changedTouches[0].clientX - _touchStartX;
 const dy = e.changedTouches[0].clientY - _touchStartY;
-if (Math.abs(dx) < 64 || Math.abs(dx) < Math.abs(dy) * 1.5) return;
+if (Math.abs(dx) < 72 || Math.abs(dx) < Math.abs(dy) * 1.8) return;
 if (state.appMode === 'calendar') {
 if (state.selectedDate) {
 moveDay(dx < 0 ? 1 : -1);
@@ -511,6 +534,66 @@ selectMonth(nm);
 }
 }
 }, { passive: true });
+window.addEventListener('focusin', (e) => {
+const el = e.target;
+if (el && el.matches && el.matches('input, textarea, select')) {
+setTimeout(() => {
+try { el.scrollIntoView({ block: 'center', behavior: 'smooth' }); } catch (err) {}
+}, 280);
+}
+});
+window.toggleNotifications = async () => {
+if (!('Notification' in window)) {
+state.aiBannerMessage = 'このブラウザ・端末では通知機能がサポートされていません。';
+render();
+return;
+}
+if (!state.notificationsEnabled) {
+const perm = await Notification.requestPermission();
+if (perm !== 'granted') {
+state.aiBannerMessage = '通知の許可が得られませんでした。端末の設定をご確認ください。';
+render();
+return;
+}
+state.notificationsEnabled = true;
+localStorage.setItem('folio_notifications', '1');
+state.aiBannerMessage = '予定15分前の通知をONにしました。';
+} else {
+state.notificationsEnabled = false;
+localStorage.setItem('folio_notifications', '0');
+state.aiBannerMessage = '通知をOFFにしました。';
+}
+render();
+};
+const _notifiedIds = new Set();
+setInterval(() => {
+if (!state.notificationsEnabled || typeof Notification === 'undefined' || Notification.permission !== 'granted') return;
+const now = new Date();
+const todayKey = formatDateKey(now.getFullYear(), now.getMonth() + 1, now.getDate());
+const nowMins = now.getHours() * 60 + now.getMinutes();
+state.items.forEach(it => {
+if (it.date !== todayKey || !it.startTime || it.isTransit || _notifiedIds.has(it.id)) return;
+const diff = timeToMinutes(it.startTime) - nowMins;
+if (diff >= 1 && diff <= 15) {
+_notifiedIds.add(it.id);
+try {
+new Notification(`まもなく予定: ${it.title}`, {
+body: `${it.startTime}${it.endTime ? ' - ' + it.endTime : ''}${it.location ? ' @ ' + it.location : ''}`
+});
+} catch (e) {}
+}
+});
+}, 60000);
+window.applySwUpdate = () => {
+if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+navigator.serviceWorker.getRegistration().then(reg => {
+if (reg && reg.waiting) reg.waiting.postMessage({ type: 'SKIP_WAITING' });
+window.location.reload();
+}).catch(() => window.location.reload());
+} else {
+window.location.reload();
+}
+};
 window.selectNewCategory = (cat) => {
 state.newCategory = cat;
 document.querySelectorAll('[data-cat-btn]').forEach(btn => {

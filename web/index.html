@@ -184,7 +184,22 @@
   <script>
     if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js').catch(() => {});
+        navigator.serviceWorker.register('/sw.js').then((reg) => {
+          if (reg.waiting && navigator.serviceWorker.controller) {
+            state.swUpdateReady = true;
+            render();
+          }
+          reg.addEventListener('updatefound', () => {
+            const nw = reg.installing;
+            if (!nw) return;
+            nw.addEventListener('statechange', () => {
+              if (nw.state === 'installed' && navigator.serviceWorker.controller) {
+                state.swUpdateReady = true;
+                render();
+              }
+            });
+          });
+        }).catch(() => {});
       });
     }
   </script>

@@ -88,7 +88,7 @@ class MainActivity : AppCompatActivity() {
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
                 webView.evaluateJavascript(
-                    "(function(){ if(typeof state!=='undefined' && state.modal){ closeModal(); return 'handled'; } if(typeof state!=='undefined' && state.selectedDate){ selectDate(null); return 'handled'; } return 'none'; })()"
+                    "(function(){ if(typeof state!=='undefined' && state.modal){ closeModal(); return 'handled'; } if(typeof state!=='undefined' && state.selectedDate){ selectDate(null); return 'handled'; } if(typeof state!=='undefined' && state.appMode==='university'){ setAppMode('calendar'); return 'handled'; } if(typeof state!=='undefined' && state.mobileHomeView==='agenda'){ toggleMobileHomeView(); return 'handled'; } return 'none'; })()"
                 ) { res ->
                     if (res != "\"handled\"") {
                         if (webView.canGoBack()) {

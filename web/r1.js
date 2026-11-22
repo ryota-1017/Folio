@@ -1,8 +1,22 @@
 function renderScheduleCardHtml(it) {
 const st = CATEGORY_STYLES[it.category] || CATEGORY_STYLES.personal;
 const formattedMemo = formatMemoText(it.memo);
+let liveBadge = '';
+let liveRing = '';
+if (it.date === TODAY_STR && it.startTime && !it.isTransit) {
+const now = new Date();
+const nowMins = now.getHours() * 60 + now.getMinutes();
+const sMins = timeToMinutes(it.startTime);
+const eMins = it.endTime ? timeToMinutes(it.endTime) : sMins + 60;
+if (nowMins >= sMins && nowMins < eMins) {
+liveBadge = `<span class="inline-block px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#366B47] text-white">進行中</span>`;
+liveRing = 'ring-2 ring-[#366B47]/60';
+} else if (sMins > nowMins && sMins - nowMins <= 60) {
+liveBadge = `<span class="inline-block px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#F2E6CE] text-[#231F1C]">まもなく</span>`;
+}
+}
 return `
-<div onclick="openItemDetail('${it.id}')" class="group relative rounded-[20px] p-3 sm:p-4 transition-all soft-card-3d hover:-translate-y-0.5 flex items-start gap-3 sm:gap-4 cursor-pointer">
+<div onclick="openItemDetail('${it.id}')" class="group relative rounded-[20px] p-3 sm:p-4 transition-all soft-card-3d hover:-translate-y-0.5 flex items-start gap-3 sm:gap-4 cursor-pointer ${liveRing}">
 <div class="w-12 sm:w-16 shrink-0 pt-0.5 text-right">
 <div class="text-xs sm:text-sm font-bold text-[#231F1C]">${it.startTime || '終日'}</div>
 ${it.endTime ? `<div class="text-[11px] sm:text-xs text-[#6E665E] mt-0.5">${it.endTime}</div>` : ''}
@@ -14,6 +28,7 @@ ${it.endTime ? `<div class="text-[11px] sm:text-xs text-[#6E665E] mt-0.5">${it.e
 <span class="inline-block px-2.5 py-0.5 rounded-full text-[11px] font-semibold shadow-sm ${st.bg} ${st.text}">
 ${st.label}
 </span>
+${liveBadge}
 ${(it.hasPrepAlert || (it.memo && /小テスト|提出|締切|※要予習/.test(it.memo))) ? `
 <span class="inline-block px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#F9E4E2] text-[#8C2D25]">要予習・提出</span>
 ` : ''}
@@ -165,7 +180,7 @@ state.categoryFilter === f.id ? 'pill-thumb text-[#231F1C]' : 'text-[#6E665E]'
 `).join('')}
 </div>
 </div>
-<div class="flex-1 min-h-0 overflow-y-auto space-y-3 pb-20 pr-0.5">${agendaHtml}</div>
+<div data-scroll-key="agenda" class="flex-1 min-h-0 overflow-y-auto space-y-3 pb-20 pr-0.5">${agendaHtml}</div>
 </div>
 `;
 } else {
@@ -254,7 +269,7 @@ ${ICONS.subject}
 </button>
 </div>
 </div>
-<div class="flex-1 min-h-0 overflow-y-auto space-y-2 pb-20 pr-0.5">
+<div data-scroll-key="mobile-day" class="flex-1 min-h-0 overflow-y-auto space-y-2 pb-20 pr-0.5">
 ${activeItems.length > 0
 ? renderGroupedScheduleListHtml(activeItems, activeDay)
 : `<div class="py-6 text-center text-xs text-[#8C847A]">この日の予定はありません</div>`
@@ -393,7 +408,7 @@ ${ICONS.chevron_right}
 </div>
 ${mobileDailySwitchHtml}
 </div>
-<div class="flex-1 overflow-y-auto space-y-2.5 pr-1 pb-20">
+<div data-scroll-key="daily-schedule" class="flex-1 overflow-y-auto space-y-2.5 pr-1 pb-20">
 ${scheduleCardsHtml}
 </div>
 </section>

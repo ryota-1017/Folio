@@ -84,6 +84,7 @@ return;
 const expiresInSec = Number(resp.expires_in) || 3500;
 const expiresAt = Date.now() + Math.max(60, expiresInSec - 120) * 1000;
 state.driveAccessToken = resp.access_token;
+state.needsRelogin = false;
 localStorage.setItem(TOKEN_STORAGE, resp.access_token);
 localStorage.setItem(TOKEN_EXP_STORAGE, String(expiresAt));
 localStorage.setItem(LOGGED_IN_STORAGE, '1');
@@ -290,7 +291,8 @@ state.aiBannerMessage = `同期に失敗しました（カレンダー: ${gcalEr
 if (String(err.message || '').startsWith('401')) {
 clearStoredGoogleToken(false);
 state.driveSyncStatus = 'disconnected';
-if (!silent) state.aiBannerMessage = 'ログインの有効期限が切れました（401）。再度ログインしてください。';
+state.needsRelogin = true;
+if (!silent) state.aiBannerMessage = 'ログインの有効期限が切れました（401）。右上のアイコンから再ログインしてください。';
 } else {
 state.driveSyncStatus = 'error';
 if (!silent) state.aiBannerMessage = `同期に失敗しました（${err.message || '通信エラー'}）。`;

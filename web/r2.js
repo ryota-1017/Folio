@@ -74,7 +74,7 @@ ${course ? `
 <div class="text-sm font-bold text-[#224363] truncate">${course.name}</div>
 <div class="text-xs text-[#4A6A8A] truncate mt-0.5">${course.room || '詳細なし'} ・ ${course.credits}単位</div>
 </div>
-` : `<div class="text-xs text-[#8C847A]">空きコマ（タップして登録）</div>`}
+` : `<div class="text-xs text-[#8C847A]">空きコマ（90分・タップして登録）</div>`}
 </div>
 ${course ? `
 <div class="flex items-center gap-1 text-xs font-semibold shrink-0">

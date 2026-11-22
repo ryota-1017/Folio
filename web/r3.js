@@ -125,6 +125,19 @@ ${ICONS.check}
 <div class="text-lg font-bold text-[#231F1C]">${course.name}</div>
 <div class="text-xs text-[#5C554D] mt-1">${course.instructor} ・ ${course.room} ・ ${course.credits}単位</div>
 <div class="mt-2 text-xs bg-[#EFECE6] px-3.5 py-2.5 rounded-2xl text-[#231F1C] shadow-inner">評価基準: ${course.evaluation}</div>
+${Array.isArray(course.altCourses) && course.altCourses.length > 0 ? `
+<div class="mt-2 space-y-1">
+<div class="text-[11px] font-semibold text-[#5C554D]">同時間帯の別候補（隔週・複数授業切替）</div>
+<div class="flex flex-wrap gap-1.5">
+${course.altCourses.map((alt, aIdx) => `
+<button type="button" onclick="switchCourseCandidate('${course.id}', ${aIdx})"
+class="px-2.5 py-1 rounded-full bg-[#EFECE6] hover:bg-[#E5DFD5] text-[11px] font-medium text-[#231F1C] transition">
+${escapeHtml(alt.name)} に切替
+</button>
+`).join('')}
+</div>
+</div>
+` : ''}
 </div>
 <div class="grid grid-cols-3 gap-3">
 ${[
@@ -237,6 +250,35 @@ return `
 ` : '<div class="text-[11px] text-[#8C847A]">カスタムルールは未登録です</div>'}
 </div>
 <div class="pt-2 border-t grid-hairline">
+<div class="font-semibold text-[#5C554D] mb-2">リマインダー通知・端末管理</div>
+<div class="flex flex-wrap items-center gap-2">
+<button type="button" onclick="toggleNotifications()"
+class="px-3 py-2 rounded-2xl text-[11px] font-semibold transition ${state.notificationsEnabled ? 'bg-[#E5EFE8] text-[#244E32]' : 'pill-thumb text-[#5C554D]'}">
+${state.notificationsEnabled ? '予定15分前通知: ON' : '予定15分前通知: OFF'}
+</button>
+<button type="button" onclick="wipeLocalDeviceData()"
+class="px-3 py-2 rounded-2xl bg-[#F9E4E2] hover:bg-[#F3D5D2] text-[#8C2D25] text-[11px] font-semibold transition">
+端末データを消去してログアウト
+</button>
+</div>
+</div>
+${state.trashItems && state.trashItems.length > 0 ? `
+<div class="pt-2 border-t grid-hairline">
+<div class="font-semibold text-[#5C554D] mb-1.5">ゴミ箱（直近の削除から復元）</div>
+<div class="space-y-1.5 max-h-28 overflow-y-auto pr-0.5">
+${state.trashItems.slice(0, 8).map(tr => `
+<div class="p-2 rounded-xl bg-[#F4EFE7] border border-[#E5DFD5] flex items-center justify-between gap-2">
+<div class="min-w-0">
+<div class="font-semibold text-[#231F1C] truncate">${escapeHtml(tr.title)}</div>
+<div class="text-[10px] text-[#6E665E]">${tr.date || ''} ${tr.startTime || ''}</div>
+</div>
+<button type="button" onclick="restoreTrashedItem('${tr.id}')" class="px-2.5 py-1 rounded-full bg-[#231F1C] text-white text-[10px] font-semibold shrink-0">復元</button>
+</div>
+`).join('')}
+</div>
+</div>
+` : ''}
+<div class="pt-2 border-t grid-hairline">
 <div class="font-semibold text-[#5C554D] mb-2">データバックアップ（JSON）</div>
 <div class="flex items-center gap-3">
 <button type="button" onclick="exportBackupJson()" title="バックアップを書き出す"
@@ -287,7 +329,7 @@ matchedItems.length === 0 ? '<div class="text-xs text-[#8C847A] py-8 text-center
 matchedItems.map(it => {
 const st = CATEGORY_STYLES[it.category] || CATEGORY_STYLES.personal;
 return `
-<button type="button" onclick="closeModal(); selectDate('${it.date}');" class="w-full text-left p-3 rounded-2xl bg-[#F4EFE7] hover:bg-[#ECE5DA] border border-[#E5DFD5] transition flex items-center justify-between gap-2">
+<button type="button" onclick="selectDate('${it.date}'); openItemDetail('${it.id}');" class="w-full text-left p-3 rounded-2xl bg-[#F4EFE7] hover:bg-[#ECE5DA] border border-[#E5DFD5] transition flex items-center justify-between gap-2">
 <div class="min-w-0">
 <div class="text-xs font-bold text-[#231F1C] truncate">${it.title}</div>
 <div class="text-[11px] text-[#6E665E] mt-0.5">${it.date} ${it.startTime || '終日'}</div>

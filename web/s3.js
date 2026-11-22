@@ -1,6 +1,43 @@
-window.deleteItem = (id) => {
+window.deleteItem = async (id) => {
+const target = state.items.find(x => x.id === id);
+if (target) {
+state.trashItems = [{ ...target, deletedAt: new Date().toISOString() }, ...(state.trashItems || [])].slice(0, 20);
+}
 state.items = state.items.filter(x => x.id !== id);
 state.completedItemIds = state.completedItemIds.filter(cid => cid !== id);
+state.aiBannerMessage = target ? `「${target.title}」を削除しました（設定のゴミ箱から復元可）` : null;
+render();
+if (target && target.gcalEventId && state.driveAccessToken) {
+try {
+await fetch(`https://www.googleapis.com/calendar/v3/calendars/primary/events/${encodeURIComponent(target.gcalEventId)}`, {
+method: 'DELETE',
+headers: { Authorization: `Bearer ${state.driveAccessToken}` }
+});
+} catch (err) {}
+}
+};
+window.restoreTrashedItem = (id) => {
+const idx = (state.trashItems || []).findIndex(x => x.id === id);
+if (idx < 0) return;
+const restored = { ...state.trashItems[idx] };
+delete restored.deletedAt;
+delete restored.gcalEventId;
+state.trashItems.splice(idx, 1);
+state.items.push(restored);
+state.aiBannerMessage = `「${restored.title}」を復元しました。`;
+render();
+};
+window.switchCourseCandidate = (courseId, altIdx) => {
+const c = state.courses.find(x => x.id === courseId);
+if (!c || !Array.isArray(c.altCourses) || !c.altCourses[altIdx]) return;
+const picked = c.altCourses[altIdx];
+const prev = { name: c.name, room: c.room, instructor: c.instructor, timeLabel: c.timeLabel };
+c.altCourses[altIdx] = prev;
+c.name = picked.name;
+c.room = picked.room || '詳細なし';
+c.instructor = picked.instructor || '未設定';
+c.timeLabel = picked.timeLabel || c.timeLabel;
+state.aiBannerMessage = `授業を「${c.name}」に切り替えました。`;
 render();
 };
 window.toggleDeadlineDone = (id) => {
@@ -384,7 +421,26 @@ state.driveLastSynced = null;
 }
 window.disconnectGoogleDrive = () => {
 clearStoredGoogleToken(true);
+state.needsRelogin = false;
 state.aiBannerMessage = 'Googleアカウントからログアウトしました。';
+render();
+};
+window.wipeLocalDeviceData = () => {
+if (!confirm('この端末内の予定キャッシュ・APIキー・クライアントID・ログイン情報をすべて消去しますか？（Googleドライブ上のデータは消えません）')) return;
+clearStoredGoogleToken(true);
+[STORAGE_KEY, API_KEY_STORAGE, CLIENT_ID_STORAGE, EMAIL_STORAGE, ACCOUNT_LINKS_STORAGE, 'folio_notifications'].forEach(k => localStorage.removeItem(k));
+state.geminiApiKey = '';
+state.googleClientId = '';
+state.googleAccountEmail = '';
+state.accountLinks = {};
+state.items = [];
+state.notes = {};
+state.courses = [];
+state.completedItemIds = [];
+state.trashItems = [];
+state.needsRelogin = false;
+state.modal = null;
+state.aiBannerMessage = '端末内のデータをすべて消去してログアウトしました。';
 render();
 };
 window.handleGoogleLoginClick = () => {

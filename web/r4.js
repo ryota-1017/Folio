@@ -1,9 +1,12 @@
 function render() {
 saveState();
 syncToastTimer();
+const scrollMap = {};
+document.querySelectorAll('[data-scroll-key]').forEach(el => {
+scrollMap[el.getAttribute('data-scroll-key')] = el.scrollTop;
+});
 const root = document.getElementById('app');
 const isPortrait = isPortraitLayout();
-const statusInfo = getNextStatusSummary();
 const steppedTabsHtml = Array.from({ length: 12 }, (_, idx) => {
 const m = idx + 1;
 const active = m === state.currentMonth;
@@ -140,23 +143,17 @@ ${ICONS.tune}
 </div>
 </header>
 ${mobileMonthStripHtml}
-${(statusInfo.nextEvent || statusInfo.nextDeadline || state.isOffline) ? `
+${(state.isOffline || state.needsRelogin || state.swUpdateReady) ? `
 <div class="${isPortrait ? 'px-3 pb-1' : 'px-6 pb-1.5'} flex items-center gap-1.5 overflow-x-auto hide-scrollbar shrink-0 text-[11px]">
 ${state.isOffline ? `<span class="px-2.5 py-0.5 rounded-full bg-[#F9E4E2] text-[#8C2D25] font-semibold shrink-0">オフライン表示中</span>` : ''}
-${statusInfo.nextEvent ? `
-<button type="button" onclick="openItemDetail('${statusInfo.nextEvent.id}')" class="px-2.5 py-0.5 rounded-full bg-[#EFEAE1] hover:bg-[#E5DFD5] text-[#231F1C] font-medium flex items-center gap-1.5 shrink-0 transition">
-<span class="w-1.5 h-1.5 rounded-full bg-[#366B47]"></span>
-<span class="font-bold">次 ${statusInfo.nextEvent.startTime}</span>
-<span class="truncate max-w-[140px]">${escapeHtml(statusInfo.nextEvent.title)}</span>
-<span class="text-[#366B47] font-semibold">(${statusInfo.nextDiffText})</span>
+${state.needsRelogin ? `
+<button type="button" onclick="handleGoogleLoginClick()" class="px-2.5 py-0.5 rounded-full bg-[#E5EDF5] hover:bg-[#D8E5F2] text-[#224363] font-semibold shrink-0 transition">
+セッション切れ・タップで再ログイン
 </button>
 ` : ''}
-${statusInfo.nextDeadline ? `
-<button type="button" onclick="openItemDetail('${statusInfo.nextDeadline.id}')" class="px-2.5 py-0.5 rounded-full bg-[#E5EDF5] hover:bg-[#D8E5F2] text-[#224363] font-medium flex items-center gap-1.5 shrink-0 transition">
-<span class="w-1.5 h-1.5 rounded-full bg-[#2B5B84]"></span>
-<span class="font-bold">締切</span>
-<span class="truncate max-w-[140px]">${escapeHtml(statusInfo.nextDeadline.title)}</span>
-<span class="font-semibold">(${statusInfo.deadlineBadge})</span>
+${state.swUpdateReady ? `
+<button type="button" onclick="applySwUpdate()" class="px-2.5 py-0.5 rounded-full bg-[#E5EFE8] hover:bg-[#D5E6DB] text-[#244E32] font-semibold shrink-0 transition">
+新しい更新があります・タップで再読み込み
 </button>
 ` : ''}
 </div>
@@ -188,5 +185,9 @@ ${ICONS.add}
 </div>
 ${modalHtml}
 `;
+Object.keys(scrollMap).forEach(k => {
+const el = document.querySelector(`[data-scroll-key="${k}"]`);
+if (el) el.scrollTop = scrollMap[k];
+});
 }
 render();

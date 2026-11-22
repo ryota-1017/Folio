@@ -27,6 +27,7 @@ state.notes = cleanedNotes;
 }
 if (Array.isArray(saved.courses)) state.courses = saved.courses.filter(c => !sampleCourseIds.has(c.id));
 if (Array.isArray(saved.completedItemIds)) state.completedItemIds = saved.completedItemIds;
+if (Array.isArray(saved.trashItems)) state.trashItems = saved.trashItems.slice(0, 20);
 if (typeof saved.showCompletedDeadlines === 'boolean') state.showCompletedDeadlines = saved.showCompletedDeadlines;
 if (saved.categoryOverrides && typeof saved.categoryOverrides === 'object') state.categoryOverrides = saved.categoryOverrides;
 if (Array.isArray(saved.customCategoryRules)) state.customCategoryRules = saved.customCategoryRules;
@@ -58,6 +59,7 @@ items: state.items,
 notes: state.notes,
 courses: state.courses,
 completedItemIds: state.completedItemIds,
+trashItems: (state.trashItems || []).slice(0, 20),
 showCompletedDeadlines: state.showCompletedDeadlines,
 categoryOverrides: state.categoryOverrides,
 customCategoryRules: state.customCategoryRules,

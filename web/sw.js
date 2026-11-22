@@ -1,4 +1,4 @@
-const CACHE_NAME = 'folio-planner-cache-v1';
+const CACHE_NAME = 'folio-planner-cache-v2';
 const ASSETS = [
   '/',
   '/index.html',
@@ -14,6 +14,12 @@ const ASSETS = [
   '/icon.svg',
   '/manifest.webmanifest'
 ];
+
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
+});
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
