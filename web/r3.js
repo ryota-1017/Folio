@@ -169,20 +169,24 @@ class="w-full px-3.5 py-2.5 rounded-2xl bg-[#EFECE6] shadow-inner text-[#231F1C]
 ${state.driveSyncStatus === 'synced' ? `${state.googleAccountEmail ? state.googleAccountEmail + ' ・ ' : ''}同期済 ${state.driveLastSynced || ''}` : '未接続'}
 </span>
 </div>
-<div class="flex items-center gap-2">
-<input id="settings-google-cid" type="text" value="${state.googleClientId}" placeholder="1234567890-xxx.apps.googleusercontent.com"
-class="flex-1 px-3.5 py-2.5 rounded-2xl bg-[#EFECE6] shadow-inner text-[#231F1C] focus:outline-none focus:ring-2 focus:ring-[#5C554D]" />
+<div class="flex items-center gap-1.5">
+<input id="settings-google-cid" type="text" value="${escapeHtml(state.googleClientId)}" oninput="this.value=sanitizeGoogleClientId(this.value)" placeholder="1234567890-xxx.apps.googleusercontent.com"
+class="flex-1 min-w-0 px-3 py-2.5 rounded-2xl bg-[#EFECE6] shadow-inner text-[#231F1C] focus:outline-none focus:ring-2 focus:ring-[#5C554D]" />
+<button type="button" onclick="copyClientIdOnly()" title="クライアントIDだけをコピー"
+class="w-9 h-9 shrink-0 rounded-full pill-thumb text-[#231F1C] hover:scale-105 flex items-center justify-center transition">
+${ICONS.content_copy}
+</button>
 <button type="button" onclick="copySetupLink()" title="スマホ等にクライアントIDを引き継ぐURLをコピー"
-class="w-10 h-10 shrink-0 rounded-full pill-thumb text-[#231F1C] hover:scale-105 flex items-center justify-center transition">
+class="w-9 h-9 shrink-0 rounded-full pill-thumb text-[#231F1C] hover:scale-105 flex items-center justify-center transition">
 ${ICONS.link}
 </button>
 <button type="button" onclick="handleGoogleLoginClick()" title="${state.driveAccessToken ? 'Googleアカウントを切り替え' : 'Googleでログインして自動同期を開始'}"
-class="w-10 h-10 shrink-0 rounded-full ${state.driveAccessToken ? 'bg-gradient-to-b from-[#E5EFE8] to-[#D1E4D7] text-[#244E32]' : 'bg-gradient-to-b from-[#E5EDF5] to-[#D2E2F2] text-[#224363]'} shadow-sm hover:scale-105 flex items-center justify-center transition">
+class="w-9 h-9 shrink-0 rounded-full ${state.driveAccessToken ? 'bg-gradient-to-b from-[#E5EFE8] to-[#D1E4D7] text-[#244E32]' : 'bg-gradient-to-b from-[#E5EDF5] to-[#D2E2F2] text-[#224363]'} shadow-sm hover:scale-105 flex items-center justify-center transition">
 ${state.driveAccessToken ? ICONS.account_circle : ICONS.login}
 </button>
 ${state.driveAccessToken ? `
 <button type="button" onclick="disconnectGoogleDrive()" title="Googleからログアウト"
-class="w-10 h-10 shrink-0 rounded-full pill-thumb text-[#8C2D25] hover:scale-105 flex items-center justify-center transition">
+class="w-9 h-9 shrink-0 rounded-full pill-thumb text-[#8C2D25] hover:scale-105 flex items-center justify-center transition">
 ${ICONS.logout}
 </button>
 ` : ''}

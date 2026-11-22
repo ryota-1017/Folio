@@ -300,7 +300,7 @@ render();
 window.saveSettings = (e) => {
 e.preventDefault();
 const keyInput = document.getElementById('settings-gemini-key').value.trim();
-const cidInput = document.getElementById('settings-google-cid').value.trim();
+const cidInput = sanitizeGoogleClientId(document.getElementById('settings-google-cid').value);
 state.geminiApiKey = keyInput;
 state.googleClientId = cidInput;
 if (keyInput) localStorage.setItem(API_KEY_STORAGE, keyInput);
@@ -322,6 +322,7 @@ courses: state.courses,
 completedItemIds: state.completedItemIds,
 customCategoryRules: state.customCategoryRules,
 categoryOverrides: state.categoryOverrides,
+geminiApiKey: state.geminiApiKey,
 paperStyle: state.paperStyle
 });
 }

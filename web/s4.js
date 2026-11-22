@@ -1,6 +1,6 @@
-window.copySetupLink = async () => {
+window.copyClientIdOnly = async () => {
 const cidEl = document.getElementById('settings-google-cid');
-const cid = (cidEl ? cidEl.value.trim() : state.googleClientId);
+const cid = sanitizeGoogleClientId(cidEl ? cidEl.value : state.googleClientId);
 if (!cid) {
 state.aiBannerMessage = '先にGoogle OAuthクライアントIDを入力してください。';
 render();
@@ -8,6 +8,26 @@ return;
 }
 state.googleClientId = cid;
 localStorage.setItem(CLIENT_ID_STORAGE, cid);
+if (cidEl) cidEl.value = cid;
+try {
+await navigator.clipboard.writeText(cid);
+state.aiBannerMessage = 'クライアントIDのみをコピーしました。';
+} catch (e) {
+state.aiBannerMessage = `クライアントID: ${cid}`;
+}
+render();
+};
+window.copySetupLink = async () => {
+const cidEl = document.getElementById('settings-google-cid');
+const cid = sanitizeGoogleClientId(cidEl ? cidEl.value : state.googleClientId);
+if (!cid) {
+state.aiBannerMessage = '先にGoogle OAuthクライアントIDを入力してください。';
+render();
+return;
+}
+state.googleClientId = cid;
+localStorage.setItem(CLIENT_ID_STORAGE, cid);
+if (cidEl) cidEl.value = cid;
 const url = `${window.location.origin}${window.location.pathname}?cid=${encodeURIComponent(cid)}`;
 try {
 await navigator.clipboard.writeText(url);
@@ -31,7 +51,7 @@ render();
 };
 window.connectGoogleDrive = (silent = false, promptMode = 'consent') => {
 const cidEl = document.getElementById('settings-google-cid');
-const cid = (cidEl ? cidEl.value.trim() : state.googleClientId);
+const cid = sanitizeGoogleClientId(cidEl ? cidEl.value : state.googleClientId);
 if (!cid) {
 if (!silent) {
 state.aiBannerMessage = '先にGoogle OAuthクライアントIDを入力してください。';
@@ -226,6 +246,14 @@ if (remoteData.accountLinks && typeof remoteData.accountLinks === 'object') {
 state.accountLinks = { ...remoteData.accountLinks, ...state.accountLinks };
 localStorage.setItem(ACCOUNT_LINKS_STORAGE, JSON.stringify(state.accountLinks));
 }
+if (remoteData.geminiApiKey && !state.geminiApiKey) {
+state.geminiApiKey = remoteData.geminiApiKey;
+localStorage.setItem(API_KEY_STORAGE, state.geminiApiKey);
+}
+if (remoteData.googleClientId && !state.googleClientId) {
+state.googleClientId = sanitizeGoogleClientId(remoteData.googleClientId);
+localStorage.setItem(CLIENT_ID_STORAGE, state.googleClientId);
+}
 }
 await uploadToGoogleDrive(true);
 } else {
@@ -281,6 +309,7 @@ customCategoryRules: state.customCategoryRules,
 categoryOverrides: state.categoryOverrides,
 accountLinks: state.accountLinks,
 googleClientId: state.googleClientId,
+geminiApiKey: state.geminiApiKey,
 paperStyle: state.paperStyle,
 updatedAt: new Date().toISOString()
 }, null, 2);

@@ -3,7 +3,7 @@ try {
 const params = new URLSearchParams(window.location.search);
 const cidParam = params.get('cid');
 if (cidParam && cidParam.trim()) {
-state.googleClientId = cidParam.trim();
+state.googleClientId = sanitizeGoogleClientId(cidParam);
 localStorage.setItem(CLIENT_ID_STORAGE, state.googleClientId);
 params.delete('cid');
 const qs = params.toString();

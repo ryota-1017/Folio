@@ -318,6 +318,11 @@ return String(str || '')
 .replace(/>/g, '&gt;')
 .replace(/"/g, '&quot;');
 }
+function sanitizeGoogleClientId(raw) {
+const cleaned = String(raw || '').replace(/[\s\u200B-\u200D\uFEFF"'`<>]/g, '').trim();
+const m = cleaned.match(/[0-9]+-[a-zA-Z0-9_-]+\.apps\.googleusercontent\.com/);
+return m ? m[0] : cleaned;
+}
 function formatMemoText(raw) {
 if (!raw) return '';
 return String(raw)
