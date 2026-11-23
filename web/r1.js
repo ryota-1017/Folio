@@ -63,7 +63,9 @@ const firstStart = sorted.find(it => it.startTime)?.startTime || '';
 const lastEnd = [...sorted].reverse().find(it => it.endTime || it.startTime);
 const endStr = lastEnd ? (lastEnd.endTime || lastEnd.startTime || '') : '';
 const hasAlert = sorted.some(it => it.hasPrepAlert || (it.memo && /小テスト|提出|締切|※要予習/.test(it.memo)));
-const isExpanded = Boolean(state.expandedSchoolDays && state.expandedSchoolDays[targetDate]);
+const isExpanded = (state.expandedSchoolDays && targetDate in state.expandedSchoolDays)
+? Boolean(state.expandedSchoolDays[targetDate])
+: !isPortraitLayout();
 const nonTransit = sorted.filter(it => !it.isTransit && !/登校|下校|移動/.test(it.title || ''));
 const displayCourses = nonTransit.length > 0 ? nonTransit : sorted;
 return `
@@ -133,6 +135,8 @@ if (classItems.length === 0) {
 return [...allDayOthers, ...timedOthers];
 }
 const sortedClasses = [...classItems].sort((a, b) => timeToMinutes(a.startTime) - timeToMinutes(b.startTime));
+const actualClasses = sortedClasses.filter(it => !it.isTransit && !/登校|下校|移動/.test(it.title || ''));
+const subItemsForCell = actualClasses.length > 0 ? actualClasses : sortedClasses;
 const bounds = getSchoolTimeBounds(sortedClasses);
 const firstStart = sortedClasses.find(it => it.startTime)?.startTime || '';
 const lastEndObj = [...sortedClasses].reverse().find(it => it.endTime || it.startTime);
@@ -142,13 +146,15 @@ const afterSchool = timedOthers.filter(it => timeToMinutes(it.startTime) >= boun
 const schoolChip = {
 id: 'school-group-' + dateStr,
 title: isMobileCell
-? (sortedClasses.length === 1 ? cleanCourseTitle(sortedClasses[0].title) : `学校(${sortedClasses.length})`)
-: (sortedClasses.length === 1 ? sortedClasses[0].title : `学校（${sortedClasses.length}件）`),
+? (subItemsForCell.length === 1 ? cleanCourseTitle(subItemsForCell[0].title) : `学校(${subItemsForCell.length})`)
+: (actualClasses.length > 0
+? (actualClasses.length === 1 ? cleanCourseTitle(actualClasses[0].title) : `授業（${actualClasses.length}件）`)
+: (sortedClasses.length === 1 ? sortedClasses[0].title : `学校（${sortedClasses.length}件）`)),
 startTime: isMobileCell ? '' : firstStart,
 endTime: isMobileCell ? '' : lastEnd,
 category: 'class',
 isSchoolGroup: true,
-schoolSubItems: sortedClasses,
+schoolSubItems: isMobileCell ? sortedClasses : subItemsForCell,
 hasPrepAlert: sortedClasses.some(it => it.hasPrepAlert || (it.memo && /小テスト|提出|締切|※要予習/.test(it.memo)))
 };
 return [...allDayOthers, ...beforeSchool, schoolChip, ...afterSchool];
@@ -374,7 +380,9 @@ const st = CATEGORY_STYLES[it.category] || CATEGORY_STYLES.personal;
 const transitCls = (it.isTransit || /登校|下校|移動/.test(it.title)) ? 'opacity-55' : '';
 const timeRangeStr = formatChipTimeRange(it);
 if (it.isSchoolGroup) {
-const isExpanded = Boolean(state.expandedSchoolDays && state.expandedSchoolDays[cell.dateStr]);
+const isExpanded = (state.expandedSchoolDays && cell.dateStr in state.expandedSchoolDays)
+? Boolean(state.expandedSchoolDays[cell.dateStr])
+: !isPortrait;
 return `
 <div onclick="event.stopPropagation(); toggleSchoolDayExpand('${cell.dateStr}')" class="px-1.5 py-[1px] rounded-full text-[11px] leading-tight truncate flex items-center justify-between gap-1 shrink-0 shadow-xs border border-white/60 ${st.bg} ${st.text} cursor-pointer">
 <div class="flex items-center gap-1 min-w-0">

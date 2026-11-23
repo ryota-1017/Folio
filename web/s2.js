@@ -450,7 +450,10 @@ state.modal = 'school_day';
 render();
 };
 window.toggleSchoolDayExpand = (dateStr) => {
-state.expandedSchoolDays[dateStr] = !state.expandedSchoolDays[dateStr];
+const current = (state.expandedSchoolDays && dateStr in state.expandedSchoolDays)
+? Boolean(state.expandedSchoolDays[dateStr])
+: !isPortraitLayout();
+state.expandedSchoolDays[dateStr] = !current;
 render();
 };
 window.changeItemCategory = (id, newCat) => {
