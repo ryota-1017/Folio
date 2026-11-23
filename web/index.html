@@ -116,13 +116,11 @@
     }
 
     .today-cell-frame {
-      background: linear-gradient(180deg, #FFFDF9 0%, #F6EFE3 100%) !important;
-      border: 2.5px solid #2A231D !important;
+      background: linear-gradient(180deg, #EBE3D5 0%, #DFD5C3 100%) !important;
+      border: 1px solid rgba(140, 128, 112, 0.55) !important;
       box-shadow:
-        0 10px 24px -6px rgba(35, 31, 28, 0.18),
-        0 3px 8px -2px rgba(35, 31, 28, 0.08),
-        inset 0 1.5px 0 rgba(255, 255, 255, 0.95) !important;
-      z-index: 10;
+        0 3px 10px -3px rgba(35, 31, 28, 0.10),
+        inset 0 1px 0 rgba(255, 255, 255, 0.7) !important;
     }
 
     .paper-ruled {
@@ -184,15 +182,10 @@
       from { opacity: 0.45; transform: translateY(-18px); }
       to { opacity: 1; transform: translateY(0); }
     }
-    @keyframes folioDayFade {
-      from { opacity: 0.35; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    .anim-slide-right { animation: folioSlideFromRight 0.24s cubic-bezier(0.22, 1, 0.36, 1); }
-    .anim-slide-left { animation: folioSlideFromLeft 0.24s cubic-bezier(0.22, 1, 0.36, 1); }
-    .anim-sheet-up { animation: folioSheetUp 0.22s cubic-bezier(0.22, 1, 0.36, 1); }
-    .anim-sheet-down { animation: folioSheetDown 0.22s cubic-bezier(0.22, 1, 0.36, 1); }
-    .anim-day-fade { animation: folioDayFade 0.2s cubic-bezier(0.22, 1, 0.36, 1); }
+    .anim-slide-right { animation: folioSlideFromRight 0.22s cubic-bezier(0.22, 1, 0.36, 1); }
+    .anim-slide-left { animation: folioSlideFromLeft 0.22s cubic-bezier(0.22, 1, 0.36, 1); }
+    .anim-sheet-up { animation: folioSheetUp 0.2s cubic-bezier(0.22, 1, 0.36, 1); }
+    .anim-sheet-down { animation: folioSheetDown 0.2s cubic-bezier(0.22, 1, 0.36, 1); }
 
     /* Dark Mode Theme */
     html[data-theme="dark"] body {
@@ -251,9 +244,12 @@
       border-color: rgba(255, 255, 255, 0.10);
     }
     html[data-theme="dark"] .today-cell-frame {
-      background: linear-gradient(180deg, #2D2A24 0%, #23201B 100%) !important;
-      border: 2.5px solid #E8DFD1 !important;
-      box-shadow: 0 10px 24px -6px rgba(0, 0, 0, 0.55) !important;
+      background: linear-gradient(180deg, #322F29 0%, #282520 100%) !important;
+      border: 1px solid rgba(255, 255, 255, 0.16) !important;
+      box-shadow: 0 3px 10px -3px rgba(0, 0, 0, 0.45) !important;
+    }
+    html[data-theme="dark"] .selected-day-ring {
+      box-shadow: 0 0 0 2px #F2EFE9 !important;
     }
     html[data-theme="dark"] .paper-ruled {
       background-image: repeating-linear-gradient(to bottom, transparent, transparent 35px, rgba(255, 255, 255, 0.08) 35px, rgba(255, 255, 255, 0.08) 36px);

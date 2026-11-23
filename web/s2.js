@@ -339,15 +339,9 @@ analyzeTimetableFromRecentWeeks(true);
 render();
 };
 let _pendingSheetAnim = '';
-let _pendingDayPreviewAnim = '';
 function consumeSheetAnim() {
 const a = _pendingSheetAnim;
 _pendingSheetAnim = '';
-return a;
-}
-function consumeDayPreviewAnim() {
-const a = _pendingDayPreviewAnim;
-_pendingDayPreviewAnim = '';
 return a;
 }
 window.handleMobileDayTap = (dateStr) => {
@@ -356,7 +350,6 @@ _pendingSheetAnim = 'anim-sheet-up';
 window.selectDate(dateStr);
 return;
 }
-_pendingDayPreviewAnim = 'anim-day-fade';
 state.selectedMobileDay = dateStr;
 render();
 };

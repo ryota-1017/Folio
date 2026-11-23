@@ -271,7 +271,7 @@ return `
 <div onclick="handleMobileDayTap('${cell.dateStr}')"
 class="rounded-xl p-1 flex flex-col overflow-hidden min-h-0 cursor-pointer transition-all relative ${
 isToday ? 'today-cell-frame' : 'day-tile'
-} ${isSelected && !isToday ? 'ring-2 ring-[#231F1C] z-10' : isSelected && isToday ? 'ring-2 ring-[#8C2D25]' : ''}">
+} ${isSelected ? 'ring-2 ring-[#231F1C] selected-day-ring z-10' : ''}">
 <div class="flex items-center justify-between shrink-0 mb-0.5">
 <span class="text-[11px] leading-none ${numColor} ${isToday || isSelected ? 'font-bold' : 'font-semibold'}">
 ${cell.dayNumber}
@@ -294,17 +294,17 @@ return `<div class="grid grid-cols-7 gap-1 flex-1 min-h-0">${cellsHtml}</div>`;
 const activeItems = state.items
 .filter(it => it.date === activeDay && filterFn(it))
 .sort((a, b) => timeToMinutes(a.startTime) - timeToMinutes(b.startTime));
-const dayPreviewAnim = consumeDayPreviewAnim();
 
 sheetBodyHtml = `
-<div class="flex-1 flex flex-col overflow-hidden px-3 pb-2 pt-0.5 gap-1.5">
-<div class="flex-[1.25] min-h-0 flex flex-col gap-1 ${sheetAnimClass}">
+<div class="flex-1 min-h-0 flex flex-col overflow-hidden px-3 pb-2 pt-0.5 gap-1.5">
+<div class="flex-[2.25] min-h-0 flex flex-col gap-1 ${sheetAnimClass}">
 <div class="grid grid-cols-7 gap-1 py-1 rounded-xl bg-[#EFEAE1]/70 border border-white/60 shadow-inner shrink-0">
 ${WEEKDAY_HEADERS.map(h => `<div class="text-center text-[11px] font-semibold ${h.color}">${h.ja}</div>`).join('')}
 </div>
 <div class="flex-1 min-h-0 flex flex-col gap-1">${mobileRowsHtml}</div>
 </div>
-<div ontouchstart="onBoundaryTouchStart(event)" ontouchend="onBoundaryTouchEnd(event, '${activeDay}')" class="shrink-0 pt-1 border-t grid-hairline select-none ${dayPreviewAnim}">
+<div class="flex-1 min-h-0 flex flex-col pt-1 border-t grid-hairline overflow-hidden">
+<div ontouchstart="onBoundaryTouchStart(event)" ontouchend="onBoundaryTouchEnd(event, '${activeDay}')" class="shrink-0 select-none pb-1">
 <div onclick="selectDate('${activeDay}')" title="上にスワイプまたはタップして全体表示" class="flex justify-center pb-1 cursor-pointer">
 <span class="w-10 h-1 rounded-full bg-[#B4ACA0]"></span>
 </div>
@@ -334,11 +334,13 @@ ${ICONS.subject}
 </button>
 </div>
 </div>
-<div data-scroll-key="mobile-day" class="flex-1 min-h-0 overflow-y-auto space-y-2 pb-20 pr-0.5 ${dayPreviewAnim}">
+</div>
+<div data-scroll-key="mobile-day" class="flex-1 min-h-0 overflow-y-auto space-y-2 pb-20 pr-0.5">
 ${activeItems.length > 0
 ? renderGroupedScheduleListHtml(activeItems, activeDay)
-: `<div class="py-6 text-center text-xs text-[#59524A]">この日の予定はありません</div>`
+: `<div class="py-4 text-center text-xs text-[#59524A]">この日の予定はありません</div>`
 }
+</div>
 </div>
 </div>
 `;
