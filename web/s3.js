@@ -338,15 +338,22 @@ window.saveSettings = (e) => {
 e.preventDefault();
 const keyInput = document.getElementById('settings-gemini-key').value.trim();
 const cidInput = sanitizeGoogleClientId(document.getElementById('settings-google-cid').value);
+const keyChanged = keyInput !== state.geminiApiKey;
 state.geminiApiKey = keyInput;
 state.googleClientId = cidInput;
 if (keyInput) localStorage.setItem(API_KEY_STORAGE, keyInput);
 else localStorage.removeItem(API_KEY_STORAGE);
+if (keyChanged) localStorage.setItem('folio_gemini_api_key_updated_at', new Date().toISOString());
 if (cidInput) localStorage.setItem(CLIENT_ID_STORAGE, cidInput);
 else localStorage.removeItem(CLIENT_ID_STORAGE);
 state.aiBannerMessage = 'APIキー・Google連携設定を保存しました。';
 state.modal = null;
 render();
+if (state.driveAccessToken) {
+clearTimeout(driveSyncTimer);
+lastScheduledPayload = buildSyncPayloadString();
+uploadToGoogleDrive(true);
+}
 };
 let driveSyncTimer = null;
 let lastScheduledPayload = null;
@@ -400,7 +407,7 @@ localStorage.setItem(ACCOUNT_LINKS_STORAGE, JSON.stringify(state.accountLinks));
 render();
 };
 function scheduleDriveSync() {
-if (!state.driveAccessToken) return;
+if (!state.driveAccessToken || state.driveSyncStatus === 'syncing') return;
 const currentPayload = buildSyncPayloadString();
 if (currentPayload === lastScheduledPayload) return;
 lastScheduledPayload = currentPayload;

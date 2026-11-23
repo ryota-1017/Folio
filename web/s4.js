@@ -208,6 +208,7 @@ if (!silent) window.handleSyncClick();
 return;
 }
 if (state.driveSyncStatus === 'syncing') return;
+clearTimeout(driveSyncTimer);
 state.driveSyncStatus = 'syncing';
 render();
 let gcalCount = 0;
@@ -224,13 +225,14 @@ gcalError = msg;
 }
 try {
 const q = encodeURIComponent(`name='${DRIVE_FILE_NAME}' and trashed=false`);
-const searchRes = await fetch(`https://www.googleapis.com/drive/v3/files?q=${q}&fields=files(id,name,modifiedTime)`, {
+const searchRes = await fetch(`https://www.googleapis.com/drive/v3/files?q=${q}&orderBy=modifiedTime%20desc&fields=files(id,name,modifiedTime)`, {
 headers: { Authorization: `Bearer ${state.driveAccessToken}` }
 });
 if (searchRes.status === 401) throw new Error('401');
 if (!searchRes.ok) throw new Error(await readGoogleApiError(searchRes));
 const searchData = await searchRes.json();
-const existingFile = searchData.files && searchData.files[0];
+const matchingFiles = Array.isArray(searchData.files) ? searchData.files : [];
+const existingFile = matchingFiles[0];
 if (existingFile) {
 state.driveFileId = existingFile.id;
 const dlRes = await fetch(`https://www.googleapis.com/drive/v3/files/${existingFile.id}?alt=media`, {
@@ -247,9 +249,30 @@ if (remoteData.accountLinks && typeof remoteData.accountLinks === 'object') {
 state.accountLinks = { ...remoteData.accountLinks, ...state.accountLinks };
 localStorage.setItem(ACCOUNT_LINKS_STORAGE, JSON.stringify(state.accountLinks));
 }
-if (remoteData.geminiApiKey && !state.geminiApiKey) {
-state.geminiApiKey = remoteData.geminiApiKey;
+let remoteGeminiKey = remoteData.geminiApiKey || '';
+let remoteGeminiUpdatedAt = remoteData.geminiApiKeyUpdatedAt || '';
+if (!remoteGeminiKey && matchingFiles.length > 1) {
+for (let i = 1; i < Math.min(matchingFiles.length, 5); i++) {
+try {
+const altRes = await fetch(`https://www.googleapis.com/drive/v3/files/${matchingFiles[i].id}?alt=media`, {
+headers: { Authorization: `Bearer ${state.driveAccessToken}` }
+});
+if (altRes.ok) {
+const altData = await altRes.json();
+if (altData.geminiApiKey) {
+remoteGeminiKey = altData.geminiApiKey;
+remoteGeminiUpdatedAt = altData.geminiApiKeyUpdatedAt || '';
+break;
+}
+}
+} catch (e) {}
+}
+}
+const localGeminiUpdatedAt = localStorage.getItem('folio_gemini_api_key_updated_at') || '';
+if (remoteGeminiKey && (!state.geminiApiKey || (remoteGeminiUpdatedAt && (!localGeminiUpdatedAt || remoteGeminiUpdatedAt > localGeminiUpdatedAt)))) {
+state.geminiApiKey = remoteGeminiKey;
 localStorage.setItem(API_KEY_STORAGE, state.geminiApiKey);
+if (remoteGeminiUpdatedAt) localStorage.setItem('folio_gemini_api_key_updated_at', remoteGeminiUpdatedAt);
 }
 if (remoteData.googleClientId && !state.googleClientId) {
 state.googleClientId = sanitizeGoogleClientId(remoteData.googleClientId);
@@ -312,6 +335,7 @@ categoryOverrides: state.categoryOverrides,
 accountLinks: state.accountLinks,
 googleClientId: state.googleClientId,
 geminiApiKey: state.geminiApiKey,
+geminiApiKeyUpdatedAt: localStorage.getItem('folio_gemini_api_key_updated_at') || '',
 paperStyle: state.paperStyle,
 updatedAt: new Date().toISOString()
 }, null, 2);
