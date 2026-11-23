@@ -1,91 +1,75 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
   <defs>
-    <linearGradient id="bgGrad" x1="0" y1="0" x2="0" y2="1">
+    <linearGradient id="iosBg" x1="0" y1="0" x2="0" y2="1">
       <stop offset="0%" stop-color="#FFFFFF"/>
-      <stop offset="100%" stop-color="#F2F6FC"/>
+      <stop offset="100%" stop-color="#F3F5F9"/>
     </linearGradient>
-    <linearGradient id="backPageGrad" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#D8E6FF"/>
-      <stop offset="100%" stop-color="#B5CEFA"/>
-    </linearGradient>
-    <linearGradient id="bodyGrad" x1="0" y1="0" x2="1" y2="1">
+    <linearGradient id="iosPage" x1="0" y1="0" x2="0" y2="1">
       <stop offset="0%" stop-color="#FFFFFF"/>
-      <stop offset="100%" stop-color="#EEF4FF"/>
+      <stop offset="100%" stop-color="#F9FAFC"/>
     </linearGradient>
-    <linearGradient id="headerGrad" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#58B0FF"/>
-      <stop offset="55%" stop-color="#1677FF"/>
-      <stop offset="100%" stop-color="#0C56D6"/>
+    <linearGradient id="iosRedHeader" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#FF594F"/>
+      <stop offset="100%" stop-color="#FF3B30"/>
     </linearGradient>
-    <linearGradient id="ribbonGrad" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#FF8275"/>
-      <stop offset="55%" stop-color="#FF3B30"/>
-      <stop offset="100%" stop-color="#D6241B"/>
+    <linearGradient id="iosBlueDot" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#2E90FF"/>
+      <stop offset="100%" stop-color="#007AFF"/>
     </linearGradient>
-    <linearGradient id="ringGrad" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#94A3B8"/>
-      <stop offset="45%" stop-color="#FFFFFF"/>
-      <stop offset="100%" stop-color="#64748B"/>
+    <linearGradient id="iosGreenDot" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#4CD964"/>
+      <stop offset="100%" stop-color="#28CD41"/>
     </linearGradient>
-    <linearGradient id="accentBarGrad" x1="0" y1="0" x2="1" y2="0">
-      <stop offset="0%" stop-color="#1677FF"/>
-      <stop offset="100%" stop-color="#60A5FA"/>
+    <linearGradient id="iosRing" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#AEAEB2"/>
+      <stop offset="50%" stop-color="#E5E5EA"/>
+      <stop offset="100%" stop-color="#8E8E93"/>
     </linearGradient>
-    <linearGradient id="glossGrad" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.45"/>
-      <stop offset="60%" stop-color="#FFFFFF" stop-opacity="0"/>
-    </linearGradient>
-    <filter id="cardShadow" x="-20%" y="-15%" width="140%" height="145%">
-      <feDropShadow dx="0" dy="3.5" stdDeviation="3" flood-color="#1652B8" flood-opacity="0.18"/>
+    <filter id="iosShadow" x="-18%" y="-14%" width="136%" height="140%">
+      <feDropShadow dx="0" dy="2.5" stdDeviation="2.5" flood-color="#1C1C1E" flood-opacity="0.12"/>
     </filter>
-    <filter id="ribbonShadow" x="-30%" y="-20%" width="160%" height="150%">
-      <feDropShadow dx="0" dy="2" stdDeviation="1.3" flood-color="#B91C1C" flood-opacity="0.28"/>
-    </filter>
-    <clipPath id="bookClip">
-      <rect x="17" y="11" width="32" height="40" rx="7"/>
+    <clipPath id="iosSheetClip">
+      <rect x="16" y="12" width="34" height="40" rx="8"/>
     </clipPath>
   </defs>
 
-  <!-- White ceramic base -->
-  <rect x="0" y="0" width="64" height="64" rx="16" fill="url(#bgGrad)"/>
+  <!-- Pure iOS white squircle base -->
+  <rect x="0" y="0" width="64" height="64" rx="15" fill="url(#iosBg)"/>
 
-  <!-- Soft ambient back page for 3D depth -->
-  <rect x="20" y="15" width="31" height="39" rx="7" fill="url(#backPageGrad)"/>
+  <!-- Subtle stacked sheet beneath for crisp notebook feel -->
+  <rect x="18" y="14.5" width="32" height="39.5" rx="7.5" fill="#E5E7EE"/>
 
-  <!-- Main 3D Notebook Card -->
-  <g filter="url(#cardShadow)">
-    <rect x="17" y="11" width="32" height="40" rx="7" fill="url(#bodyGrad)"/>
-    <g clip-path="url(#bookClip)">
-      <!-- Aquamorphic Blue Gradient Header -->
-      <rect x="17" y="11" width="32" height="12.5" fill="url(#headerGrad)"/>
-      <!-- Subtle specular gloss over top-left -->
-      <path d="M17 11 H49 V23.5 L17 19 Z" fill="url(#glossGrad)"/>
+  <!-- Main iOS Planner Sheet -->
+  <g filter="url(#iosShadow)">
+    <rect x="16" y="12" width="34" height="40" rx="8" fill="url(#iosPage)"/>
+    <g clip-path="url(#iosSheetClip)">
+      <!-- iOS System Red Header Band -->
+      <rect x="16" y="12" width="34" height="10.5" fill="url(#iosRedHeader)"/>
+      <!-- Crisp hairline separator -->
+      <rect x="16" y="22.5" width="34" height="0.7" fill="#000000" fill-opacity="0.06"/>
     </g>
-    <!-- Crisp inner highlight border -->
-    <rect x="17.5" y="11.5" width="31" height="39" rx="6.5" fill="none" stroke="#FFFFFF" stroke-opacity="0.85" stroke-width="1"/>
+    <rect x="16.35" y="12.35" width="33.3" height="39.3" rx="7.65" fill="none" stroke="#000000" stroke-opacity="0.05" stroke-width="0.7"/>
   </g>
 
-  <!-- Planner content lines -->
-  <circle cx="25.5" cy="31" r="2.2" fill="url(#accentBarGrad)"/>
-  <rect x="30" y="29.4" width="13.5" height="3.2" rx="1.6" fill="#2A3447" fill-opacity="0.85"/>
-  <circle cx="25.5" cy="39" r="2.2" fill="#94A3B8" fill-opacity="0.7"/>
-  <rect x="30" y="37.4" width="10" height="3.2" rx="1.6" fill="#64748B" fill-opacity="0.55"/>
+  <!-- Minimalist iOS Reminder / Planner Rows -->
+  <circle cx="24" cy="30" r="2.1" fill="url(#iosBlueDot)"/>
+  <rect x="28.5" y="28.6" width="15" height="2.8" rx="1.4" fill="#1C1C1E" fill-opacity="0.86"/>
 
-  <!-- 3D Bookmark Ribbon -->
-  <g filter="url(#ribbonShadow)">
-    <path d="M37 11 V26.5 L40.5 23.6 L44 26.5 V11 Z" fill="url(#ribbonGrad)"/>
-    <path d="M37.7 11 V25.2 L40.5 22.9" fill="none" stroke="#FFFFFF" stroke-opacity="0.45" stroke-width="0.9"/>
-  </g>
+  <circle cx="24" cy="37.5" r="2.1" fill="url(#iosGreenDot)"/>
+  <rect x="28.5" y="36.1" width="12.5" height="2.8" rx="1.4" fill="#3A3A3C" fill-opacity="0.65"/>
 
-  <!-- 3D Metallic Binder Rings -->
+  <circle cx="24" cy="45" r="2.1" fill="#C7C7CC"/>
+  <rect x="28.5" y="43.6" width="9.5" height="2.8" rx="1.4" fill="#8E8E93" fill-opacity="0.5"/>
+
+  <!-- Clean iOS Notebook Rings on Left -->
   <g>
-    <circle cx="19.5" cy="21" r="1.8" fill="#1E3A8A" fill-opacity="0.28"/>
-    <rect x="12.5" y="19.4" width="8" height="3.2" rx="1.6" fill="url(#ringGrad)"/>
+    <circle cx="18.2" cy="17.2" r="1.4" fill="#FFFFFF" fill-opacity="0.35"/>
+    <rect x="12" y="15.9" width="7" height="2.6" rx="1.3" fill="url(#iosRing)"/>
 
-    <circle cx="19.5" cy="31" r="1.8" fill="#1E3A8A" fill-opacity="0.2"/>
-    <rect x="12.5" y="29.4" width="8" height="3.2" rx="1.6" fill="url(#ringGrad)"/>
+    <circle cx="18.2" cy="30" r="1.4" fill="#8E8E93" fill-opacity="0.28"/>
+    <rect x="12" y="28.7" width="7" height="2.6" rx="1.3" fill="url(#iosRing)"/>
 
-    <circle cx="19.5" cy="41" r="1.8" fill="#1E3A8A" fill-opacity="0.2"/>
-    <rect x="12.5" y="39.4" width="8" height="3.2" rx="1.6" fill="url(#ringGrad)"/>
+    <circle cx="18.2" cy="42.8" r="1.4" fill="#8E8E93" fill-opacity="0.28"/>
+    <rect x="12" y="41.5" width="7" height="2.6" rx="1.3" fill="url(#iosRing)"/>
   </g>
 </svg>
