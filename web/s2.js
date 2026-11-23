@@ -104,7 +104,7 @@ weeks.push({ days: cells.slice(i, i + 7) });
 }
 return weeks;
 }
-function buildMiniMonthHtml(year, month) {
+function buildMiniMonthHtml(year, month, delta) {
 const mIndex = ((month - 1) % 12 + 12) % 12;
 const actualYear = month < 1 ? year - 1 : month > 12 ? year + 1 : year;
 const actualMonth = mIndex + 1;
@@ -114,8 +114,9 @@ const offset = (firstDay.getDay() + 6) % 7;
 const cells = [];
 for (let i = 0; i < offset; i++) cells.push('');
 for (let d = 1; d <= daysInMonth; d++) cells.push(d);
+const dirLabel = delta < 0 ? '前の月へ' : '次の月へ';
 return `
-<div class="text-xs select-none">
+<div onclick="event.stopPropagation(); shiftMonth(${delta})" title="${dirLabel}（${actualYear}年${actualMonth}月）" class="text-xs select-none cursor-pointer rounded-xl p-1 -m-1 hover:bg-[#EFEAE1]/55 transition">
 <div class="flex items-baseline gap-1 border-b border-[#D6D0C6] pb-0.5 mb-1">
 <span class="font-bold text-[#231F1C]">${actualMonth}</span>
 <span class="text-[#6E665E]">${MONTH_NAMES_EN[mIndex]}</span>
@@ -127,7 +128,8 @@ ${['月','火','水','木','金','土','日'].map((w, i) => `
 ${cells.map((d, idx) => {
 const col = idx % 7;
 const color = col === 5 ? 'text-[#2B5B84]' : col === 6 ? 'text-[#B83B2E]' : 'text-[#4A443E]';
-return `<span class="${color}">${d}</span>`;
+if (!d) return `<span class="${color}"></span>`;
+return `<button type="button" onclick="event.stopPropagation(); openCalendarDate(${actualYear}, ${actualMonth}, ${d})" title="${actualYear}/${actualMonth}/${d} を開く" class="${color} rounded hover:bg-[#231F1C] hover:text-white transition font-medium leading-tight">${d}</button>`;
 }).join('')}
 </div>
 </div>
@@ -158,6 +160,30 @@ state.selectedDate = null;
 state.appMode = 'calendar';
 render();
 if (state.driveAccessToken) window.syncWithGoogleDrive(true);
+};
+window.shiftMonth = (delta) => {
+_pendingSheetAnim = delta > 0 ? 'anim-slide-right' : 'anim-slide-left';
+let nm = state.currentMonth + delta;
+let ny = state.currentYear;
+while (nm < 1) { nm += 12; ny--; }
+while (nm > 12) { nm -= 12; ny++; }
+state.currentYear = ny;
+window.selectMonth(nm);
+};
+window.openCalendarDate = (year, month, day) => {
+state.currentYear = year;
+state.currentMonth = month;
+state.appMode = 'calendar';
+const dateStr = formatDateKey(year, month, day);
+state.selectedMobileDay = dateStr;
+window.selectDate(dateStr);
+if (state.driveAccessToken) window.syncWithGoogleDrive(true);
+};
+window.handleMiniCalAreaClick = (e, el) => {
+if (!el) return;
+const rect = el.getBoundingClientRect();
+const isRight = (e.clientX - rect.left) >= rect.width / 2;
+window.shiftMonth(isRight ? 1 : -1);
 };
 window.toggleShowCompletedDeadlines = () => {
 state.showCompletedDeadlines = !state.showCompletedDeadlines;
@@ -192,6 +218,31 @@ const found = extractInstructorFromMemo(it.memo);
 if (found && found !== '未設定') return found;
 }
 return '未設定';
+}
+function extractRoomOnlyFromItem(it) {
+if (!it) return '';
+if (it.location && it.location.trim()) return it.location.trim();
+if (it.memo && it.memo.trim()) {
+const plain = String(it.memo)
+.replace(/<br\s*\/?>/gi, '\n')
+.replace(/<[^>]+>/g, ' ')
+.replace(/&nbsp;/g, ' ')
+.trim();
+const m = plain.match(/(?:教室|場所|ルーム)\s*[:：]\s*([^\n\r]+)/);
+if (m && m[1]) {
+const cleaned = m[1].split(/[\/｜|・\t]|(?:担当|教員|教師|講師|先生|持ち物|備考)[:：]/)[0].trim();
+if (cleaned) return cleaned;
+}
+}
+return '';
+}
+function getCourseMetaText(it) {
+const parts = [];
+const room = extractRoomOnlyFromItem(it);
+const instructor = extractInstructorFromMemo(it && it.memo);
+if (room) parts.push(room);
+if (instructor && instructor !== '未設定') parts.push(instructor);
+return parts.join('・');
 }
 function extractRoomFromItems(items) {
 for (const it of items) {

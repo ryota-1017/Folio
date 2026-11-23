@@ -88,12 +88,16 @@ ${hasAlert ? `<span class="inline-block px-2 py-0.5 rounded-full text-[10px] fon
 </div>
 <div class="text-sm sm:text-base font-bold text-[#231F1C] mt-1 leading-snug">学校（${sorted.length}件）</div>
 <div class="mt-1.5 flex flex-wrap gap-1">
-${displayCourses.map(it => `
-<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-[#F9E4E2]/70 text-[#8C2D25] text-[11px] font-medium leading-snug break-words">
+${displayCourses.map(it => {
+const meta = getCourseMetaText(it);
+return `
+<span class="inline-flex flex-wrap items-center gap-x-1 px-2 py-0.5 rounded-lg bg-[#F9E4E2]/70 text-[#8C2D25] text-[11px] font-medium leading-snug break-words">
 ${it.startTime ? `<span class="font-bold opacity-80">${it.startTime}</span>` : ''}
-<span>${escapeHtml(cleanCourseTitle(it.title))}</span>
+<span class="font-semibold">${escapeHtml(cleanCourseTitle(it.title))}</span>
+${meta ? `<span class="text-[10px] opacity-80">(${escapeHtml(meta)})</span>` : ''}
 </span>
-`).join('')}
+`;
+}).join('')}
 </div>
 </div>
 </div>
@@ -359,9 +363,9 @@ const canShowMiniCals = isLastRow && !w.days[5].dateStr && !w.days[6].dateStr;
 const dayCellsHtml = w.days.map((cell, cIdx) => {
 if (canShowMiniCals && cIdx === 5) {
 return `
-<div class="col-span-2 p-2.5 rounded-2xl soft-card-3d grid grid-cols-2 gap-3 items-center">
-${buildMiniMonthHtml(state.currentYear, state.currentMonth - 1)}
-${buildMiniMonthHtml(state.currentYear, state.currentMonth + 1)}
+<div onclick="handleMiniCalAreaClick(event, this)" class="col-span-2 p-2.5 rounded-2xl soft-card-3d grid grid-cols-2 gap-3 items-center cursor-pointer">
+${buildMiniMonthHtml(state.currentYear, state.currentMonth - 1, -1)}
+${buildMiniMonthHtml(state.currentYear, state.currentMonth + 1, 1)}
 </div>
 `;
 }
@@ -397,10 +401,12 @@ ${isExpanded && Array.isArray(it.schoolSubItems) ? `
 ${it.schoolSubItems.map(sub => {
 const subTransit = (sub.isTransit || /登校|下校|移動/.test(sub.title)) ? 'opacity-55' : '';
 const subTimeRange = formatChipTimeRange(sub);
+const subMeta = getCourseMetaText(sub);
 return `
-<div onclick="event.stopPropagation(); openItemDetail('${sub.id}')" class="px-1.5 py-[1px] rounded text-[10px] leading-tight truncate flex items-center gap-1 bg-[#F9E4E2]/70 text-[#8C2D25] ${subTransit}">
+<div onclick="event.stopPropagation(); openItemDetail('${sub.id}')" class="px-1.5 py-[2px] rounded text-[10px] leading-tight flex flex-wrap items-baseline gap-x-1 bg-[#F9E4E2]/70 text-[#8C2D25] ${subTransit}">
 ${subTimeRange ? `<span class="font-semibold opacity-80 shrink-0">${subTimeRange}</span>` : ''}
-<span class="truncate">${escapeHtml(cleanCourseTitle(sub.title))}</span>
+<span class="font-semibold">${escapeHtml(cleanCourseTitle(sub.title))}</span>
+${subMeta ? `<span class="text-[9px] opacity-80">${escapeHtml(subMeta)}</span>` : ''}
 </div>
 `;
 }).join('')}
@@ -445,7 +451,7 @@ ${WEEKDAY_HEADERS.map(h => `
 </div>
 `).join('')}
 </div>
-<div class="flex-1 flex flex-col gap-2 overflow-hidden">
+<div class="flex-1 flex flex-col gap-2 overflow-hidden ${sheetAnimClass}">
 ${rowsHtml}
 </div>
 </div>
