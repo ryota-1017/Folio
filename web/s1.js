@@ -73,8 +73,8 @@ const UNIVERSITY_PERIODS = [
 { period: 7, start: '19:50', end: '21:20' },
 ];
 const CATEGORY_STYLES = {
-class: { label: '学校・授業', bg: 'bg-[#F9E4E2]', text: 'text-[#8C2D25]', dot: 'bg-[#C94035]', icon: 'menu_book' },
-deadline: { label: '塾・重要手続', bg: 'bg-[#E5EDF5]', text: 'text-[#224363]', dot: 'bg-[#2B5B84]', icon: 'assignment_late' },
-parttime: { label: 'プライベート', bg: 'bg-[#E5EFE8]', text: 'text-[#244E32]', dot: 'bg-[#366B47]', icon: 'event' },
-personal: { label: '行事・その他', bg: 'bg-[#F0EDE8]', text: 'text-[#4A443E]', dot: 'bg-[#7A736A]', icon: 'work' },
+class: { label: '学校・授業', bg: 'bg-[#FFECEB]', text: 'text-[#C62828]', dot: 'bg-[#EA4335]', icon: 'menu_book' },
+deadline: { label: '塾・重要手続', bg: 'bg-[#E8F2FF]', text: 'text-[#155EEF]', dot: 'bg-[#1677FF]', icon: 'assignment_late' },
+parttime: { label: 'プライベート', bg: 'bg-[#E6F6EC]', text: 'text-[#137333]', dot: 'bg-[#1E8E3E]', icon: 'event' },
+personal: { label: '行事・その他', bg: 'bg-[#F1F3F5]', text: 'text-[#495057]', dot: 'bg-[#868E96]', icon: 'work' },
 };

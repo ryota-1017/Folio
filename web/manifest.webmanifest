@@ -4,8 +4,8 @@
   "description": "Material Design 3ベースの大学生向けデジタル手帳・時間割プランナー",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#DAD2C5",
-  "theme_color": "#FAF8F4",
+  "background_color": "#F4F5F7",
+  "theme_color": "#FFFFFF",
   "icons": [
     {
       "src": "/icon.svg",
