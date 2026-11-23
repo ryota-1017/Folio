@@ -177,6 +177,7 @@ return entries.map(e => e.html).join('');
 
 function renderCalendarBody(isPortrait) {
 let sheetBodyHtml = "";
+const sheetAnimClass = consumeSheetAnim();
 const filterFn = (it) => state.categoryFilter === 'all' || it.category === state.categoryFilter;
 
 if (!state.selectedDate) {
@@ -267,7 +268,7 @@ const isSelected = cell.dateStr === activeDay;
 const hasNote = Boolean(state.notes[cell.dateStr] && state.notes[cell.dateStr].trim());
 const numColor = cIdx === 5 ? 'text-[#2B5B84]' : cIdx === 6 ? 'text-[#B83B2E]' : 'text-[#231F1C]';
 return `
-<div onclick="setSelectedMobileDay('${cell.dateStr}')"
+<div onclick="handleMobileDayTap('${cell.dateStr}')"
 class="rounded-xl p-1 flex flex-col overflow-hidden min-h-0 cursor-pointer transition-all relative ${
 isToday ? 'today-cell-frame' : 'day-tile'
 } ${isSelected && !isToday ? 'ring-2 ring-[#231F1C] z-10' : isSelected && isToday ? 'ring-2 ring-[#8C2D25]' : ''}">
@@ -296,13 +297,17 @@ const activeItems = state.items
 
 sheetBodyHtml = `
 <div class="flex-1 flex flex-col overflow-hidden px-3 pb-2 pt-0.5 gap-1.5">
-<div class="flex-[1.25] min-h-0 flex flex-col gap-1">
+<div class="flex-[1.25] min-h-0 flex flex-col gap-1 ${sheetAnimClass}">
 <div class="grid grid-cols-7 gap-1 py-1 rounded-xl bg-[#EFEAE1]/70 border border-white/60 shadow-inner shrink-0">
 ${WEEKDAY_HEADERS.map(h => `<div class="text-center text-[11px] font-semibold ${h.color}">${h.ja}</div>`).join('')}
 </div>
 <div class="flex-1 min-h-0 flex flex-col gap-1">${mobileRowsHtml}</div>
 </div>
-<div class="flex items-center justify-between gap-2 shrink-0 pt-1 border-t grid-hairline">
+<div ontouchstart="onBoundaryTouchStart(event)" ontouchend="onBoundaryTouchEnd(event, '${activeDay}')" class="shrink-0 pt-1 border-t grid-hairline select-none">
+<div onclick="selectDate('${activeDay}')" title="上にスワイプまたはタップして全体表示" class="flex justify-center pb-1 cursor-pointer">
+<span class="w-10 h-1 rounded-full bg-[#C8C0B4]"></span>
+</div>
+<div class="flex items-center justify-between gap-2">
 <button type="button" onclick="selectDate('${activeDay}')" class="flex items-center gap-1.5 min-w-0 text-left">
 <span class="text-sm font-bold text-[#231F1C] truncate">${activeDay.replace(/-/g, '.')}</span>
 <span class="text-[11px] font-medium text-[#6E665E] shrink-0">${getDayName(activeDay).split('・')[1] || ''}</span>
@@ -517,7 +522,7 @@ state.paperStyle === 'ruled' ? 'paper-ruled' : 'paper-dots'
 `;
 if (isPortrait) {
 sheetBodyHtml = `
-<div class="flex-1 flex flex-col px-3 pb-3 pt-1 overflow-hidden">
+<div class="flex-1 flex flex-col px-3 pb-3 pt-1 overflow-hidden ${sheetAnimClass}">
 ${state.mobileDailyTab === 'schedule' ? schedulePaneHtml : notePaneHtml}
 </div>
 `;

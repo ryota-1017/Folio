@@ -21,13 +21,13 @@ ${m}
 }).join('');
 const mobileMonthStripHtml = isPortrait ? `
 <div class="px-3 pb-1.5 shrink-0">
-<div class="flex items-center overflow-x-auto hide-scrollbar gap-1 p-1 rounded-2xl pill-track">
+<div class="grid grid-cols-12 gap-0.5 p-0.5 rounded-xl pill-track">
 ${Array.from({ length: 12 }, (_, idx) => {
 const m = idx + 1;
 const active = m === state.currentMonth;
 return `
 <button type="button" onclick="selectMonth(${m})" title="${m}月"
-class="min-w-[34px] flex-1 h-7 rounded-xl text-xs font-semibold flex items-center justify-center transition-all shrink-0 ${
+class="h-7 rounded-lg text-[11px] font-semibold flex items-center justify-center transition-all ${
 active ? 'pill-thumb text-[#231F1C]' : 'text-[#6E665E]'
 }">
 ${m}

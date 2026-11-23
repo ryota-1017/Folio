@@ -337,6 +337,35 @@ window.reanalyzeTimetable = () => {
 analyzeTimetableFromRecentWeeks(true);
 render();
 };
+let _pendingSheetAnim = '';
+function consumeSheetAnim() {
+const a = _pendingSheetAnim;
+_pendingSheetAnim = '';
+return a;
+}
+window.handleMobileDayTap = (dateStr) => {
+if (state.selectedMobileDay === dateStr) {
+_pendingSheetAnim = 'anim-sheet-up';
+window.selectDate(dateStr);
+return;
+}
+state.selectedMobileDay = dateStr;
+render();
+};
+let _boundaryStartY = 0;
+window.onBoundaryTouchStart = (e) => {
+if (e.touches && e.touches.length === 1) {
+_boundaryStartY = e.touches[0].clientY;
+}
+};
+window.onBoundaryTouchEnd = (e, activeDay) => {
+if (!e.changedTouches || e.changedTouches.length !== 1) return;
+const dy = e.changedTouches[0].clientY - _boundaryStartY;
+if (dy < -28) {
+_pendingSheetAnim = 'anim-sheet-up';
+window.selectDate(activeDay);
+}
+};
 window.setSelectedMobileDay = (dateStr) => { state.selectedMobileDay = dateStr; render(); };
 window.setUniSelectedDay = (d) => { state.uniSelectedDay = d; render(); };
 window.toggleUniGridMobile = () => { state.uniGridMobile = !state.uniGridMobile; render(); };
@@ -413,6 +442,9 @@ render();
 window.togglePastAgenda = () => { state.showPastAgenda = !state.showPastAgenda; render(); };
 window.setMobileUniTab = (t) => { state.mobileUniTab = t; render(); };
 window.selectDate = (dateStr) => {
+if (dateStr && !state.selectedDate && !_pendingSheetAnim) {
+_pendingSheetAnim = 'anim-sheet-up';
+}
 state.selectedDate = dateStr || null;
 if (dateStr && window.history && window.history.pushState) {
 try { window.history.pushState({ folioView: 'daily', dateStr }, ''); } catch (e) {}
@@ -545,9 +577,11 @@ const dy = e.changedTouches[0].clientY - _touchStartY;
 if (Math.abs(dx) < 72 || Math.abs(dx) < Math.abs(dy) * 1.8) return;
 if (state.appMode === 'calendar') {
 if (state.selectedDate) {
+_pendingSheetAnim = dx < 0 ? 'anim-slide-right' : 'anim-slide-left';
 moveDay(dx < 0 ? 1 : -1);
 } else {
 const delta = dx < 0 ? 1 : -1;
+_pendingSheetAnim = delta > 0 ? 'anim-slide-right' : 'anim-slide-left';
 let nm = state.currentMonth + delta;
 let ny = state.currentYear;
 if (nm < 1) { nm = 12; ny--; }
