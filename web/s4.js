@@ -279,6 +279,10 @@ if (remoteData.googleClientId && !state.googleClientId) {
 state.googleClientId = sanitizeGoogleClientId(remoteData.googleClientId);
 localStorage.setItem(CLIENT_ID_STORAGE, state.googleClientId);
 }
+if (remoteData.theme === 'dark' || remoteData.theme === 'light') {
+state.theme = remoteData.theme;
+localStorage.setItem('folio_theme', state.theme);
+}
 }
 await uploadToGoogleDrive(true);
 } else {
@@ -338,6 +342,7 @@ googleClientId: state.googleClientId,
 geminiApiKey: state.geminiApiKey,
 geminiApiKeyUpdatedAt: localStorage.getItem('folio_gemini_api_key_updated_at') || '',
 paperStyle: state.paperStyle,
+theme: state.theme,
 updatedAt: new Date().toISOString()
 }, null, 2);
 const metadata = { name: DRIVE_FILE_NAME, mimeType: 'application/json' };

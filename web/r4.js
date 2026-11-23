@@ -1,4 +1,7 @@
 function render() {
+if (typeof document !== 'undefined') {
+document.documentElement.setAttribute('data-theme', state.theme === 'dark' ? 'dark' : 'light');
+}
 saveState();
 syncToastTimer();
 const scrollMap = {};
@@ -28,7 +31,7 @@ const active = m === state.currentMonth;
 return `
 <button type="button" onclick="selectMonth(${m})" title="${m}月"
 class="h-7 rounded-lg text-[11px] font-semibold flex items-center justify-center transition-all ${
-active ? 'pill-thumb text-[#231F1C]' : 'text-[#6E665E]'
+active ? 'pill-thumb text-[#231F1C]' : 'text-[#47413B]'
 }">
 ${m}
 </button>
@@ -57,7 +60,7 @@ ${ICONS.keyboard_arrow_down}
 <header class="${isPortrait ? 'px-3 pt-2.5 pb-1.5' : 'px-6 pt-5 pb-2.5'} flex items-center justify-between shrink-0 gap-2">
 <div class="flex items-center ${isPortrait ? 'gap-2' : 'gap-3'} min-w-0">
 ${state.appMode === 'calendar' && state.selectedDate ? `
-<button type="button" onclick="selectDate(null)" title="月間カレンダーに戻る"
+<button type="button" onclick="closeDailyToHome()" title="月間カレンダーに戻る"
 class="${isPortrait ? 'w-8 h-8' : 'mr-1 w-10 h-10'} rounded-full pill-thumb hover:scale-105 flex items-center justify-center text-[#231F1C] transition shrink-0">
 ${ICONS.arrow_back}
 </button>
@@ -69,7 +72,7 @@ ${state.currentMonth}
 <span class="${isPortrait ? 'text-xs' : 'text-sm md:text-base'} font-semibold leading-tight text-[#231F1C] truncate">
 ${MONTH_NAMES_EN[state.currentMonth - 1]}
 </span>
-<div class="flex items-center gap-0.5 mt-0.5 text-xs text-[#5C554D]">
+<div class="flex items-center gap-0.5 mt-0.5 text-xs text-[#38322D]">
 <button type="button" onclick="setYear(-1)" title="前の年"
 class="w-5 h-5 rounded-full hover:bg-[#EAE5DC] flex items-center justify-center transition">
 ${ICONS.chevron_left}
@@ -88,7 +91,7 @@ ${ICONS.chevron_right}
 class="${isPortrait ? 'w-8 h-7' : 'w-10 h-8'} rounded-full flex items-center justify-center transition-all ${
 state.appMode === 'calendar'
 ? 'pill-thumb text-[#231F1C]'
-: 'text-[#6E665E] hover:text-[#231F1C]'
+: 'text-[#47413B] hover:text-[#231F1C]'
 }">
 ${ICONS.calendar_month}
 </button>
@@ -96,7 +99,7 @@ ${ICONS.calendar_month}
 class="${isPortrait ? 'w-8 h-7' : 'w-10 h-8'} rounded-full flex items-center justify-center transition-all ${
 state.appMode === 'university'
 ? 'pill-thumb text-[#231F1C]'
-: 'text-[#6E665E] hover:text-[#231F1C]'
+: 'text-[#47413B] hover:text-[#231F1C]'
 }">
 ${ICONS.school}
 </button>
@@ -130,7 +133,7 @@ state.driveSyncStatus === 'synced' && state.driveAccessToken
 ? 'pill-thumb text-[#244E32]'
 : state.driveSyncStatus === 'error'
 ? 'text-[#B83B2E]'
-: 'text-[#6E665E] hover:text-[#231F1C]'
+: 'text-[#47413B] hover:text-[#231F1C]'
 } ${state.driveSyncStatus === 'syncing' ? 'animate-spin' : ''}">
 ${state.driveSyncStatus === 'synced' && state.driveAccessToken ? ICONS.cloud_done : ICONS.sync}
 </button>

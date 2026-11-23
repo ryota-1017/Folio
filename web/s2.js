@@ -37,6 +37,7 @@ mobileUniTab: 'timetable',
 uniSelectedDay: Math.min(5, (_now.getDay() + 6) % 7),
 uniGridMobile: false,
 paperStyle: 'ruled',
+theme: localStorage.getItem('folio_theme') || 'light',
 modal: null,
 activeCourseSlot: null,
 editingCourseMode: false,
@@ -338,9 +339,15 @@ analyzeTimetableFromRecentWeeks(true);
 render();
 };
 let _pendingSheetAnim = '';
+let _pendingDayPreviewAnim = '';
 function consumeSheetAnim() {
 const a = _pendingSheetAnim;
 _pendingSheetAnim = '';
+return a;
+}
+function consumeDayPreviewAnim() {
+const a = _pendingDayPreviewAnim;
+_pendingDayPreviewAnim = '';
 return a;
 }
 window.handleMobileDayTap = (dateStr) => {
@@ -349,7 +356,39 @@ _pendingSheetAnim = 'anim-sheet-up';
 window.selectDate(dateStr);
 return;
 }
+_pendingDayPreviewAnim = 'anim-day-fade';
 state.selectedMobileDay = dateStr;
+render();
+};
+window.closeDailyToHome = () => {
+_pendingSheetAnim = 'anim-sheet-down';
+window.selectDate(null);
+};
+let _dailySwipeStartY = 0;
+let _dailySwipeCanDismiss = false;
+window.onDailyTouchStart = (e) => {
+if (!e.touches || e.touches.length !== 1 || !isPortraitLayout() || !state.selectedDate) {
+_dailySwipeCanDismiss = false;
+return;
+}
+_dailySwipeStartY = e.touches[0].clientY;
+const scroller = e.target && e.target.closest ? e.target.closest('[data-scroll-key], textarea') : null;
+_dailySwipeCanDismiss = !scroller || scroller.scrollTop <= 2;
+};
+window.onDailyTouchEnd = (e) => {
+if (!_dailySwipeCanDismiss || !e.changedTouches || e.changedTouches.length !== 1) return;
+const dy = e.changedTouches[0].clientY - _dailySwipeStartY;
+if (dy > 58) {
+window.closeDailyToHome();
+}
+_dailySwipeCanDismiss = false;
+};
+window.setTheme = (mode) => {
+state.theme = mode === 'dark' ? 'dark' : 'light';
+localStorage.setItem('folio_theme', state.theme);
+if (typeof document !== 'undefined') {
+document.documentElement.setAttribute('data-theme', state.theme);
+}
 render();
 };
 let _boundaryStartY = 0;

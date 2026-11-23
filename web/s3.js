@@ -367,7 +367,8 @@ completedItemIds: state.completedItemIds,
 customCategoryRules: state.customCategoryRules,
 categoryOverrides: state.categoryOverrides,
 geminiApiKey: state.geminiApiKey,
-paperStyle: state.paperStyle
+paperStyle: state.paperStyle,
+theme: state.theme
 });
 }
 window.addCustomCategoryRule = () => {
