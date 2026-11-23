@@ -166,7 +166,7 @@ modalHtml = `
 <div onclick="if(event.target===this) closeModal()" class="fixed inset-0 z-50 bg-[#231F1C]/35 backdrop-blur-xs flex items-center justify-center p-4">
 <div class="w-full max-w-md soft-card-3d rounded-[32px] p-6 m3-fab flex flex-col max-h-[86vh]">
 <div class="flex items-center justify-between pb-4 border-b grid-hairline shrink-0">
-<h3 class="text-base font-bold text-[#231F1C]">Google カレンダー / API 連携設定</h3>
+<h3 class="text-base font-bold text-[#231F1C]">Googleログイン・APIキー同期</h3>
 <button type="button" onclick="closeModal()" title="閉じる" class="w-9 h-9 rounded-full pill-thumb hover:scale-105 flex items-center justify-center transition">${ICONS.close}</button>
 </div>
 <form onsubmit="saveSettings(event)" class="mt-4 space-y-4 text-xs flex-1 overflow-y-auto pr-1">
@@ -204,7 +204,7 @@ ${ICONS.logout}
 </button>
 ` : ''}
 </div>
-<p class="text-[11px] text-[#6E665E] mt-1">ログインするとGoogleアカウントとクライアントIDが自動連結され、次回からログインだけで同期できます。</p>
+<p class="text-[11px] text-[#6E665E] mt-1">ログインするとGoogleドライブ経由でGemini APIキー・クライアントIDが同期されます。</p>
 </div>
 ${linkedAccounts.length > 0 ? `
 <div class="pt-2 border-t grid-hairline">
@@ -222,7 +222,34 @@ ${linkedAccounts.map(acc => `
 </div>
 </div>
 ` : ''}
-<div class="pt-2 border-t grid-hairline">
+<div class="pt-2 flex items-center justify-end gap-2">
+${state.driveAccessToken ? `
+<button type="button" onclick="syncWithGoogleDrive(false)"
+class="px-4 h-10 rounded-full pill-thumb text-[#231F1C] font-semibold flex items-center gap-1.5 hover:scale-105 transition">
+${ICONS.sync}
+<span>今すぐ同期</span>
+</button>
+` : ''}
+<button type="submit" title="保存して同期"
+class="px-4 h-10 rounded-full m3-fab-dark hover:scale-105 text-white font-semibold flex items-center gap-1.5 transition">
+${ICONS.check}
+<span>保存</span>
+</button>
+</div>
+</form>
+</div>
+</div>
+`;
+} else if (state.modal === 'settings') {
+modalHtml = `
+<div onclick="if(event.target===this) closeModal()" class="fixed inset-0 z-50 bg-[#231F1C]/35 backdrop-blur-xs flex items-center justify-center p-4">
+<div class="w-full max-w-md soft-card-3d rounded-[32px] p-6 m3-fab flex flex-col max-h-[86vh]">
+<div class="flex items-center justify-between pb-4 border-b grid-hairline shrink-0">
+<h3 class="text-base font-bold text-[#231F1C]">設定</h3>
+<button type="button" onclick="closeModal()" title="閉じる" class="w-9 h-9 rounded-full pill-thumb hover:scale-105 flex items-center justify-center transition">${ICONS.close}</button>
+</div>
+<div class="mt-4 space-y-4 text-xs flex-1 overflow-y-auto pr-1">
+<div>
 <div class="font-semibold text-[#5C554D] mb-1.5">自動カテゴリー分類ルール（キーワード指定）</div>
 <div class="flex items-center gap-1.5 mb-2">
 <input id="rule-keyword-input" type="text" placeholder="例: 睡眠, 塾, 部活"
@@ -293,13 +320,7 @@ ${ICONS.upload}
 <span class="text-[11px] text-[#6E665E]">手動書き出し / 読み込み</span>
 </div>
 </div>
-<div class="pt-1 flex justify-end">
-<button type="submit" title="設定を保存"
-class="w-11 h-11 rounded-full m3-fab-dark hover:scale-105 text-white flex items-center justify-center transition">
-${ICONS.check}
-</button>
 </div>
-</form>
 </div>
 </div>
 `;

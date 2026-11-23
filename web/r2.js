@@ -21,6 +21,7 @@ course
 ${course ? `
 <div>
 <div class="${isPortrait ? 'text-[10px]' : 'text-xs'} font-bold text-[#224363] leading-tight line-clamp-2">${course.name}</div>
+${!isPortrait && course.instructor && course.instructor !== '未設定' ? `<div class="text-[10px] text-[#3B5B7A] mt-0.5 truncate font-medium" title="担当: ${escapeHtml(course.instructor)}">担当: ${escapeHtml(course.instructor)}</div>` : ''}
 ${!isPortrait ? `<div class="text-[11px] text-[#4A6A8A] mt-0.5 truncate" title="${course.room || ''}">${course.room || ''}</div>` : ''}
 </div>
 <div class="mt-1 flex items-center gap-0.5 ${isPortrait ? 'text-[9px]' : 'text-[11px]'} font-semibold">
@@ -72,7 +73,7 @@ course
 ${course ? `
 <div class="min-w-0">
 <div class="text-sm font-bold text-[#224363] truncate">${course.name}</div>
-<div class="text-xs text-[#4A6A8A] truncate mt-0.5">${course.room || '詳細なし'} ・ ${course.credits}単位</div>
+<div class="text-xs text-[#4A6A8A] truncate mt-0.5">${course.instructor && course.instructor !== '未設定' ? `担当: ${escapeHtml(course.instructor)} ・ ` : ''}${course.room || '詳細なし'} ・ ${course.credits}単位</div>
 </div>
 ` : `<div class="text-xs text-[#8C847A]">空きコマ（90分・タップして登録）</div>`}
 </div>

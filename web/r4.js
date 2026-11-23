@@ -106,7 +106,7 @@ class="${isPortrait ? 'w-8 h-8' : 'w-10 h-10'} rounded-full pill-thumb hover:sca
 ${ICONS.search}
 </button>
 ${isPortrait ? `
-<button type="button" onclick="${state.driveAccessToken ? 'handleSyncClick()' : 'handleGoogleLoginClick()'}" title="${state.driveAccessToken ? 'Googleと同期' : 'Googleでログイン'}"
+<button type="button" onclick="openModal('sync')" title="${state.driveAccessToken ? 'Googleログイン・APIキー同期' : 'Googleでログイン・APIキー設定'}"
 class="w-8 h-8 rounded-full pill-thumb flex items-center justify-center transition ${
 state.driveSyncStatus === 'synced' && state.driveAccessToken
 ? 'text-[#244E32]'
@@ -118,7 +118,7 @@ ${state.driveAccessToken ? (state.driveSyncStatus === 'synced' ? ICONS.cloud_don
 </button>
 ` : `
 <div class="inline-flex items-center pill-track p-1 rounded-full gap-0.5">
-<button type="button" onclick="handleGoogleLoginClick()" title="${state.driveAccessToken ? 'Googleログイン済（クリックでアカウント切替）' : 'Googleでログイン'}"
+<button type="button" onclick="openModal('sync')" title="${state.driveAccessToken ? 'Googleログイン済・APIキー同期設定' : 'Googleでログイン・APIキー設定'}"
 class="w-9 h-8 rounded-full flex items-center justify-center transition-all ${
 state.driveAccessToken ? 'pill-thumb text-[#244E32]' : 'text-[#224363] hover:text-[#1A334D]'
 }">
@@ -136,7 +136,7 @@ ${state.driveSyncStatus === 'synced' && state.driveAccessToken ? ICONS.cloud_don
 </button>
 </div>
 `}
-<button type="button" onclick="openModal('sync')" title="API・連携設定"
+<button type="button" onclick="openModal('settings')" title="アプリ設定"
 class="${isPortrait ? 'w-8 h-8' : 'w-10 h-10'} rounded-full pill-thumb hover:scale-105 flex items-center justify-center text-[#231F1C] transition">
 ${ICONS.tune}
 </button>
@@ -160,7 +160,7 @@ ${state.swUpdateReady ? `
 ` : ''}
 ${sheetBodyHtml}
 ${state.aiBannerMessage ? `
-<div class="fixed top-3 left-1/2 -translate-x-1/2 z-50 max-w-[92vw] sm:max-w-md px-4 py-2 rounded-full bg-[#231F1C]/92 text-[#FAF8F4] shadow-lg border border-white/15 flex items-center gap-2.5 text-xs font-medium pointer-events-auto">
+<div style="background-color:#1F1B18;" class="fixed top-3 left-1/2 -translate-x-1/2 z-50 max-w-[92vw] sm:max-w-md px-4 py-2.5 rounded-full bg-[#1F1B18] text-[#FAF8F4] shadow-2xl border border-[#4A433C] flex items-center gap-2.5 text-xs font-semibold pointer-events-auto">
 <span class="text-[#F2E6CE] shrink-0">${ICONS.auto_awesome}</span>
 <span class="truncate">${escapeHtml(state.aiBannerMessage)}</span>
 <button type="button" onclick="closeBanner()" title="閉じる" class="w-5 h-5 rounded-full hover:bg-white/15 flex items-center justify-center shrink-0">${ICONS.close}</button>

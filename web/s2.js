@@ -171,8 +171,26 @@ return (raw || '')
 }
 function extractInstructorFromMemo(memo) {
 if (!memo) return '未設定';
-const m = memo.match(/担当[:：]\s*([^\n\r]+)/);
-return m ? m[1].trim() : '未設定';
+const plain = String(memo)
+.replace(/<br\s*\/?>/gi, '\n')
+.replace(/<[^>]+>/g, ' ')
+.replace(/&nbsp;/g, ' ')
+.trim();
+const labeled = plain.match(/(?:担当教員|担当者|担当教師|担当講師|担当|教員|教師|講師|先生)\s*[:：]\s*([^\n\r]+)/);
+if (labeled && labeled[1]) {
+const cleaned = labeled[1].split(/[\/｜|・\t]|(?:教室|場所|ルーム|持ち物|備考)[:：]/)[0].trim();
+if (cleaned) return cleaned;
+}
+const suffixMatch = plain.match(/([一-龥ぁ-んァ-ヶーA-Za-z]{1,10}\s*(?:先生|教授|講師))/);
+if (suffixMatch && suffixMatch[1]) return suffixMatch[1].trim();
+return '未設定';
+}
+function extractInstructorFromItems(items) {
+for (const it of (items || [])) {
+const found = extractInstructorFromMemo(it.memo);
+if (found && found !== '未設定') return found;
+}
+return '未設定';
 }
 function extractRoomFromItems(items) {
 for (const it of items) {
@@ -215,8 +233,8 @@ const skipped = [];
 const targetItems = [];
 allClassItems.forEach(it => {
 const t = it.title || '';
-if (/登校|下校|移動|HR|LHR/.test(t)) {
-skipped.push({ item: it, reason: '登下校・HR等のため除外' });
+if (/登校|下校|移動/.test(t)) {
+skipped.push({ item: it, reason: '登下校等のため除外' });
 return;
 }
 if (/自習|宿題|行事|鑑賞/.test(t)) {
@@ -295,7 +313,7 @@ period,
 timeLabel: info.sample.startTime || '',
 name: bestName,
 room: extractRoomFromItems(e.items),
-instructor: extractInstructorFromMemo(info.sample.memo),
+instructor: extractInstructorFromItems(e.items),
 credits: 2,
 evaluation: 'カレンダー直近3週間から自動反映',
 attended: e.items.length,

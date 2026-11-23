@@ -104,17 +104,70 @@ ${sorted.map(it => renderScheduleCardHtml(it)).join('')}
 `;
 }
 
+function getSchoolTimeBounds(classItems) {
+const sorted = [...classItems].sort((a, b) => timeToMinutes(a.startTime) - timeToMinutes(b.startTime));
+const nonTransit = sorted.filter(it => !it.isTransit && !/登校|下校|移動/.test(it.title || ''));
+const basis = nonTransit.length > 0 ? nonTransit : sorted;
+const starts = basis.map(it => timeToMinutes(it.startTime)).filter(m => m < 9999);
+const ends = basis.map(it => timeToMinutes(it.endTime || it.startTime)).filter(m => m < 9999);
+if (starts.length === 0) {
+const fbStarts = sorted.map(it => timeToMinutes(it.startTime)).filter(m => m < 9999);
+const fbEnds = sorted.map(it => timeToMinutes(it.endTime || it.startTime)).filter(m => m < 9999);
+return {
+startMins: fbStarts.length > 0 ? Math.min(...fbStarts) : 9999,
+endMins: fbEnds.length > 0 ? Math.max(...fbEnds) : 9999
+};
+}
+return {
+startMins: Math.min(...starts),
+endMins: ends.length > 0 ? Math.max(...ends) : Math.min(...starts)
+};
+}
+
+function buildOrderedDayDisplayItems(dayItems, dateStr, isMobileCell = false) {
+const classItems = dayItems.filter(it => it.category === 'class');
+const otherItems = dayItems.filter(it => it.category !== 'class');
+const allDayOthers = otherItems.filter(it => !it.startTime);
+const timedOthers = otherItems.filter(it => Boolean(it.startTime)).sort((a, b) => timeToMinutes(a.startTime) - timeToMinutes(b.startTime));
+if (classItems.length === 0) {
+return [...allDayOthers, ...timedOthers];
+}
+const sortedClasses = [...classItems].sort((a, b) => timeToMinutes(a.startTime) - timeToMinutes(b.startTime));
+const bounds = getSchoolTimeBounds(sortedClasses);
+const firstStart = sortedClasses.find(it => it.startTime)?.startTime || '';
+const lastEndObj = [...sortedClasses].reverse().find(it => it.endTime || it.startTime);
+const lastEnd = lastEndObj ? (lastEndObj.endTime || lastEndObj.startTime || '') : '';
+const beforeSchool = timedOthers.filter(it => timeToMinutes(it.startTime) < bounds.startMins);
+const afterSchool = timedOthers.filter(it => timeToMinutes(it.startTime) >= bounds.startMins);
+const schoolChip = {
+id: 'school-group-' + dateStr,
+title: isMobileCell
+? (sortedClasses.length === 1 ? cleanCourseTitle(sortedClasses[0].title) : `学校(${sortedClasses.length})`)
+: (sortedClasses.length === 1 ? sortedClasses[0].title : `学校（${sortedClasses.length}件）`),
+startTime: isMobileCell ? '' : firstStart,
+endTime: isMobileCell ? '' : lastEnd,
+category: 'class',
+isSchoolGroup: true,
+schoolSubItems: sortedClasses,
+hasPrepAlert: sortedClasses.some(it => it.hasPrepAlert || (it.memo && /小テスト|提出|締切|※要予習/.test(it.memo)))
+};
+return [...allDayOthers, ...beforeSchool, schoolChip, ...afterSchool];
+}
+
 function renderGroupedScheduleListHtml(dayItems, targetDate) {
 const classItems = dayItems.filter(it => it.category === 'class');
 const otherItems = dayItems.filter(it => it.category !== 'class');
-const entries = otherItems.map(it => ({
-sortMins: timeToMinutes(it.startTime),
+const bounds = classItems.length > 0 ? getSchoolTimeBounds(classItems) : { startMins: 9999, endMins: 9999 };
+const entries = otherItems.map(it => {
+const m = timeToMinutes(it.startTime);
+return {
+sortMins: !it.startTime ? -1 : (m < bounds.startMins ? m : Math.max(bounds.startMins + 0.5, m)),
 html: renderScheduleCardHtml(it)
-}));
+};
+});
 if (classItems.length > 0) {
-const firstClass = [...classItems].sort((a, b) => timeToMinutes(a.startTime) - timeToMinutes(b.startTime))[0];
 entries.push({
-sortMins: timeToMinutes(firstClass.startTime),
+sortMins: bounds.startMins,
 html: renderSchoolGroupCardHtml(classItems, targetDate)
 });
 }
@@ -208,16 +261,7 @@ return `<div class="rounded-xl day-tile-slot"></div>`;
 const dayItems = state.items
 .filter(it => it.date === cell.dateStr && filterFn(it))
 .sort((a, b) => timeToMinutes(a.startTime) - timeToMinutes(b.startTime));
-const classItems = dayItems.filter(it => it.category === 'class');
-const otherItems = dayItems.filter(it => it.category !== 'class');
-const cellChips = [...otherItems.filter(it => !it.startTime), ...otherItems.filter(it => Boolean(it.startTime))];
-if (classItems.length > 0) {
-cellChips.push({
-id: 'school-group-' + cell.dateStr,
-title: classItems.length === 1 ? cleanCourseTitle(classItems[0].title) : `学校(${classItems.length})`,
-category: 'class'
-});
-}
+const cellChips = buildOrderedDayDisplayItems(dayItems, cell.dateStr, true);
 const isToday = cell.dateStr === TODAY_STR;
 const isSelected = cell.dateStr === activeDay;
 const hasNote = Boolean(state.notes[cell.dateStr] && state.notes[cell.dateStr].trim());
@@ -311,34 +355,22 @@ if (!cell.dateStr) return `<div class="rounded-2xl day-tile-slot"></div>`;
 const dayItems = state.items
 .filter(it => it.date === cell.dateStr && filterFn(it))
 .sort((a, b) => timeToMinutes(a.startTime) - timeToMinutes(b.startTime));
-const classItems = dayItems.filter(it => it.category === 'class');
-const otherItems = dayItems.filter(it => it.category !== 'class');
-const allDayOthers = otherItems.filter(it => !it.startTime);
-const timedOthers = otherItems.filter(it => Boolean(it.startTime));
-const monthDisplayItems = [...allDayOthers, ...timedOthers];
-if (classItems.length > 0) {
-monthDisplayItems.push({
-id: 'school-group-' + cell.dateStr,
-title: classItems.length === 1 ? classItems[0].title : `学校（${classItems.length}件）`,
-startTime: '',
-category: 'class',
-isSchoolGroup: true,
-schoolSubItems: classItems,
-hasPrepAlert: classItems.some(it => it.hasPrepAlert || (it.memo && /小テスト|提出|締切|※要予習/.test(it.memo)))
-});
-}
+const monthDisplayItems = buildOrderedDayDisplayItems(dayItems, cell.dateStr, false);
 const hasNote = Boolean(state.notes[cell.dateStr] && state.notes[cell.dateStr].trim());
 const isToday = cell.dateStr === TODAY_STR;
 const numColor = cIdx === 5 ? 'text-[#2B5B84]' : cIdx === 6 ? 'text-[#B83B2E]' : 'text-[#231F1C]';
+const formatChipTimeRange = (item) => item.startTime ? (item.endTime ? `${item.startTime}-${item.endTime}` : item.startTime) : '';
 const renderEventChip = (it) => {
 const st = CATEGORY_STYLES[it.category] || CATEGORY_STYLES.personal;
 const transitCls = (it.isTransit || /登校|下校|移動/.test(it.title)) ? 'opacity-55' : '';
+const timeRangeStr = formatChipTimeRange(it);
 if (it.isSchoolGroup) {
 const isExpanded = Boolean(state.expandedSchoolDays && state.expandedSchoolDays[cell.dateStr]);
 return `
 <div onclick="event.stopPropagation(); toggleSchoolDayExpand('${cell.dateStr}')" class="px-1.5 py-[1px] rounded-full text-[11px] leading-tight truncate flex items-center justify-between gap-1 shrink-0 shadow-xs border border-white/60 ${st.bg} ${st.text} cursor-pointer">
 <div class="flex items-center gap-1 min-w-0">
 <span class="w-1.5 h-1.5 rounded-full shrink-0 ${st.dot}"></span>
+${timeRangeStr ? `<span class="font-semibold opacity-80 shrink-0">${timeRangeStr}</span>` : ''}
 <span class="truncate font-semibold">${escapeHtml(it.title)}</span>
 </div>
 <span class="text-[9px] font-bold shrink-0">${isExpanded ? '▲' : '▼'}</span>
@@ -347,9 +379,10 @@ ${isExpanded && Array.isArray(it.schoolSubItems) ? `
 <div class="pl-2 space-y-0.5 border-l-2 border-[#C94035]/40 ml-1.5 my-0.5">
 ${it.schoolSubItems.map(sub => {
 const subTransit = (sub.isTransit || /登校|下校|移動/.test(sub.title)) ? 'opacity-55' : '';
+const subTimeRange = formatChipTimeRange(sub);
 return `
 <div onclick="event.stopPropagation(); openItemDetail('${sub.id}')" class="px-1.5 py-[1px] rounded text-[10px] leading-tight truncate flex items-center gap-1 bg-[#F9E4E2]/70 text-[#8C2D25] ${subTransit}">
-${sub.startTime ? `<span class="font-semibold opacity-80 shrink-0">${sub.startTime}</span>` : ''}
+${subTimeRange ? `<span class="font-semibold opacity-80 shrink-0">${subTimeRange}</span>` : ''}
 <span class="truncate">${escapeHtml(cleanCourseTitle(sub.title))}</span>
 </div>
 `;
@@ -361,7 +394,7 @@ ${sub.startTime ? `<span class="font-semibold opacity-80 shrink-0">${sub.startTi
 return `
 <div class="px-1.5 py-[1px] rounded-full text-[11px] leading-tight truncate flex items-center gap-1 shrink-0 shadow-xs border border-white/60 ${st.bg} ${st.text} ${transitCls}">
 <span class="w-1.5 h-1.5 rounded-full shrink-0 ${st.dot}"></span>
-${it.startTime ? `<span class="font-semibold opacity-80">${it.startTime}</span>` : ''}
+${timeRangeStr ? `<span class="font-semibold opacity-80 shrink-0">${timeRangeStr}</span>` : ''}
 <span class="truncate">${escapeHtml(it.title)}</span>
 </div>
 `;

@@ -46,7 +46,8 @@ if (state.googleClientId) {
 window.connectGoogleDrive(false, '');
 return;
 }
-state.aiBannerMessage = '未ログインです。右端の設定ボタンからGoogleクライアントIDを登録し、ログインしてください。';
+state.aiBannerMessage = '未ログインです。右上のGoogleログインボタンからクライアントIDを登録し、ログインしてください。';
+state.modal = 'sync';
 render();
 };
 window.connectGoogleDrive = (silent = false, promptMode = 'consent') => {
