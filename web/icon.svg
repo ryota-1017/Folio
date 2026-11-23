@@ -1,75 +1,38 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
   <defs>
-    <linearGradient id="iosBg" x1="0" y1="0" x2="0" y2="1">
+    <linearGradient id="warmBg" x1="0" y1="0" x2="1" y2="1">
       <stop offset="0%" stop-color="#FFFFFF"/>
-      <stop offset="100%" stop-color="#F3F5F9"/>
+      <stop offset="55%" stop-color="#FAF7F2"/>
+      <stop offset="100%" stop-color="#EFE9DF"/>
     </linearGradient>
-    <linearGradient id="iosPage" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#FFFFFF"/>
-      <stop offset="100%" stop-color="#F9FAFC"/>
+    <linearGradient id="dotRed" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#DB5245"/>
+      <stop offset="100%" stop-color="#B83B2E"/>
     </linearGradient>
-    <linearGradient id="iosRedHeader" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#FF594F"/>
-      <stop offset="100%" stop-color="#FF3B30"/>
+    <linearGradient id="dotBlue" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#3B72A3"/>
+      <stop offset="100%" stop-color="#25527A"/>
     </linearGradient>
-    <linearGradient id="iosBlueDot" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#2E90FF"/>
-      <stop offset="100%" stop-color="#007AFF"/>
+    <linearGradient id="dotGreen" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#48855C"/>
+      <stop offset="100%" stop-color="#316342"/>
     </linearGradient>
-    <linearGradient id="iosGreenDot" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#4CD964"/>
-      <stop offset="100%" stop-color="#28CD41"/>
-    </linearGradient>
-    <linearGradient id="iosRing" x1="0" y1="0" x2="1" y2="0">
-      <stop offset="0%" stop-color="#AEAEB2"/>
-      <stop offset="50%" stop-color="#E5E5EA"/>
-      <stop offset="100%" stop-color="#8E8E93"/>
-    </linearGradient>
-    <filter id="iosShadow" x="-18%" y="-14%" width="136%" height="140%">
-      <feDropShadow dx="0" dy="2.5" stdDeviation="2.5" flood-color="#1C1C1E" flood-opacity="0.12"/>
-    </filter>
-    <clipPath id="iosSheetClip">
-      <rect x="16" y="12" width="34" height="40" rx="8"/>
-    </clipPath>
   </defs>
 
-  <!-- Pure iOS white squircle base -->
-  <rect x="0" y="0" width="64" height="64" rx="15" fill="url(#iosBg)"/>
+  <!-- Subtle warm gradient background -->
+  <rect x="0" y="0" width="64" height="64" rx="16" fill="url(#warmBg)"/>
 
-  <!-- Subtle stacked sheet beneath for crisp notebook feel -->
-  <rect x="18" y="14.5" width="32" height="39.5" rx="7.5" fill="#E5E7EE"/>
+  <!-- Borderless Taskito-style timeline / task rows -->
+  <!-- Row 1 -->
+  <circle cx="17.5" cy="20" r="4" fill="url(#dotRed)"/>
+  <rect x="25.5" y="17.2" width="24" height="5.6" rx="2.8" fill="#2A2521"/>
 
-  <!-- Main iOS Planner Sheet -->
-  <g filter="url(#iosShadow)">
-    <rect x="16" y="12" width="34" height="40" rx="8" fill="url(#iosPage)"/>
-    <g clip-path="url(#iosSheetClip)">
-      <!-- iOS System Red Header Band -->
-      <rect x="16" y="12" width="34" height="10.5" fill="url(#iosRedHeader)"/>
-      <!-- Crisp hairline separator -->
-      <rect x="16" y="22.5" width="34" height="0.7" fill="#000000" fill-opacity="0.06"/>
-    </g>
-    <rect x="16.35" y="12.35" width="33.3" height="39.3" rx="7.65" fill="none" stroke="#000000" stroke-opacity="0.05" stroke-width="0.7"/>
-  </g>
+  <!-- Row 2 (checked) -->
+  <circle cx="17.5" cy="32" r="4" fill="url(#dotBlue)"/>
+  <path d="M15.7 32 L17 33.3 L19.5 30.7" fill="none" stroke="#FFFFFF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect x="25.5" y="29.2" width="27" height="5.6" rx="2.8" fill="#3D3630"/>
 
-  <!-- Minimalist iOS Reminder / Planner Rows -->
-  <circle cx="24" cy="30" r="2.1" fill="url(#iosBlueDot)"/>
-  <rect x="28.5" y="28.6" width="15" height="2.8" rx="1.4" fill="#1C1C1E" fill-opacity="0.86"/>
-
-  <circle cx="24" cy="37.5" r="2.1" fill="url(#iosGreenDot)"/>
-  <rect x="28.5" y="36.1" width="12.5" height="2.8" rx="1.4" fill="#3A3A3C" fill-opacity="0.65"/>
-
-  <circle cx="24" cy="45" r="2.1" fill="#C7C7CC"/>
-  <rect x="28.5" y="43.6" width="9.5" height="2.8" rx="1.4" fill="#8E8E93" fill-opacity="0.5"/>
-
-  <!-- Clean iOS Notebook Rings on Left -->
-  <g>
-    <circle cx="18.2" cy="17.2" r="1.4" fill="#FFFFFF" fill-opacity="0.35"/>
-    <rect x="12" y="15.9" width="7" height="2.6" rx="1.3" fill="url(#iosRing)"/>
-
-    <circle cx="18.2" cy="30" r="1.4" fill="#8E8E93" fill-opacity="0.28"/>
-    <rect x="12" y="28.7" width="7" height="2.6" rx="1.3" fill="url(#iosRing)"/>
-
-    <circle cx="18.2" cy="42.8" r="1.4" fill="#8E8E93" fill-opacity="0.28"/>
-    <rect x="12" y="41.5" width="7" height="2.6" rx="1.3" fill="url(#iosRing)"/>
-  </g>
+  <!-- Row 3 -->
+  <circle cx="17.5" cy="44" r="4" fill="url(#dotGreen)"/>
+  <rect x="25.5" y="41.2" width="18" height="5.6" rx="2.8" fill="#8C8276"/>
 </svg>
