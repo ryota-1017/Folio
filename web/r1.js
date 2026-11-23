@@ -188,7 +188,7 @@ return entries.map(e => e.html).join('');
 function renderCalendarBody(isPortrait) {
 let sheetBodyHtml = "";
 const sheetAnimClass = consumeSheetAnim();
-const filterFn = (it) => state.categoryFilter === 'all' || it.category === state.categoryFilter;
+const filterFn = (it) => (state.categoryFilter === 'all' || it.category === state.categoryFilter) && !/睡眠/.test(it.title || '');
 
 if (!state.selectedDate) {
 const weeks = getCalendarWeeks(state.currentYear, state.currentMonth);
