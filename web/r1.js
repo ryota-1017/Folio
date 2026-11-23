@@ -10,13 +10,13 @@ const sMins = timeToMinutes(it.startTime);
 const eMins = it.endTime ? timeToMinutes(it.endTime) : sMins + 60;
 if (nowMins >= sMins && nowMins < eMins) {
 liveBadge = `<span class="inline-block px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#366B47] text-white">進行中</span>`;
-liveRing = 'ring-2 ring-[#366B47]/60';
+liveRing = 'ring-2 ring-[#366B47]/60 anim-live-glow';
 } else if (sMins > nowMins && sMins - nowMins <= 60) {
 liveBadge = `<span class="inline-block px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#F2E6CE] text-[#231F1C]">まもなく</span>`;
 }
 }
 return `
-<div onclick="openItemDetail('${it.id}')" class="group relative rounded-[20px] p-3 sm:p-4 transition-all soft-card-3d hover:-translate-y-0.5 flex items-start gap-3 sm:gap-4 cursor-pointer ${liveRing}">
+<div onclick="openItemDetail('${it.id}')" class="group relative rounded-[20px] p-3 sm:p-4 transition-all soft-card-3d anim-card-in hover:-translate-y-0.5 flex items-start gap-3 sm:gap-4 cursor-pointer ${liveRing}">
 <div class="w-12 sm:w-16 shrink-0 pt-0.5 text-right">
 <div class="text-xs sm:text-sm font-bold text-[#231F1C]">${it.startTime || '終日'}</div>
 ${it.endTime ? `<div class="text-[11px] sm:text-xs text-[#47413B] mt-0.5">${it.endTime}</div>` : ''}
@@ -67,7 +67,7 @@ const isExpanded = Boolean(state.expandedSchoolDays && state.expandedSchoolDays[
 const nonTransit = sorted.filter(it => !it.isTransit && !/登校|下校|移動/.test(it.title || ''));
 const displayCourses = nonTransit.length > 0 ? nonTransit : sorted;
 return `
-<div class="space-y-1.5">
+<div class="space-y-1.5 anim-card-in">
 <div onclick="toggleSchoolDayExpand('${targetDate}')" class="group relative rounded-[20px] p-3 sm:p-4 transition-all soft-card-3d hover:-translate-y-0.5 flex items-start gap-3 sm:gap-4 cursor-pointer">
 <div class="w-12 sm:w-16 shrink-0 pt-0.5 text-right">
 <div class="text-xs sm:text-sm font-bold text-[#231F1C]">${firstStart || '学校'}</div>
@@ -96,7 +96,7 @@ ${it.startTime ? `<span class="font-bold opacity-80">${it.startTime}</span>` : '
 </div>
 </div>
 ${isExpanded ? `
-<div class="pl-3 sm:pl-5 space-y-1.5 border-l-2 border-[#C94035]/35 ml-2">
+<div class="pl-3 sm:pl-5 space-y-1.5 border-l-2 border-[#C94035]/35 ml-2 anim-expand-in">
 ${sorted.map(it => renderScheduleCardHtml(it)).join('')}
 </div>
 ` : ''}
@@ -232,7 +232,7 @@ const agendaHtml = monthItems.length > 0
 ? `${upcomingHtml}${pastSectionHtml}`
 : `<div class="py-12 text-center text-xs text-[#59524A]">${state.currentMonth}月の予定はありません</div>`;
 sheetBodyHtml = `
-<div class="flex-1 flex flex-col overflow-hidden px-3 pb-2 pt-0.5 gap-2">
+<div class="flex-1 flex flex-col overflow-hidden px-3 pb-2 pt-0.5 gap-2 ${sheetAnimClass}">
 <div class="flex items-center justify-between gap-2 shrink-0">
 <span class="text-xs font-bold text-[#38322D] truncate">${anchorDay.slice(5).replace('-', '/')}〜の予定</span>
 <div class="inline-flex items-center pill-track p-0.5 rounded-full gap-0.5 shrink-0">
@@ -294,6 +294,7 @@ return `<div class="grid grid-cols-7 gap-1 flex-1 min-h-0">${cellsHtml}</div>`;
 const activeItems = state.items
 .filter(it => it.date === activeDay && filterFn(it))
 .sort((a, b) => timeToMinutes(a.startTime) - timeToMinutes(b.startTime));
+const dayPreviewAnim = consumeDayPreviewAnim();
 
 sheetBodyHtml = `
 <div class="flex-1 min-h-0 flex flex-col overflow-hidden px-3 pb-2 pt-0.5 gap-1.5">
@@ -335,7 +336,7 @@ ${ICONS.subject}
 </div>
 </div>
 </div>
-<div data-scroll-key="mobile-day" class="flex-1 min-h-0 overflow-y-auto space-y-2 pb-20 pr-0.5">
+<div data-scroll-key="mobile-day" class="flex-1 min-h-0 overflow-y-auto space-y-2 pb-20 pr-0.5 ${dayPreviewAnim}">
 ${activeItems.length > 0
 ? renderGroupedScheduleListHtml(activeItems, activeDay)
 : `<div class="py-4 text-center text-xs text-[#59524A]">この日の予定はありません</div>`
@@ -384,7 +385,7 @@ ${timeRangeStr ? `<span class="font-semibold opacity-80 shrink-0">${timeRangeStr
 <span class="text-[9px] font-bold shrink-0">${isExpanded ? '▲' : '▼'}</span>
 </div>
 ${isExpanded && Array.isArray(it.schoolSubItems) ? `
-<div class="pl-2 space-y-0.5 border-l-2 border-[#C94035]/40 ml-1.5 my-0.5">
+<div class="pl-2 space-y-0.5 border-l-2 border-[#C94035]/40 ml-1.5 my-0.5 anim-expand-in">
 ${it.schoolSubItems.map(sub => {
 const subTransit = (sub.isTransit || /登校|下校|移動/.test(sub.title)) ? 'opacity-55' : '';
 const subTimeRange = formatChipTimeRange(sub);

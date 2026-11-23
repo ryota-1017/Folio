@@ -167,25 +167,71 @@
     .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
     @keyframes folioSlideFromRight {
-      from { opacity: 0.35; transform: translateX(34px); }
-      to { opacity: 1; transform: translateX(0); }
+      from { opacity: 0.25; transform: translateX(42px) scale(0.985); }
+      to { opacity: 1; transform: translateX(0) scale(1); }
     }
     @keyframes folioSlideFromLeft {
-      from { opacity: 0.35; transform: translateX(-34px); }
-      to { opacity: 1; transform: translateX(0); }
+      from { opacity: 0.25; transform: translateX(-42px) scale(0.985); }
+      to { opacity: 1; transform: translateX(0) scale(1); }
     }
     @keyframes folioSheetUp {
-      from { opacity: 0.4; transform: translateY(22px); }
-      to { opacity: 1; transform: translateY(0); }
+      from { opacity: 0.25; transform: translateY(32px) scale(0.98); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
     }
     @keyframes folioSheetDown {
-      from { opacity: 0.45; transform: translateY(-18px); }
+      from { opacity: 0.35; transform: translateY(-24px) scale(0.98); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    @keyframes folioDayFade {
+      from { opacity: 0.25; transform: translateY(14px); }
       to { opacity: 1; transform: translateY(0); }
     }
-    .anim-slide-right { animation: folioSlideFromRight 0.22s cubic-bezier(0.22, 1, 0.36, 1); }
-    .anim-slide-left { animation: folioSlideFromLeft 0.22s cubic-bezier(0.22, 1, 0.36, 1); }
-    .anim-sheet-up { animation: folioSheetUp 0.2s cubic-bezier(0.22, 1, 0.36, 1); }
-    .anim-sheet-down { animation: folioSheetDown 0.2s cubic-bezier(0.22, 1, 0.36, 1); }
+    @keyframes folioModePop {
+      from { opacity: 0.3; transform: scale(0.965); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    @keyframes folioModalPop {
+      from { opacity: 0; transform: translateY(18px) scale(0.92); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    @keyframes folioBackdropFade {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    @keyframes folioToastDrop {
+      from { opacity: 0; transform: translate(-50%, -20px) scale(0.94); }
+      to { opacity: 1; transform: translate(-50%, 0) scale(1); }
+    }
+    @keyframes folioExpandIn {
+      from { opacity: 0; transform: translateY(-8px) scaleY(0.94); }
+      to { opacity: 1; transform: translateY(0) scaleY(1); }
+    }
+    @keyframes folioCardCascade {
+      from { opacity: 0; transform: translateY(10px) scale(0.98); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    @keyframes folioLiveGlow {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(54, 107, 71, 0.35); }
+      50% { box-shadow: 0 0 0 5px rgba(54, 107, 71, 0); }
+    }
+    .anim-slide-right { animation: folioSlideFromRight 0.28s cubic-bezier(0.22, 1, 0.36, 1) both; }
+    .anim-slide-left { animation: folioSlideFromLeft 0.28s cubic-bezier(0.22, 1, 0.36, 1) both; }
+    .anim-sheet-up { animation: folioSheetUp 0.26s cubic-bezier(0.22, 1, 0.36, 1) both; }
+    .anim-sheet-down { animation: folioSheetDown 0.25s cubic-bezier(0.22, 1, 0.36, 1) both; }
+    .anim-day-fade { animation: folioDayFade 0.22s cubic-bezier(0.22, 1, 0.36, 1) both; }
+    .anim-mode-pop { animation: folioModePop 0.24s cubic-bezier(0.22, 1, 0.36, 1) both; }
+    .anim-modal-pop { animation: folioModalPop 0.28s cubic-bezier(0.34, 1.35, 0.64, 1) both; }
+    .anim-backdrop-in { animation: folioBackdropFade 0.18s ease-out both; }
+    .anim-toast-drop { animation: folioToastDrop 0.28s cubic-bezier(0.34, 1.35, 0.64, 1) both; }
+    .anim-expand-in { transform-origin: top center; animation: folioExpandIn 0.22s cubic-bezier(0.22, 1, 0.36, 1) both; }
+    .anim-card-in { animation: folioCardCascade 0.24s cubic-bezier(0.22, 1, 0.36, 1) both; }
+    .anim-live-glow { animation: folioLiveGlow 2.2s ease-in-out infinite; }
+    button, .day-tile, .soft-card-3d, .pill-thumb {
+      transition: transform 0.18s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.2s ease, background-color 0.2s ease, opacity 0.2s ease;
+    }
+    button:active, .day-tile:active {
+      transform: scale(0.96);
+    }
 
     /* Dark Mode Theme */
     html[data-theme="dark"] body {

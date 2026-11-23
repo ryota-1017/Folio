@@ -1,5 +1,6 @@
 function renderUniversityBody(isPortrait) {
 let sheetBodyHtml = "";
+const uniAnimClass = consumeSheetAnim();
 const deadlineItems = state.items
 .filter(it => it.category === 'deadline' && (state.showCompletedDeadlines || !state.completedItemIds.includes(it.id)))
 .sort((a, b) => a.date.localeCompare(b.date));
@@ -195,7 +196,7 @@ ${pickups.map(p => `
 
 if (isPortrait) {
 sheetBodyHtml = `
-<div class="flex-1 flex flex-col gap-2.5 px-3 pb-3 pt-1 overflow-hidden">
+<div class="flex-1 flex flex-col gap-2.5 px-3 pb-3 pt-1 overflow-hidden ${uniAnimClass}">
 <div class="flex justify-center shrink-0">
 <div class="inline-flex items-center pill-track p-1 rounded-full gap-1">
 <button type="button" onclick="setMobileUniTab('timetable')" title="時間割"
@@ -219,7 +220,7 @@ ${state.mobileUniTab === 'timetable' ? timetablePaneHtml : deadlinesPaneHtml}
 `;
 } else {
 sheetBodyHtml = `
-<div class="flex-1 grid grid-cols-1 lg:grid-cols-3 gap-4 p-5 pt-2 overflow-y-auto lg:overflow-hidden">
+<div class="flex-1 grid grid-cols-1 lg:grid-cols-3 gap-4 p-5 pt-2 overflow-y-auto lg:overflow-hidden ${uniAnimClass}">
 ${timetablePaneHtml}
 ${deadlinesPaneHtml}
 </div>

@@ -163,7 +163,7 @@ ${state.swUpdateReady ? `
 ` : ''}
 ${sheetBodyHtml}
 ${state.aiBannerMessage ? `
-<div style="background-color:#1F1B18;" class="fixed top-3 left-1/2 -translate-x-1/2 z-50 max-w-[92vw] sm:max-w-md px-4 py-2.5 rounded-full bg-[#1F1B18] text-[#FAF8F4] shadow-2xl border border-[#4A433C] flex items-center gap-2.5 text-xs font-semibold pointer-events-auto">
+<div style="background-color:#1F1B18;" class="fixed top-3 left-1/2 z-50 max-w-[92vw] sm:max-w-md px-4 py-2.5 rounded-full bg-[#1F1B18] text-[#FAF8F4] shadow-2xl border border-[#4A433C] flex items-center gap-2.5 text-xs font-semibold pointer-events-auto anim-toast-drop">
 <span class="text-[#F2E6CE] shrink-0">${ICONS.auto_awesome}</span>
 <span class="truncate">${escapeHtml(state.aiBannerMessage)}</span>
 <button type="button" onclick="closeBanner()" title="閉じる" class="w-5 h-5 rounded-full hover:bg-white/15 flex items-center justify-center shrink-0">${ICONS.close}</button>

@@ -4,8 +4,8 @@ if (state.modal === 'add') {
 const editingItem = state.editingItemId ? state.items.find(x => x.id === state.editingItemId) : null;
 const defaultDate = editingItem ? editingItem.date : (state.selectedDate || state.selectedMobileDay || TODAY_STR);
 modalHtml = `
-<div onclick="if(event.target===this) closeModal()" class="fixed inset-0 z-50 bg-[#231F1C]/35 backdrop-blur-xs flex items-center justify-center p-4">
-<div class="w-full max-w-md soft-card-3d rounded-[32px] p-6 m3-fab">
+<div onclick="if(event.target===this) closeModal()" class="fixed inset-0 z-50 bg-[#231F1C]/35 backdrop-blur-xs flex items-center justify-center p-4 anim-backdrop-in">
+<div class="w-full max-w-md soft-card-3d rounded-[32px] p-6 m3-fab anim-modal-pop">
 <div class="flex items-center justify-between pb-4 border-b grid-hairline">
 <h3 class="text-base font-bold text-[#231F1C]">${editingItem ? 'スケジュール編集' : '新規スケジュール追加'}</h3>
 <button type="button" onclick="closeModal()" title="閉じる"
@@ -72,8 +72,8 @@ ${ICONS.check}
 const course = state.courses.find(c => c.dayOfWeek === state.activeCourseSlot.dayOfWeek && c.period === state.activeCourseSlot.period);
 const dayLabel = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][state.activeCourseSlot.dayOfWeek] || 'Day';
 modalHtml = `
-<div onclick="if(event.target===this) closeModal()" class="fixed inset-0 z-50 bg-[#231F1C]/35 backdrop-blur-xs flex items-center justify-center p-4">
-<div class="w-full max-w-md soft-card-3d rounded-[32px] p-6 m3-fab">
+<div onclick="if(event.target===this) closeModal()" class="fixed inset-0 z-50 bg-[#231F1C]/35 backdrop-blur-xs flex items-center justify-center p-4 anim-backdrop-in">
+<div class="w-full max-w-md soft-card-3d rounded-[32px] p-6 m3-fab anim-modal-pop">
 <div class="flex items-center justify-between pb-4 border-b grid-hairline">
 <h3 class="text-base font-bold text-[#231F1C]">${dayLabel} ${state.activeCourseSlot.period}限</h3>
 <div class="flex items-center gap-2">
@@ -163,8 +163,8 @@ ${[
 } else if (state.modal === 'sync') {
 const linkedAccounts = Object.values(state.accountLinks || {});
 modalHtml = `
-<div onclick="if(event.target===this) closeModal()" class="fixed inset-0 z-50 bg-[#231F1C]/35 backdrop-blur-xs flex items-center justify-center p-4">
-<div class="w-full max-w-md soft-card-3d rounded-[32px] p-6 m3-fab flex flex-col max-h-[86vh]">
+<div onclick="if(event.target===this) closeModal()" class="fixed inset-0 z-50 bg-[#231F1C]/35 backdrop-blur-xs flex items-center justify-center p-4 anim-backdrop-in">
+<div class="w-full max-w-md soft-card-3d rounded-[32px] p-6 m3-fab anim-modal-pop flex flex-col max-h-[86vh]">
 <div class="flex items-center justify-between pb-4 border-b grid-hairline shrink-0">
 <h3 class="text-base font-bold text-[#231F1C]">Googleログイン・APIキー同期</h3>
 <button type="button" onclick="closeModal()" title="閉じる" class="w-9 h-9 rounded-full pill-thumb hover:scale-105 flex items-center justify-center transition">${ICONS.close}</button>
@@ -242,8 +242,8 @@ ${ICONS.check}
 `;
 } else if (state.modal === 'settings') {
 modalHtml = `
-<div onclick="if(event.target===this) closeModal()" class="fixed inset-0 z-50 bg-[#231F1C]/35 backdrop-blur-xs flex items-center justify-center p-4">
-<div class="w-full max-w-md soft-card-3d rounded-[32px] p-6 m3-fab flex flex-col max-h-[86vh]">
+<div onclick="if(event.target===this) closeModal()" class="fixed inset-0 z-50 bg-[#231F1C]/35 backdrop-blur-xs flex items-center justify-center p-4 anim-backdrop-in">
+<div class="w-full max-w-md soft-card-3d rounded-[32px] p-6 m3-fab anim-modal-pop flex flex-col max-h-[86vh]">
 <div class="flex items-center justify-between pb-4 border-b grid-hairline shrink-0">
 <h3 class="text-base font-bold text-[#231F1C]">設定</h3>
 <button type="button" onclick="closeModal()" title="閉じる" class="w-9 h-9 rounded-full pill-thumb hover:scale-105 flex items-center justify-center transition">${ICONS.close}</button>
@@ -347,8 +347,8 @@ const matchedItems = q
 ).slice(0, 30)
 : [];
 modalHtml = `
-<div onclick="if(event.target===this) closeModal()" class="fixed inset-0 z-50 bg-[#231F1C]/35 backdrop-blur-xs flex items-center justify-center p-4">
-<div class="w-full max-w-md soft-card-3d rounded-[32px] p-6 m3-fab flex flex-col max-h-[80vh]">
+<div onclick="if(event.target===this) closeModal()" class="fixed inset-0 z-50 bg-[#231F1C]/35 backdrop-blur-xs flex items-center justify-center p-4 anim-backdrop-in">
+<div class="w-full max-w-md soft-card-3d rounded-[32px] p-6 m3-fab anim-modal-pop flex flex-col max-h-[80vh]">
 <div class="flex items-center justify-between pb-3 border-b grid-hairline shrink-0">
 <h3 class="text-base font-bold text-[#231F1C]">予定・ノート検索</h3>
 <button type="button" onclick="closeModal()" title="閉じる" class="w-9 h-9 rounded-full pill-thumb hover:scale-105 flex items-center justify-center transition">${ICONS.close}</button>
@@ -379,8 +379,8 @@ return `
 } else if (state.modal === 'timetable_audit') {
 const info = state.timetableDebugInfo || { included: [], skipped: [], rangeStart: '', rangeEnd: '' };
 modalHtml = `
-<div onclick="if(event.target===this) closeModal()" class="fixed inset-0 z-50 bg-[#231F1C]/35 backdrop-blur-xs flex items-center justify-center p-4">
-<div class="w-full max-w-lg soft-card-3d rounded-[32px] p-6 m3-fab flex flex-col max-h-[82vh]">
+<div onclick="if(event.target===this) closeModal()" class="fixed inset-0 z-50 bg-[#231F1C]/35 backdrop-blur-xs flex items-center justify-center p-4 anim-backdrop-in">
+<div class="w-full max-w-lg soft-card-3d rounded-[32px] p-6 m3-fab anim-modal-pop flex flex-col max-h-[82vh]">
 <div class="flex items-center justify-between pb-3 border-b grid-hairline shrink-0">
 <div>
 <h3 class="text-base font-bold text-[#231F1C]">授業の自動反映・未反映確認</h3>
@@ -430,8 +430,8 @@ if (it) {
 const st = CATEGORY_STYLES[it.category] || CATEGORY_STYLES.personal;
 const formattedMemo = formatMemoText(it.memo);
 modalHtml = `
-<div onclick="if(event.target===this) closeModal()" class="fixed inset-0 z-50 bg-[#231F1C]/35 backdrop-blur-xs flex items-center justify-center p-4">
-<div class="w-full max-w-md soft-card-3d rounded-[32px] p-6 m3-fab flex flex-col max-h-[84vh]">
+<div onclick="if(event.target===this) closeModal()" class="fixed inset-0 z-50 bg-[#231F1C]/35 backdrop-blur-xs flex items-center justify-center p-4 anim-backdrop-in">
+<div class="w-full max-w-md soft-card-3d rounded-[32px] p-6 m3-fab anim-modal-pop flex flex-col max-h-[84vh]">
 <div class="flex items-center justify-between pb-3 border-b grid-hairline shrink-0 gap-2">
 <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold ${st.bg} ${st.text}">
 ${st.label}
@@ -485,8 +485,8 @@ const schoolItems = state.items
 .filter(it => it.date === dDate && it.category === 'class')
 .sort((a, b) => timeToMinutes(a.startTime) - timeToMinutes(b.startTime));
 modalHtml = `
-<div onclick="if(event.target===this) closeModal()" class="fixed inset-0 z-50 bg-[#231F1C]/35 backdrop-blur-xs flex items-center justify-center p-4">
-<div class="w-full max-w-md soft-card-3d rounded-[32px] p-6 m3-fab flex flex-col max-h-[82vh]">
+<div onclick="if(event.target===this) closeModal()" class="fixed inset-0 z-50 bg-[#231F1C]/35 backdrop-blur-xs flex items-center justify-center p-4 anim-backdrop-in">
+<div class="w-full max-w-md soft-card-3d rounded-[32px] p-6 m3-fab anim-modal-pop flex flex-col max-h-[82vh]">
 <div class="flex items-center justify-between pb-3 border-b grid-hairline shrink-0">
 <div>
 <h3 class="text-base font-bold text-[#231F1C]">学校の予定（${schoolItems.length}件）</h3>

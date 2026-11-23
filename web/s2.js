@@ -339,9 +339,15 @@ analyzeTimetableFromRecentWeeks(true);
 render();
 };
 let _pendingSheetAnim = '';
+let _pendingDayPreviewAnim = '';
 function consumeSheetAnim() {
 const a = _pendingSheetAnim;
 _pendingSheetAnim = '';
+return a;
+}
+function consumeDayPreviewAnim() {
+const a = _pendingDayPreviewAnim;
+_pendingDayPreviewAnim = '';
 return a;
 }
 window.handleMobileDayTap = (dateStr) => {
@@ -350,6 +356,7 @@ _pendingSheetAnim = 'anim-sheet-up';
 window.selectDate(dateStr);
 return;
 }
+_pendingDayPreviewAnim = 'anim-day-fade';
 state.selectedMobileDay = dateStr;
 render();
 };
@@ -462,17 +469,19 @@ render();
 };
 window.setAppMode = (mode) => {
 state.appMode = mode;
+_pendingSheetAnim = 'anim-mode-pop';
 if (mode === 'university') analyzeTimetableFromRecentWeeks(true);
 render();
 };
-window.setMobileDailyTab = (t) => { state.mobileDailyTab = t; render(); };
+window.setMobileDailyTab = (t) => { state.mobileDailyTab = t; _pendingSheetAnim = 'anim-mode-pop'; render(); };
 window.toggleMobileHomeView = () => {
 state.mobileHomeView = state.mobileHomeView === 'calendar' ? 'agenda' : 'calendar';
 state.showPastAgenda = false;
+_pendingSheetAnim = 'anim-mode-pop';
 render();
 };
 window.togglePastAgenda = () => { state.showPastAgenda = !state.showPastAgenda; render(); };
-window.setMobileUniTab = (t) => { state.mobileUniTab = t; render(); };
+window.setMobileUniTab = (t) => { state.mobileUniTab = t; _pendingSheetAnim = 'anim-mode-pop'; render(); };
 window.selectDate = (dateStr) => {
 if (dateStr && !state.selectedDate && !_pendingSheetAnim) {
 _pendingSheetAnim = 'anim-sheet-up';
