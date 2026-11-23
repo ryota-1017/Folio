@@ -1,4 +1,4 @@
-const CACHE_NAME = 'folio-planner-cache-v4';
+const CACHE_NAME = 'folio-planner-cache-v5';
 const ASSETS = [
   '/',
   '/index.html',

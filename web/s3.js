@@ -45,6 +45,7 @@ if (state.completedItemIds.includes(id)) {
 state.completedItemIds = state.completedItemIds.filter(cid => cid !== id);
 } else {
 state.completedItemIds.push(id);
+_justCompletedTaskId = id;
 }
 render();
 };

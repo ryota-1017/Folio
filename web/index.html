@@ -228,6 +228,20 @@
       0%, 100% { box-shadow: 0 0 0 0 rgba(54, 107, 71, 0.35); }
       50% { box-shadow: 0 0 0 5px rgba(54, 107, 71, 0); }
     }
+    @keyframes folioCheckPop {
+      0% { transform: scale(0.6); }
+      55% { transform: scale(1.24); }
+      100% { transform: scale(1); }
+    }
+    @keyframes folioStrikeDraw {
+      from { background-size: 0% 1.5px; }
+      to { background-size: 100% 1.5px; }
+    }
+    @keyframes folioTodayPulse {
+      0% { box-shadow: 0 0 0 0 rgba(22, 119, 255, 0.55); transform: scale(0.97); }
+      45% { box-shadow: 0 0 0 8px rgba(22, 119, 255, 0.18); transform: scale(1.02); }
+      100% { box-shadow: 0 0 0 12px rgba(22, 119, 255, 0); transform: scale(1); }
+    }
     .anim-slide-right { animation: folioSlideFromRight 0.28s cubic-bezier(0.22, 1, 0.36, 1) both; }
     .anim-slide-left { animation: folioSlideFromLeft 0.28s cubic-bezier(0.22, 1, 0.36, 1) both; }
     .anim-sheet-up { animation: folioSheetUp 0.26s cubic-bezier(0.22, 1, 0.36, 1) both; }
@@ -240,6 +254,17 @@
     .anim-expand-in { transform-origin: top center; animation: folioExpandIn 0.22s cubic-bezier(0.22, 1, 0.36, 1) both; }
     .anim-card-in { animation: folioCardCascade 0.24s cubic-bezier(0.22, 1, 0.36, 1) both; }
     .anim-live-glow { animation: folioLiveGlow 2.2s ease-in-out infinite; }
+    .anim-check-pop { animation: folioCheckPop 0.34s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+    .anim-strike-draw {
+      display: inline;
+      text-decoration: none !important;
+      background-image: linear-gradient(currentColor, currentColor);
+      background-repeat: no-repeat;
+      background-position: left center;
+      background-size: 100% 1.5px;
+      animation: folioStrikeDraw 0.28s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+    .anim-today-pulse { animation: folioTodayPulse 0.65s cubic-bezier(0.22, 1, 0.36, 1) both; }
     button, .day-tile, .soft-card-3d, .pill-thumb {
       transition: transform 0.18s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.2s ease, background-color 0.2s ease, opacity 0.2s ease;
     }

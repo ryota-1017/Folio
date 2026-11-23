@@ -8,6 +8,13 @@ const scrollMap = {};
 document.querySelectorAll('[data-scroll-key]').forEach(el => {
 scrollMap[el.getAttribute('data-scroll-key')] = el.scrollTop;
 });
+const prevPills = Array.from(document.querySelectorAll('.pill-track')).map(track => {
+const thumb = track.querySelector('.pill-thumb');
+if (!thumb) return null;
+const r = thumb.getBoundingClientRect();
+const tr = track.getBoundingClientRect();
+return { left: r.left - tr.left, width: r.width, trackWidth: tr.width };
+});
 const root = document.getElementById('app');
 const isPortrait = isPortraitLayout();
 const steppedTabsHtml = Array.from({ length: 12 }, (_, idx) => {
@@ -192,5 +199,27 @@ Object.keys(scrollMap).forEach(k => {
 const el = document.querySelector(`[data-scroll-key="${k}"]`);
 if (el) el.scrollTop = scrollMap[k];
 });
+const nextTracks = document.querySelectorAll('.pill-track');
+if (prevPills.length > 0 && prevPills.length === nextTracks.length && typeof requestAnimationFrame === 'function') {
+nextTracks.forEach((track, idx) => {
+const prev = prevPills[idx];
+const thumb = track.querySelector('.pill-thumb');
+if (!prev || !thumb) return;
+const r = thumb.getBoundingClientRect();
+const tr = track.getBoundingClientRect();
+const dx = prev.left - (r.left - tr.left);
+if (Math.abs(dx) > 2 && Math.abs(prev.trackWidth - tr.width) < 12 && r.width > 0) {
+thumb.style.transition = 'none';
+thumb.style.transformOrigin = 'left center';
+thumb.style.transform = `translateX(${dx}px) scaleX(${prev.width / r.width})`;
+requestAnimationFrame(() => {
+requestAnimationFrame(() => {
+thumb.style.transition = 'transform 0.28s cubic-bezier(0.34, 1.2, 0.64, 1)';
+thumb.style.transform = 'translateX(0) scaleX(1)';
+});
+});
+}
+});
+}
 }
 render();

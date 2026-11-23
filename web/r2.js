@@ -133,28 +133,29 @@ ${state.showCompletedDeadlines ? ICONS.visibility : ICONS.visibility_off}
 </button>
 </div>
 <div class="space-y-2.5 flex-1 overflow-y-auto pr-1">
-${deadlineItems.length > 0 ? deadlineItems.map(dl => {
+${(() => { const justDoneId = consumeJustCompletedTask(); return deadlineItems.length > 0 ? deadlineItems.map(dl => {
 const isDone = state.completedItemIds.includes(dl.id);
+const isJustDone = dl.id === justDoneId;
 const diff = daysUntil(TODAY_STR, dl.date);
 const badge = diff < 0 ? '期限超過' : diff === 0 ? '今日' : `${diff}d`;
 return `
-<div class="p-3.5 rounded-2xl bg-[#F4EFE7] border border-[#E5DFD5] shadow-sm flex items-start justify-between gap-2.5 ${isDone ? 'opacity-50' : ''}">
+<div class="p-3.5 rounded-2xl bg-[#F4EFE7] border border-[#E5DFD5] shadow-sm flex items-start justify-between gap-2.5 transition-opacity duration-300 ${isDone ? 'opacity-50' : ''}">
 <div class="flex items-start gap-3">
 <button type="button" onclick="toggleDeadlineDone('${dl.id}')" title="完了切替"
 class="mt-0.5 w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 ${
 isDone ? 'bg-[#38322D] border-[#38322D] text-white' : 'border-[#38322D] bg-white'
-}">
+} ${isJustDone ? 'anim-check-pop' : ''}">
 ${isDone ? ICONS.check : ''}
 </button>
 <div>
-<div class="text-xs font-bold text-[#231F1C] ${isDone ? 'line-through' : ''}">${dl.title}</div>
+<div class="text-xs font-bold text-[#231F1C] ${isJustDone ? 'anim-strike-draw' : (isDone ? 'line-through' : '')}">${dl.title}</div>
 <div class="text-xs text-[#47413B] mt-0.5">${dl.date} ${dl.endTime || dl.startTime || ''}</div>
 </div>
 </div>
 <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-[#F9E7E5] text-[#7A271F] shadow-sm shrink-0">${badge}</span>
 </div>
 `;
-}).join('') : '<div class="text-xs text-[#59524A] py-6 text-center">課題・締切は登録されていません（右下の＋ボタンから追加できます）</div>'}
+}).join('') : '<div class="text-xs text-[#59524A] py-6 text-center">課題・締切は登録されていません（右下の＋ボタンから追加できます）</div>'; })()}
 </div>
 </div>
 <div class="p-4 rounded-2xl bg-[#F4EFE7] border border-[#E5DFD5] shadow-sm">

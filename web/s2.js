@@ -391,6 +391,8 @@ render();
 };
 let _pendingSheetAnim = '';
 let _pendingDayPreviewAnim = '';
+let _justJumpedToToday = false;
+let _justCompletedTaskId = null;
 function consumeSheetAnim() {
 const a = _pendingSheetAnim;
 _pendingSheetAnim = '';
@@ -400,6 +402,16 @@ function consumeDayPreviewAnim() {
 const a = _pendingDayPreviewAnim;
 _pendingDayPreviewAnim = '';
 return a;
+}
+function consumeTodayHighlight() {
+const v = _justJumpedToToday;
+_justJumpedToToday = false;
+return v;
+}
+function consumeJustCompletedTask() {
+const id = _justCompletedTaskId;
+_justCompletedTaskId = null;
+return id;
 }
 window.handleMobileDayTap = (dateStr) => {
 if (state.selectedMobileDay === dateStr) {
@@ -426,11 +438,30 @@ _dailySwipeStartY = e.touches[0].clientY;
 const scroller = e.target && e.target.closest ? e.target.closest('[data-scroll-key], textarea') : null;
 _dailySwipeCanDismiss = !scroller || scroller.scrollTop <= 2;
 };
+window.onDailyTouchMove = (e) => {
+if (!_dailySwipeCanDismiss || !e.touches || e.touches.length !== 1) return;
+const dy = e.touches[0].clientY - _dailySwipeStartY;
+const el = document.getElementById('mobile-daily-sheet');
+if (!el) return;
+if (dy > 4) {
+el.style.transition = 'none';
+el.style.transform = `translateY(${Math.min(dy * 0.85, 220)}px)`;
+el.style.opacity = String(Math.max(0.55, 1 - dy / 420));
+} else {
+el.style.transform = '';
+el.style.opacity = '';
+}
+};
 window.onDailyTouchEnd = (e) => {
 if (!_dailySwipeCanDismiss || !e.changedTouches || e.changedTouches.length !== 1) return;
 const dy = e.changedTouches[0].clientY - _dailySwipeStartY;
+const el = document.getElementById('mobile-daily-sheet');
 if (dy > 58) {
 window.closeDailyToHome();
+} else if (el) {
+el.style.transition = 'transform 0.28s cubic-bezier(0.34, 1.4, 0.64, 1), opacity 0.2s ease';
+el.style.transform = 'translateY(0)';
+el.style.opacity = '1';
 }
 _dailySwipeCanDismiss = false;
 };
@@ -448,12 +479,40 @@ if (e.touches && e.touches.length === 1) {
 _boundaryStartY = e.touches[0].clientY;
 }
 };
+window.onBoundaryTouchMove = (e) => {
+if (!e.touches || e.touches.length !== 1) return;
+const dy = e.touches[0].clientY - _boundaryStartY;
+const sheet = document.getElementById('mobile-home-sheet');
+const cal = document.getElementById('mobile-home-cal');
+if (dy < -4 && sheet) {
+const clamped = Math.max(dy, -150);
+sheet.style.transition = 'none';
+sheet.style.transform = `translateY(${clamped * 0.65}px)`;
+if (cal) {
+cal.style.transition = 'none';
+cal.style.transform = `scale(${1 + clamped * 0.00025})`;
+cal.style.opacity = String(Math.max(0.65, 1 + clamped * 0.0022));
+}
+}
+};
 window.onBoundaryTouchEnd = (e, activeDay) => {
 if (!e.changedTouches || e.changedTouches.length !== 1) return;
 const dy = e.changedTouches[0].clientY - _boundaryStartY;
-if (dy < -28) {
+const sheet = document.getElementById('mobile-home-sheet');
+const cal = document.getElementById('mobile-home-cal');
+if (dy < -32) {
 _pendingSheetAnim = 'anim-sheet-up';
 window.selectDate(activeDay);
+} else {
+if (sheet) {
+sheet.style.transition = 'transform 0.28s cubic-bezier(0.34, 1.4, 0.64, 1)';
+sheet.style.transform = 'translateY(0)';
+}
+if (cal) {
+cal.style.transition = 'transform 0.28s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.25s ease';
+cal.style.transform = 'scale(1)';
+cal.style.opacity = '1';
+}
 }
 };
 window.setSelectedMobileDay = (dateStr) => { state.selectedMobileDay = dateStr; render(); };
@@ -570,6 +629,7 @@ state.currentYear = _now.getFullYear();
 state.currentMonth = _now.getMonth() + 1;
 state.appMode = 'calendar';
 state.selectedMobileDay = TODAY_STR;
+_justJumpedToToday = true;
 if (!isPortraitLayout() || state.selectedDate) state.selectedDate = TODAY_STR;
 render();
 };
