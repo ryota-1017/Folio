@@ -43,6 +43,7 @@ editingCourseMode: false,
 editingItemId: null,
 detailItemId: null,
 schoolDayModalDate: null,
+expandedSchoolDays: {},
 newCategory: 'personal',
 categoryFilter: 'all',
 categoryOverrides: {},
@@ -360,6 +361,10 @@ render();
 window.openSchoolDayModal = (dateStr) => {
 state.schoolDayModalDate = dateStr;
 state.modal = 'school_day';
+render();
+};
+window.toggleSchoolDayExpand = (dateStr) => {
+state.expandedSchoolDays[dateStr] = !state.expandedSchoolDays[dateStr];
 render();
 };
 window.changeItemCategory = (id, newCat) => {

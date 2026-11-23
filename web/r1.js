@@ -45,8 +45,11 @@ ${ICONS.delete}
 </div>
 </div>
 <div class="text-sm sm:text-base font-bold text-[#231F1C] mt-1 leading-snug">${escapeHtml(it.title)}</div>
+${it.location && (!formattedMemo || !formattedMemo.includes(it.location)) ? `
+<div class="mt-1 text-xs text-[#4A6A8A] break-words">場所: ${escapeHtml(it.location)}</div>
+` : ''}
 ${formattedMemo ? `
-<p class="mt-1.5 text-xs text-[#4A443E] leading-relaxed bg-[#F4EFE7] px-3 py-2 rounded-2xl border border-[#E5DFD5] whitespace-pre-wrap line-clamp-2 break-words">${escapeHtml(formattedMemo)}</p>
+<p class="mt-1.5 text-xs text-[#4A443E] leading-relaxed bg-[#F4EFE7] px-3 py-2 rounded-2xl border border-[#E5DFD5] whitespace-pre-wrap break-words">${escapeHtml(formattedMemo)}</p>
 ` : ''}
 </div>
 </div>
@@ -60,13 +63,12 @@ const firstStart = sorted.find(it => it.startTime)?.startTime || '';
 const lastEnd = [...sorted].reverse().find(it => it.endTime || it.startTime);
 const endStr = lastEnd ? (lastEnd.endTime || lastEnd.startTime || '') : '';
 const hasAlert = sorted.some(it => it.hasPrepAlert || (it.memo && /小テスト|提出|締切|※要予習/.test(it.memo)));
-const previewNames = sorted
-.filter(it => !it.isTransit && !/登校|下校|移動/.test(it.title || ''))
-.slice(0, 4)
-.map(it => cleanCourseTitle(it.title))
-.join(' ・ ');
+const isExpanded = Boolean(state.expandedSchoolDays && state.expandedSchoolDays[targetDate]);
+const nonTransit = sorted.filter(it => !it.isTransit && !/登校|下校|移動/.test(it.title || ''));
+const displayCourses = nonTransit.length > 0 ? nonTransit : sorted;
 return `
-<div onclick="openSchoolDayModal('${targetDate}')" class="group relative rounded-[20px] p-3 sm:p-4 transition-all soft-card-3d hover:-translate-y-0.5 flex items-start gap-3 sm:gap-4 cursor-pointer">
+<div class="space-y-1.5">
+<div onclick="toggleSchoolDayExpand('${targetDate}')" class="group relative rounded-[20px] p-3 sm:p-4 transition-all soft-card-3d hover:-translate-y-0.5 flex items-start gap-3 sm:gap-4 cursor-pointer">
 <div class="w-12 sm:w-16 shrink-0 pt-0.5 text-right">
 <div class="text-xs sm:text-sm font-bold text-[#231F1C]">${firstStart || '学校'}</div>
 ${endStr ? `<div class="text-[11px] sm:text-xs text-[#6E665E] mt-0.5">${endStr}</div>` : ''}
@@ -80,11 +82,24 @@ ${st.label}
 </span>
 ${hasAlert ? `<span class="inline-block px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#F9E4E2] text-[#8C2D25]">要予習・提出</span>` : ''}
 </div>
-<span class="text-[11px] font-semibold text-[#8C2D25] shrink-0">詳細を見る</span>
+<span class="text-[11px] font-semibold text-[#8C2D25] shrink-0">${isExpanded ? '折りたたむ' : '広げて詳細を見る'}</span>
 </div>
 <div class="text-sm sm:text-base font-bold text-[#231F1C] mt-1 leading-snug">学校（${sorted.length}件）</div>
-${previewNames ? `<div class="mt-1 text-xs text-[#6E665E] truncate">${escapeHtml(previewNames)}</div>` : ''}
+<div class="mt-1.5 flex flex-wrap gap-1">
+${displayCourses.map(it => `
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-[#F9E4E2]/70 text-[#8C2D25] text-[11px] font-medium leading-snug break-words">
+${it.startTime ? `<span class="font-bold opacity-80">${it.startTime}</span>` : ''}
+<span>${escapeHtml(cleanCourseTitle(it.title))}</span>
+</span>
+`).join('')}
 </div>
+</div>
+</div>
+${isExpanded ? `
+<div class="pl-3 sm:pl-5 space-y-1.5 border-l-2 border-[#C94035]/35 ml-2">
+${sorted.map(it => renderScheduleCardHtml(it)).join('')}
+</div>
+` : ''}
 </div>
 `;
 }
@@ -308,6 +323,7 @@ title: classItems.length === 1 ? classItems[0].title : `学校（${classItems.le
 startTime: '',
 category: 'class',
 isSchoolGroup: true,
+schoolSubItems: classItems,
 hasPrepAlert: classItems.some(it => it.hasPrepAlert || (it.memo && /小テスト|提出|締切|※要予習/.test(it.memo)))
 });
 }
@@ -317,9 +333,33 @@ const numColor = cIdx === 5 ? 'text-[#2B5B84]' : cIdx === 6 ? 'text-[#B83B2E]' :
 const renderEventChip = (it) => {
 const st = CATEGORY_STYLES[it.category] || CATEGORY_STYLES.personal;
 const transitCls = (it.isTransit || /登校|下校|移動/.test(it.title)) ? 'opacity-55' : '';
-const clickAttr = it.isSchoolGroup ? `onclick="event.stopPropagation(); openSchoolDayModal('${cell.dateStr}')"` : '';
+if (it.isSchoolGroup) {
+const isExpanded = Boolean(state.expandedSchoolDays && state.expandedSchoolDays[cell.dateStr]);
 return `
-<div ${clickAttr} class="px-1.5 py-[1px] rounded-full text-[11px] leading-tight truncate flex items-center gap-1 shrink-0 shadow-xs border border-white/60 ${st.bg} ${st.text} ${transitCls}">
+<div onclick="event.stopPropagation(); toggleSchoolDayExpand('${cell.dateStr}')" class="px-1.5 py-[1px] rounded-full text-[11px] leading-tight truncate flex items-center justify-between gap-1 shrink-0 shadow-xs border border-white/60 ${st.bg} ${st.text} cursor-pointer">
+<div class="flex items-center gap-1 min-w-0">
+<span class="w-1.5 h-1.5 rounded-full shrink-0 ${st.dot}"></span>
+<span class="truncate font-semibold">${escapeHtml(it.title)}</span>
+</div>
+<span class="text-[9px] font-bold shrink-0">${isExpanded ? '▲' : '▼'}</span>
+</div>
+${isExpanded && Array.isArray(it.schoolSubItems) ? `
+<div class="pl-2 space-y-0.5 border-l-2 border-[#C94035]/40 ml-1.5 my-0.5">
+${it.schoolSubItems.map(sub => {
+const subTransit = (sub.isTransit || /登校|下校|移動/.test(sub.title)) ? 'opacity-55' : '';
+return `
+<div onclick="event.stopPropagation(); openItemDetail('${sub.id}')" class="px-1.5 py-[1px] rounded text-[10px] leading-tight truncate flex items-center gap-1 bg-[#F9E4E2]/70 text-[#8C2D25] ${subTransit}">
+${sub.startTime ? `<span class="font-semibold opacity-80 shrink-0">${sub.startTime}</span>` : ''}
+<span class="truncate">${escapeHtml(cleanCourseTitle(sub.title))}</span>
+</div>
+`;
+}).join('')}
+</div>
+` : ''}
+`;
+}
+return `
+<div class="px-1.5 py-[1px] rounded-full text-[11px] leading-tight truncate flex items-center gap-1 shrink-0 shadow-xs border border-white/60 ${st.bg} ${st.text} ${transitCls}">
 <span class="w-1.5 h-1.5 rounded-full shrink-0 ${st.dot}"></span>
 ${it.startTime ? `<span class="font-semibold opacity-80">${it.startTime}</span>` : ''}
 <span class="truncate">${escapeHtml(it.title)}</span>
