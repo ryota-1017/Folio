@@ -92,7 +92,7 @@ ${ICONS.chevron_right}
 </div>
 </div>
 </div>
-<div class="flex items-center ${isPortrait ? 'gap-1' : 'gap-2.5'} shrink-0">
+<div class="flex items-center ${isPortrait ? 'gap-1.5' : 'gap-2'} shrink-0">
 <div class="inline-flex items-center pill-track p-1 rounded-full gap-0.5">
 <button type="button" onclick="setAppMode('calendar')" title="カレンダーモード"
 class="${isPortrait ? 'w-8 h-7' : 'w-10 h-8'} rounded-full flex items-center justify-center transition-all ${
@@ -111,72 +111,76 @@ state.appMode === 'university'
 ${ICONS.school}
 </button>
 </div>
-<button type="button" onclick="openModal('search')" title="予定を検索"
-class="${isPortrait ? 'w-8 h-8' : 'w-10 h-10'} rounded-full pill-thumb hover:scale-105 flex items-center justify-center text-[#231F1C] transition">
-${ICONS.search}
+<button type="button" onclick="openModal('sync')" title="${state.driveAccessToken ? 'Googleアカウント・ログイン管理' : 'Googleでログイン'}"
+class="relative ${isPortrait ? 'w-8 h-8' : 'w-10 h-10'} rounded-full pill-thumb hover:scale-105 flex items-center justify-center transition ${
+state.driveAccessToken ? 'text-[#244E32]' : 'text-[#224363]'
+}">
+${state.driveAccessToken ? ICONS.account_circle : ICONS.login}
+${state.driveAccessToken ? `<span class="absolute top-1 right-1 w-2 h-2 rounded-full bg-[#366B47] ring-2 ring-white"></span>` : ''}
 </button>
-${isPortrait ? `
-<button type="button" onclick="openModal('sync')" title="${state.driveAccessToken ? 'Googleログイン・APIキー同期' : 'Googleでログイン・APIキー設定'}"
-class="w-8 h-8 rounded-full pill-thumb flex items-center justify-center transition ${
+<button type="button" onclick="handleSyncClick()" title="${state.driveAccessToken ? (state.driveSyncStatus === 'synced' ? '同期済（タップで今すぐ再同期）' : '今すぐ同期') : '同期（要ログイン）'}"
+class="${isPortrait ? 'w-8 h-8' : 'w-10 h-10'} rounded-full pill-thumb hover:scale-105 flex items-center justify-center transition ${
 state.driveSyncStatus === 'synced' && state.driveAccessToken
 ? 'text-[#244E32]'
 : state.driveSyncStatus === 'error'
 ? 'text-[#B83B2E]'
-: 'text-[#224363]'
-} ${state.driveSyncStatus === 'syncing' ? 'animate-spin' : ''}">
-${state.driveAccessToken ? (state.driveSyncStatus === 'synced' ? ICONS.cloud_done : ICONS.sync) : ICONS.login}
-</button>
-` : `
-<div class="inline-flex items-center pill-track p-1 rounded-full gap-0.5">
-<button type="button" onclick="openModal('sync')" title="${state.driveAccessToken ? 'Googleログイン済・APIキー同期設定' : 'Googleでログイン・APIキー設定'}"
-class="w-9 h-8 rounded-full flex items-center justify-center transition-all ${
-state.driveAccessToken ? 'pill-thumb text-[#244E32]' : 'text-[#224363] hover:text-[#1A334D]'
-}">
-${state.driveAccessToken ? ICONS.account_circle : ICONS.login}
-</button>
-<button type="button" onclick="handleSyncClick()" title="${state.driveAccessToken ? (state.driveSyncStatus === 'synced' ? '同期済・自動同期ON（クリックで今すぐ再同期）' : 'Googleカレンダーと今すぐ同期') : 'Googleと同期（要ログイン）'}"
-class="w-9 h-8 rounded-full flex items-center justify-center transition-all ${
-state.driveSyncStatus === 'synced' && state.driveAccessToken
-? 'pill-thumb text-[#244E32]'
-: state.driveSyncStatus === 'error'
-? 'text-[#B83B2E]'
-: 'text-[#47413B] hover:text-[#231F1C]'
+: 'text-[#38322D]'
 } ${state.driveSyncStatus === 'syncing' ? 'animate-spin' : ''}">
 ${state.driveSyncStatus === 'synced' && state.driveAccessToken ? ICONS.cloud_done : ICONS.sync}
 </button>
-</div>
-`}
-<button type="button" onclick="openModal('settings')" title="アプリ設定"
+<button type="button" onclick="openModal('settings')" title="設定"
 class="${isPortrait ? 'w-8 h-8' : 'w-10 h-10'} rounded-full pill-thumb hover:scale-105 flex items-center justify-center text-[#231F1C] transition">
 ${ICONS.tune}
 </button>
 </div>
 </header>
 ${mobileMonthStripHtml}
-${(state.isOffline || state.needsRelogin || state.swUpdateReady) ? `
-<div class="${isPortrait ? 'px-3 pb-1' : 'px-6 pb-1.5'} flex items-center gap-1.5 overflow-x-auto hide-scrollbar shrink-0 text-[11px]">
-${state.isOffline ? `<span class="px-2.5 py-0.5 rounded-full bg-[#F9E4E2] text-[#8C2D25] font-semibold shrink-0">オフライン表示中</span>` : ''}
-${state.needsRelogin ? `
-<button type="button" onclick="handleGoogleLoginClick()" class="px-2.5 py-0.5 rounded-full bg-[#E5EDF5] hover:bg-[#D8E5F2] text-[#224363] font-semibold shrink-0 transition">
-セッション切れ・タップで再ログイン
-</button>
-` : ''}
-${state.swUpdateReady ? `
-<button type="button" onclick="applySwUpdate()" class="px-2.5 py-0.5 rounded-full bg-[#E5EFE8] hover:bg-[#D5E6DB] text-[#244E32] font-semibold shrink-0 transition">
-新しい更新があります・タップで再読み込み
-</button>
-` : ''}
-</div>
-` : ''}
 ${sheetBodyHtml}
-${state.aiBannerMessage ? `
-<div style="background-color:#1F1B18;" class="fixed top-3 left-1/2 z-50 max-w-[92vw] sm:max-w-md px-4 py-2.5 rounded-full bg-[#1F1B18] text-[#FAF8F4] shadow-2xl border border-[#4A433C] flex items-center gap-2.5 text-xs font-semibold pointer-events-auto anim-toast-drop">
-<span class="text-[#F2E6CE] shrink-0">${ICONS.auto_awesome}</span>
+${(() => {
+if (state.aiBannerMessage) {
+return `
+<div class="vellora-toast fixed top-3 left-1/2 z-[60] max-w-[92vw] sm:max-w-md px-4 py-2.5 rounded-full flex items-center gap-2.5 text-xs font-semibold pointer-events-auto anim-toast-drop">
+<span class="text-[#D4A853] shrink-0">${ICONS.auto_awesome}</span>
 <span class="truncate">${escapeHtml(state.aiBannerMessage)}</span>
 <button type="button" onclick="closeBanner()" title="閉じる" class="w-5 h-5 rounded-full hover:bg-white/15 flex items-center justify-center shrink-0">${ICONS.close}</button>
-</div>
-` : ''}
+</div>`;
+}
+if (state.swUpdateReady) {
+return `
+<div class="vellora-toast fixed top-3 left-1/2 z-[60] max-w-[92vw] sm:max-w-md px-4 py-2 rounded-full flex items-center gap-2.5 text-xs font-semibold pointer-events-auto anim-toast-drop">
+<span class="truncate">新しい更新が準備できています</span>
+<button type="button" onclick="applySwUpdate()" class="px-2.5 py-1 rounded-full bg-white/15 hover:bg-white/25 text-[11px] font-bold shrink-0 transition">更新</button>
+</div>`;
+}
+if (state.latestRelease) {
+return `
+<div class="vellora-toast fixed top-3 left-1/2 z-[60] max-w-[92vw] sm:max-w-md px-4 py-2 rounded-full flex items-center gap-2.5 text-xs font-semibold pointer-events-auto anim-toast-drop">
+<span class="truncate">新バージョン v${escapeHtml(state.latestRelease.version)} が公開されています</span>
+<a href="${escapeHtml(state.latestRelease.url)}" target="_blank" rel="noopener noreferrer" class="px-2.5 py-1 rounded-full bg-white/15 hover:bg-white/25 text-[11px] font-bold shrink-0 transition">GitHub</a>
+<button type="button" onclick="dismissLatestRelease()" title="閉じる" class="w-5 h-5 rounded-full hover:bg-white/15 flex items-center justify-center shrink-0">${ICONS.close}</button>
+</div>`;
+}
+if (state.needsRelogin) {
+return `
+<div class="vellora-toast fixed top-3 left-1/2 z-[60] max-w-[92vw] sm:max-w-md px-4 py-2 rounded-full flex items-center gap-2.5 text-xs font-semibold pointer-events-auto anim-toast-drop">
+<span class="truncate">Googleのセッション期限が切れました</span>
+<button type="button" onclick="handleGoogleLoginClick()" class="px-2.5 py-1 rounded-full bg-white/15 hover:bg-white/25 text-[11px] font-bold shrink-0 transition">再ログイン</button>
+</div>`;
+}
+if (state.isOffline) {
+return `
+<div class="vellora-toast fixed top-3 left-1/2 z-[60] max-w-[92vw] sm:max-w-md px-4 py-2 rounded-full flex items-center gap-2 text-xs font-semibold pointer-events-auto anim-toast-drop">
+<span class="w-2 h-2 rounded-full bg-[#E66A5F] shrink-0"></span>
+<span class="truncate">オフラインで表示中</span>
+</div>`;
+}
+return '';
+})()}
 <div class="fixed ${isPortrait ? 'bottom-3.5 right-3.5 gap-2' : 'bottom-7 right-7 gap-3'} z-30 flex items-center">
+<button type="button" onclick="openModal('search')" title="予定・ノートを検索"
+class="${isPortrait ? 'p-3' : 'p-3.5'} rounded-full m3-fab-light text-[#231F1C] border border-white/90 flex items-center justify-center transition-transform hover:-translate-y-0.5 active:scale-95">
+${ICONS.search}
+</button>
 ${isPortrait && state.appMode === 'calendar' && !state.selectedDate ? `
 <button type="button" onclick="toggleMobileHomeView()" title="${state.mobileHomeView === 'calendar' ? 'スケジュール順表示に切替' : 'カレンダー表示に切替'}"
 class="p-3 rounded-full m3-fab-light text-[#231F1C] border border-white/90 flex items-center justify-center transition-transform hover:-translate-y-0.5 active:scale-95">
@@ -199,6 +203,26 @@ Object.keys(scrollMap).forEach(k => {
 const el = document.querySelector(`[data-scroll-key="${k}"]`);
 if (el) el.scrollTop = scrollMap[k];
 });
+const expandRect = typeof consumeExpandRect === 'function' ? consumeExpandRect() : null;
+if (expandRect && state.selectedDate) {
+const target = document.querySelector('[data-daily-expand-root="1"]');
+if (target && typeof target.animate === 'function') {
+const tr = target.getBoundingClientRect();
+if (tr.width > 0 && tr.height > 0) {
+const dx = (expandRect.left + expandRect.width / 2) - (tr.left + tr.width / 2);
+const dy = (expandRect.top + expandRect.height / 2) - (tr.top + tr.height / 2);
+const sx = Math.max(0.12, Math.min(0.95, expandRect.width / tr.width));
+const sy = Math.max(0.12, Math.min(0.95, expandRect.height / tr.height));
+target.animate([
+{ transform: `translate(${dx}px, ${dy}px) scale(${sx}, ${sy})`, opacity: 0.35, borderRadius: '20px' },
+{ transform: 'translate(0px, 0px) scale(1, 1)', opacity: 1, borderRadius: '28px' }
+], {
+duration: 340,
+easing: 'cubic-bezier(0.22, 1, 0.36, 1)'
+});
+}
+}
+}
 const nextTracks = document.querySelectorAll('.pill-track');
 if (prevPills.length > 0 && prevPills.length === nextTracks.length && typeof requestAnimationFrame === 'function') {
 nextTracks.forEach((track, idx) => {

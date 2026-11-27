@@ -48,13 +48,13 @@ class MainActivity : AppCompatActivity() {
     @SuppressLint("SetJavaScriptEnabled")
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge(
-            statusBarStyle = SystemBarStyle.light(Color.parseColor("#DAD2C5"), Color.parseColor("#DAD2C5")),
-            navigationBarStyle = SystemBarStyle.light(Color.parseColor("#DAD2C5"), Color.parseColor("#DAD2C5"))
+            statusBarStyle = SystemBarStyle.light(Color.parseColor("#EBE7DF"), Color.parseColor("#EBE7DF")),
+            navigationBarStyle = SystemBarStyle.light(Color.parseColor("#EBE7DF"), Color.parseColor("#EBE7DF"))
         )
         super.onCreate(savedInstanceState)
 
         val container = FrameLayout(this).apply {
-            setBackgroundColor(Color.parseColor("#DAD2C5"))
+            setBackgroundColor(Color.parseColor("#EBE7DF"))
             layoutParams = ViewGroup.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT
@@ -66,7 +66,7 @@ class MainActivity : AppCompatActivity() {
                 FrameLayout.LayoutParams.MATCH_PARENT,
                 FrameLayout.LayoutParams.MATCH_PARENT
             )
-            setBackgroundColor(Color.parseColor("#DAD2C5"))
+            setBackgroundColor(Color.parseColor("#EBE7DF"))
         }
         container.addView(webView)
         setContentView(container)

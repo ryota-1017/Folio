@@ -69,12 +69,26 @@ scheduleDriveSync();
 } catch (e) {}
 }
 loadSavedState();
-window.addEventListener('load', () => {
+window.addEventListener('load', async () => {
+const splashStart = Date.now();
+const finishSplash = () => {
+const wait = Math.max(0, 720 - (Date.now() - splashStart));
+setTimeout(() => { if (typeof dismissSplash === 'function') dismissSplash(); }, wait);
+};
 if (state.driveAccessToken) {
-syncWithGoogleDrive(true);
-} else if (state.googleClientId && localStorage.getItem(LOGGED_IN_STORAGE) === '1') {
-setTimeout(() => connectGoogleDrive(true, ''), 800);
+const statusEl = document.getElementById('splash-status');
+if (statusEl) statusEl.textContent = 'Googleカレンダーと同期しています...';
+try {
+await Promise.race([
+syncWithGoogleDrive(true),
+new Promise(r => setTimeout(r, 1400))
+]);
+} catch (e) {}
 }
+finishSplash();
+setTimeout(() => {
+if (typeof checkGitHubReleaseUpdate === 'function') checkGitHubReleaseUpdate(false);
+}, 2400);
 });
 window.addEventListener('focus', () => {
 if (state.driveAccessToken && Date.now() - lastAutoSyncAt > 60000) {

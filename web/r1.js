@@ -279,7 +279,7 @@ const isSelected = cell.dateStr === activeDay;
 const hasNote = Boolean(state.notes[cell.dateStr] && state.notes[cell.dateStr].trim());
 const numColor = cIdx === 5 ? 'text-[#2B5B84]' : cIdx === 6 ? 'text-[#B83B2E]' : 'text-[#231F1C]';
 return `
-<div onclick="handleMobileDayTap('${cell.dateStr}')"
+<div onclick="handleMobileDayTap('${cell.dateStr}', this)"
 class="rounded-xl p-1 flex flex-col overflow-hidden min-h-0 cursor-pointer transition-all relative ${
 isToday ? (todayPulse ? 'today-cell-frame anim-today-pulse' : 'today-cell-frame') : 'day-tile'
 } ${isSelected ? 'ring-2 ring-[#231F1C] selected-day-ring z-10' : ''}">
@@ -424,7 +424,7 @@ ${timeRangeStr ? `<span class="font-semibold opacity-80 shrink-0">${timeRangeStr
 `;
 };
 return `
-<div onclick="selectDate('${cell.dateStr}')"
+<div onclick="selectDate('${cell.dateStr}', this)"
 class="relative flex flex-col p-2 rounded-2xl day-tile cursor-pointer overflow-hidden min-h-0 group ${isToday ? (todayPulse ? 'today-cell-frame anim-today-pulse' : 'today-cell-frame') : ''}">
 <div class="flex items-center justify-between shrink-0">
 <span class="text-base md:text-lg leading-none tracking-tight ${numColor} ${isToday ? 'font-bold' : 'font-semibold'}">
@@ -541,13 +541,13 @@ state.paperStyle === 'ruled' ? 'paper-ruled' : 'paper-dots'
 `;
 if (isPortrait) {
 sheetBodyHtml = `
-<div id="mobile-daily-sheet" ontouchstart="onDailyTouchStart(event)" ontouchmove="onDailyTouchMove(event)" ontouchend="onDailyTouchEnd(event)" class="flex-1 flex flex-col px-3 pb-3 pt-1 overflow-hidden ${sheetAnimClass}">
+<div id="mobile-daily-sheet" data-daily-expand-root="1" ontouchstart="onDailyTouchStart(event)" ontouchmove="onDailyTouchMove(event)" ontouchend="onDailyTouchEnd(event)" class="flex-1 flex flex-col px-3 pb-3 pt-1 overflow-hidden ${sheetAnimClass || 'anim-fade-in'}">
 ${state.mobileDailyTab === 'schedule' ? schedulePaneHtml : notePaneHtml}
 </div>
 `;
 } else {
 sheetBodyHtml = `
-<div class="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-4 p-5 pt-2 overflow-hidden">
+<div data-daily-expand-root="1" class="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-4 p-5 pt-2 overflow-hidden anim-fade-in">
 ${schedulePaneHtml}
 ${notePaneHtml}
 </div>

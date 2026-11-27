@@ -1,11 +1,11 @@
 {
-  "name": "Folio — Digital Planner",
-  "short_name": "Folio",
-  "description": "Material Design 3ベースの大学生向けデジタル手帳・時間割プランナー",
+  "name": "Vellora — Digital Planner",
+  "short_name": "Vellora",
+  "description": "温かみのある立体感と洗練されたミニマルデザインを融合したデジタル手帳・時間割プランナー",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#DAD2C5",
-  "theme_color": "#FAF8F4",
+  "background_color": "#EBE7DF",
+  "theme_color": "#EFECE6",
   "icons": [
     {
       "src": "/icon.svg",

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'folio-planner-cache-v7';
+const CACHE_NAME = 'vellora-cache-v8';
 const ASSETS = [
   '/',
   '/index.html',

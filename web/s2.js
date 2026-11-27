@@ -24,6 +24,8 @@ const LOGGED_IN_STORAGE = 'folio_google_logged_in';
 const EMAIL_STORAGE = 'folio_google_email';
 const ACCOUNT_LINKS_STORAGE = 'folio_account_links';
 const DRIVE_FILE_NAME = 'folio-planner-data.json';
+const APP_VERSION = '1.1.0';
+const GITHUB_REPO = 'ryota-1017/Folio';
 const state = {
 currentYear: _now.getFullYear(),
 currentMonth: _now.getMonth() + 1,
@@ -61,6 +63,7 @@ accountLinks: (() => { try { return JSON.parse(localStorage.getItem(ACCOUNT_LINK
 isOffline: typeof navigator !== 'undefined' ? !navigator.onLine : false,
 needsRelogin: false,
 swUpdateReady: false,
+latestRelease: null,
 notificationsEnabled: localStorage.getItem('folio_notifications') === '1',
 driveAccessToken: null,
 driveFileId: null,
@@ -391,6 +394,7 @@ render();
 };
 let _pendingSheetAnim = '';
 let _pendingDayPreviewAnim = '';
+let _pendingExpandRect = null;
 let _justJumpedToToday = false;
 let _justCompletedTaskId = null;
 function consumeSheetAnim() {
@@ -403,6 +407,11 @@ const a = _pendingDayPreviewAnim;
 _pendingDayPreviewAnim = '';
 return a;
 }
+function consumeExpandRect() {
+const r = _pendingExpandRect;
+_pendingExpandRect = null;
+return r;
+}
 function consumeTodayHighlight() {
 const v = _justJumpedToToday;
 _justJumpedToToday = false;
@@ -413,10 +422,72 @@ const id = _justCompletedTaskId;
 _justCompletedTaskId = null;
 return id;
 }
-window.handleMobileDayTap = (dateStr) => {
+window.dismissSplash = () => {
+const el = document.getElementById('vellora-splash');
+if (!el || el.classList.contains('is-hidden')) return;
+el.classList.add('is-hidden');
+setTimeout(() => { if (el && el.parentNode) el.style.display = 'none'; }, 520);
+};
+function sendOsNotification(title, body) {
+if (!state.notificationsEnabled) return;
+if (typeof Notification === 'undefined' || Notification.permission !== 'granted') return;
+try {
+new Notification(title, { body: body || '', icon: 'icon.svg', silent: false });
+} catch (e) {}
+}
+function compareVersions(a, b) {
+const pa = String(a || '').replace(/^v/i, '').split('.').map(n => parseInt(n, 10) || 0);
+const pb = String(b || '').replace(/^v/i, '').split('.').map(n => parseInt(n, 10) || 0);
+const len = Math.max(pa.length, pb.length);
+for (let i = 0; i < len; i++) {
+const da = pa[i] || 0;
+const db = pb[i] || 0;
+if (da > db) return 1;
+if (da < db) return -1;
+}
+return 0;
+}
+window.dismissLatestRelease = () => {
+state.latestRelease = null;
+render();
+};
+window.checkGitHubReleaseUpdate = async (manual = false) => {
+if (!navigator.onLine) {
+if (manual) { state.aiBannerMessage = 'オフラインのため最新バージョンを確認できません。'; render(); }
+return;
+}
+try {
+const res = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/releases/latest`, {
+headers: { Accept: 'application/vnd.github+json' }
+});
+if (!res.ok) {
+if (manual) { state.aiBannerMessage = `現在のバージョンは v${APP_VERSION} です。`; render(); }
+return;
+}
+const data = await res.json();
+const tag = String(data.tag_name || '').replace(/^v/i, '');
+if (tag && compareVersions(tag, APP_VERSION) > 0) {
+state.latestRelease = {
+version: tag,
+url: data.html_url || `https://github.com/${GITHUB_REPO}/releases/latest`,
+name: data.name || `v${tag}`
+};
+if (manual) state.aiBannerMessage = `新しいバージョン v${tag} が公開されています。`;
+sendOsNotification('Vellora アップデート', `新しいバージョン v${tag} が利用可能です。`);
+render();
+} else if (manual) {
+state.latestRelease = null;
+state.aiBannerMessage = `Vellora v${APP_VERSION} は最新です。`;
+render();
+}
+} catch (e) {
+if (manual) { state.aiBannerMessage = 'アップデート確認中にエラーが発生しました。'; render(); }
+}
+};
+window.handleMobileDayTap = (dateStr, sourceEl) => {
 if (state.selectedMobileDay === dateStr) {
-_pendingSheetAnim = 'anim-sheet-up';
-window.selectDate(dateStr);
+_pendingSheetAnim = '';
+window.selectDate(dateStr, sourceEl);
 return;
 }
 _pendingDayPreviewAnim = 'anim-day-fade';
@@ -595,8 +666,12 @@ render();
 };
 window.togglePastAgenda = () => { state.showPastAgenda = !state.showPastAgenda; render(); };
 window.setMobileUniTab = (t) => { state.mobileUniTab = t; _pendingSheetAnim = 'anim-mode-pop'; render(); };
-window.selectDate = (dateStr) => {
-if (dateStr && !state.selectedDate && !_pendingSheetAnim) {
+window.selectDate = (dateStr, sourceEl) => {
+if (dateStr && sourceEl && sourceEl.getBoundingClientRect) {
+const rect = sourceEl.getBoundingClientRect();
+_pendingExpandRect = { left: rect.left, top: rect.top, width: rect.width, height: rect.height };
+_pendingSheetAnim = '';
+} else if (dateStr && !state.selectedDate && !_pendingSheetAnim) {
 _pendingSheetAnim = 'anim-sheet-up';
 }
 state.selectedDate = dateStr || null;

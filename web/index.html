@@ -4,127 +4,135 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="robots" content="noindex, nofollow" />
-  <title>Folio — Digital Planner</title>
-  <link rel="icon" type="image/svg+xml" href="/icon.svg" />
-  <meta name="theme-color" content="#FAF8F4" />
+  <title>Vellora — Digital Planner</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect x='0' y='0' width='64' height='64' rx='16' fill='%23FFFFFF'/%3E%3Crect x='19' y='13' width='28' height='38' rx='4.5' stroke='%23161616' stroke-width='3.2' fill='none'/%3E%3Cpath d='M14.5 23h6M14.5 32h6M14.5 41h6' stroke='%23161616' stroke-width='3.2' stroke-linecap='round'/%3E%3Cpath d='M34 14.5v13l3.5-2.6 3.5 2.6v-13z' fill='%23D71920'/%3E%3Cpath d='M25.5 35h13' stroke='%23161616' stroke-width='2.6' stroke-linecap='round'/%3E%3Cpath d='M25.5 41h8.5' stroke='%238E8982' stroke-width='2.6' stroke-linecap='round'/%3E%3Ccircle cx='39.5' cy='41' r='1.7' fill='%238E8982'/%3E%3C/svg%3E" />
+  <meta name="theme-color" content="#EFECE6" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-title" content="Folio" />
+  <meta name="apple-mobile-web-app-title" content="Vellora" />
   <link rel="manifest" href="/manifest.webmanifest" />
   <link rel="apple-touch-icon" href="/icon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     body {
-      background-color: #DAD2C5;
-      color: #231F1C;
-      font-family: 'Inter', 'Segoe UI', 'Hiragino Kaku Gothic ProN', 'Yu Gothic UI', sans-serif;
+      background-color: #EBE7DF;
+      color: #1D1D1F;
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Inter', 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Yu Gothic UI', sans-serif;
       margin: 0;
       padding: 0;
       user-select: none;
+      -webkit-font-smoothing: antialiased;
     }
     input, textarea, select {
       user-select: text;
     }
+    .font-brand {
+      font-family: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
+    }
 
+    /* Warm Apple-inspired Soft 3D Surfaces */
     .planner-cover {
-      background: radial-gradient(circle at 20% 15%, #E6DFD3 0%, #D5CCC0 55%, #C6BCB0 100%);
+      background: radial-gradient(circle at 18% 12%, #F4F1EB 0%, #EAE5DC 58%, #E1DBD0 100%);
     }
 
     .planner-sheet {
-      background: linear-gradient(180deg, #FCFBF8 0%, #F7F3EC 100%);
+      background: linear-gradient(180deg, #FEFDFB 0%, #FAF8F4 100%);
       box-shadow:
-        -10px 0 28px -6px rgba(35, 31, 28, 0.14),
-        0 24px 54px -14px rgba(35, 31, 28, 0.22),
-        0 6px 14px -4px rgba(35, 31, 28, 0.08),
-        inset 0 1.5px 0 rgba(255, 255, 255, 0.95);
+        0 24px 60px -18px rgba(29, 29, 31, 0.14),
+        0 6px 18px -6px rgba(29, 29, 31, 0.06),
+        inset 0 1px 0 rgba(255, 255, 255, 0.96);
     }
 
     .index-tab {
-      background: linear-gradient(180deg, #EFEAE1 0%, #E3DDD2 100%);
-      color: #635B52;
+      background: linear-gradient(180deg, #F3EFE8 0%, #EAE4DA 100%);
+      color: #6B655E;
       border-top: 1px solid rgba(255, 255, 255, 0.85);
-      border-bottom: 1px solid rgba(35, 31, 28, 0.08);
-      border-left: 1px solid rgba(255, 255, 255, 0.55);
+      border-bottom: 1px solid rgba(29, 29, 31, 0.05);
+      border-left: 1px solid rgba(255, 255, 255, 0.6);
       box-shadow:
-        -4px 4px 10px -2px rgba(35, 31, 28, 0.10),
-        inset 1px 1px 0 rgba(255, 255, 255, 0.65);
-      transition: all 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+        -3px 3px 10px -3px rgba(29, 29, 31, 0.07),
+        inset 1px 1px 0 rgba(255, 255, 255, 0.7);
+      transition: all 0.22s cubic-bezier(0.22, 1, 0.36, 1);
     }
     .index-tab:hover {
-      background: linear-gradient(180deg, #F7F3EC 0%, #ECE6DC 100%);
-      color: #231F1C;
+      background: linear-gradient(180deg, #FAF8F4 0%, #F1ECE3 100%);
+      color: #1D1D1F;
       transform: translateX(-3px);
     }
     .index-tab-active {
-      background: linear-gradient(90deg, #FCFBF8 0%, #F9F6F0 100%);
-      color: #231F1C;
+      background: linear-gradient(90deg, #FEFDFB 0%, #FBF9F5 100%);
+      color: #1D1D1F;
       font-weight: 700;
       box-shadow:
-        -6px 4px 14px -2px rgba(35, 31, 28, 0.14),
-        inset 1px 1.5px 0 rgba(255, 255, 255, 0.95);
+        -6px 4px 16px -3px rgba(29, 29, 31, 0.10),
+        inset 1px 1.5px 0 rgba(255, 255, 255, 0.98);
       z-index: 30;
       transform: translateX(-6px);
     }
 
     .day-tile {
-      background: linear-gradient(180deg, #FFFFFF 0%, #F9F6F0 100%);
-      border: 1px solid rgba(214, 208, 198, 0.65);
+      background: linear-gradient(180deg, #FFFFFF 0%, #FCFBF8 100%);
+      border: 1px solid rgba(29, 29, 31, 0.065);
       box-shadow:
-        0 3px 10px -3px rgba(35, 31, 28, 0.06),
-        0 1px 3px rgba(35, 31, 28, 0.03),
+        0 2px 8px -3px rgba(29, 29, 31, 0.05),
+        0 1px 2px rgba(29, 29, 31, 0.02),
         inset 0 1px 0 rgba(255, 255, 255, 0.95);
-      transition: transform 0.18s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.18s ease, background 0.18s ease;
+      transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.2s ease, background 0.2s ease;
     }
     .day-tile:hover {
-      background: linear-gradient(180deg, #FFFFFF 0%, #F4EFE6 100%);
+      background: linear-gradient(180deg, #FFFFFF 0%, #F7F4EE 100%);
       transform: translateY(-2px);
       box-shadow:
-        0 10px 20px -6px rgba(35, 31, 28, 0.12),
-        0 3px 6px -2px rgba(35, 31, 28, 0.06),
+        0 10px 22px -8px rgba(29, 29, 31, 0.11),
+        0 2px 6px -2px rgba(29, 29, 31, 0.05),
         inset 0 1px 0 rgba(255, 255, 255, 1);
     }
 
     .day-tile-slot {
-      background-color: rgba(235, 230, 221, 0.25);
+      background-color: rgba(235, 230, 222, 0.28);
     }
 
     .soft-card-3d {
-      background: linear-gradient(180deg, #FFFFFF 0%, #F8F4EC 100%);
-      border: 1px solid rgba(214, 208, 198, 0.65);
+      background: linear-gradient(180deg, #FFFFFF 0%, #FAF8F3 100%);
+      border: 1px solid rgba(29, 29, 31, 0.065);
       box-shadow:
-        0 8px 22px -6px rgba(35, 31, 28, 0.08),
-        0 2px 6px -1px rgba(35, 31, 28, 0.04),
-        inset 0 1.5px 0 rgba(255, 255, 255, 0.95);
+        0 10px 26px -10px rgba(29, 29, 31, 0.09),
+        0 2px 6px -2px rgba(29, 29, 31, 0.04),
+        inset 0 1px 0 rgba(255, 255, 255, 0.96);
     }
 
     .pill-track {
-      background-color: #EAE4DA;
+      background-color: rgba(232, 227, 218, 0.85);
       box-shadow:
-        inset 0 2px 5px rgba(35, 31, 28, 0.09),
-        0 1px 0 rgba(255, 255, 255, 0.8);
+        inset 0 1.5px 4px rgba(29, 29, 31, 0.07),
+        0 1px 0 rgba(255, 255, 255, 0.85);
     }
 
     .pill-thumb {
-      background: linear-gradient(180deg, #FFFFFF 0%, #F7F3EC 100%);
+      background: linear-gradient(180deg, #FFFFFF 0%, #F8F6F1 100%);
       box-shadow:
-        0 3px 8px -1px rgba(35, 31, 28, 0.14),
-        inset 0 1px 0 rgba(255, 255, 255, 0.95);
+        0 2px 8px -2px rgba(29, 29, 31, 0.12),
+        0 1px 2px rgba(29, 29, 31, 0.04),
+        inset 0 1px 0 rgba(255, 255, 255, 0.96);
     }
 
     .grid-hairline {
-      border-color: #E2DCD2;
+      border-color: rgba(29, 29, 31, 0.08);
     }
 
     .today-cell-frame {
-      background: linear-gradient(180deg, #EBE3D5 0%, #DFD5C3 100%) !important;
-      border: 1px solid rgba(140, 128, 112, 0.55) !important;
+      background: linear-gradient(180deg, #F0E9DC 0%, #E7DEC9 100%) !important;
+      border: 1px solid rgba(138, 124, 102, 0.42) !important;
       box-shadow:
-        0 3px 10px -3px rgba(35, 31, 28, 0.10),
-        inset 0 1px 0 rgba(255, 255, 255, 0.7) !important;
+        0 4px 12px -4px rgba(29, 29, 31, 0.09),
+        inset 0 1px 0 rgba(255, 255, 255, 0.78) !important;
     }
 
     .selected-day-ring {
-      box-shadow: 0 0 0 2px #231F1C !important;
+      box-shadow: 0 0 0 2px #1D1D1F !important;
       border-color: transparent !important;
     }
 
@@ -133,36 +141,78 @@
         to bottom,
         transparent,
         transparent 35px,
-        #E6E1D8 35px,
-        #E6E1D8 36px
+        #E9E5DD 35px,
+        #E9E5DD 36px
       );
       line-height: 36px;
     }
     .paper-dots {
-      background-image: radial-gradient(#CBC4B9 1px, transparent 1px);
+      background-image: radial-gradient(#CFC9BE 1px, transparent 1px);
       background-size: 20px 20px;
       line-height: 30px;
     }
 
     .m3-fab {
       box-shadow:
-        0 14px 28px -6px rgba(35, 31, 28, 0.28),
-        0 6px 12px -3px rgba(35, 31, 28, 0.14),
-        inset 0 1.5px 0 rgba(255, 255, 255, 0.25);
+        0 18px 36px -10px rgba(29, 29, 31, 0.22),
+        0 6px 14px -4px rgba(29, 29, 31, 0.10),
+        inset 0 1px 0 rgba(255, 255, 255, 0.25);
     }
     .m3-fab-light {
-      background: linear-gradient(180deg, #FFFFFF 0%, #F2ECE2 100%);
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
       box-shadow:
-        0 12px 26px -6px rgba(35, 31, 28, 0.20),
-        0 4px 10px -2px rgba(35, 31, 28, 0.10),
-        inset 0 1.5px 0 rgba(255, 255, 255, 0.95);
+        0 10px 24px -6px rgba(29, 29, 31, 0.14),
+        0 3px 8px -2px rgba(29, 29, 31, 0.06),
+        inset 0 1px 0 rgba(255, 255, 255, 0.95);
     }
     .m3-fab-dark {
-      background: linear-gradient(180deg, #564D43 0%, #3A322B 100%);
+      background: linear-gradient(180deg, #32312F 0%, #1C1B1A 100%);
+      color: #FFFFFF !important;
       box-shadow:
-        0 14px 28px -6px rgba(35, 31, 28, 0.34),
-        0 6px 12px -3px rgba(35, 31, 28, 0.18),
-        inset 0 1.5px 0 rgba(255, 255, 255, 0.22);
+        0 14px 28px -6px rgba(29, 29, 31, 0.34),
+        0 5px 12px -3px rgba(29, 29, 31, 0.16),
+        inset 0 1px 0 rgba(255, 255, 255, 0.20);
+    }
+
+    /* Floating Glass Notification Popup */
+    .vellora-toast {
+      background: rgba(255, 255, 255, 0.88);
+      color: #1D1D1F;
+      backdrop-filter: blur(22px) saturate(180%);
+      -webkit-backdrop-filter: blur(22px) saturate(180%);
+      border: 1px solid rgba(29, 29, 31, 0.09);
+      box-shadow:
+        0 18px 42px -12px rgba(29, 29, 31, 0.22),
+        0 4px 12px -2px rgba(29, 29, 31, 0.08),
+        inset 0 1px 0 rgba(255, 255, 255, 0.95);
+    }
+
+    /* Splash Start Screen */
+    #vellora-splash {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(circle at 30% 20%, #FAF8F3 0%, #EFEBE3 65%, #E6E0D5 100%);
+      transition: opacity 0.45s cubic-bezier(0.22, 1, 0.36, 1), transform 0.45s cubic-bezier(0.22, 1, 0.36, 1), visibility 0.45s;
+    }
+    #vellora-splash.splash-hidden {
+      opacity: 0;
+      transform: scale(1.035);
+      visibility: hidden;
+      pointer-events: none;
+    }
+    @keyframes splashBarSlide {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(220%); }
+    }
+    .splash-progress-bar {
+      animation: splashBarSlide 1.15s cubic-bezier(0.4, 0, 0.2, 1) infinite;
     }
 
     ::-webkit-scrollbar { width: 5px; height: 5px; }
@@ -171,32 +221,37 @@
     .hide-scrollbar::-webkit-scrollbar { display: none; }
     .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
+    /* Animations */
+    @keyframes folioFadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
     @keyframes folioSlideFromRight {
-      from { opacity: 0.25; transform: translateX(42px) scale(0.985); }
+      from { opacity: 0.2; transform: translateX(42px) scale(0.985); }
       to { opacity: 1; transform: translateX(0) scale(1); }
     }
     @keyframes folioSlideFromLeft {
-      from { opacity: 0.25; transform: translateX(-42px) scale(0.985); }
+      from { opacity: 0.2; transform: translateX(-42px) scale(0.985); }
       to { opacity: 1; transform: translateX(0) scale(1); }
     }
     @keyframes folioSheetUp {
-      from { opacity: 0.25; transform: translateY(32px) scale(0.98); }
+      from { opacity: 0.15; transform: translateY(34px) scale(0.975); }
       to { opacity: 1; transform: translateY(0) scale(1); }
     }
     @keyframes folioSheetDown {
-      from { opacity: 0.35; transform: translateY(-24px) scale(0.98); }
+      from { opacity: 0.25; transform: translateY(-22px) scale(0.98); }
       to { opacity: 1; transform: translateY(0) scale(1); }
     }
     @keyframes folioDayFade {
-      from { opacity: 0.25; transform: translateY(14px); }
+      from { opacity: 0; transform: translateY(10px); }
       to { opacity: 1; transform: translateY(0); }
     }
     @keyframes folioModePop {
-      from { opacity: 0.3; transform: scale(0.965); }
+      from { opacity: 0; transform: scale(0.97); }
       to { opacity: 1; transform: scale(1); }
     }
     @keyframes folioModalPop {
-      from { opacity: 0; transform: translateY(18px) scale(0.92); }
+      from { opacity: 0; transform: translateY(18px) scale(0.93); }
       to { opacity: 1; transform: translateY(0) scale(1); }
     }
     @keyframes folioBackdropFade {
@@ -204,58 +259,34 @@
       to { opacity: 1; }
     }
     @keyframes folioToastDrop {
-      from { opacity: 0; transform: translate(-50%, -20px) scale(0.94); }
+      from { opacity: 0; transform: translate(-50%, -24px) scale(0.92); }
       to { opacity: 1; transform: translate(-50%, 0) scale(1); }
     }
     @keyframes folioExpandIn {
-      from { opacity: 0; transform: translateY(-8px) scaleY(0.94); }
+      from { opacity: 0; transform: translateY(-6px) scaleY(0.95); }
       to { opacity: 1; transform: translateY(0) scaleY(1); }
     }
     @keyframes folioCardCascade {
-      from { opacity: 0; transform: translateY(10px) scale(0.98); }
+      from { opacity: 0; transform: translateY(10px) scale(0.985); }
       to { opacity: 1; transform: translateY(0) scale(1); }
     }
     @keyframes folioLiveGlow {
       0%, 100% { box-shadow: 0 0 0 0 rgba(54, 107, 71, 0.35); }
       50% { box-shadow: 0 0 0 5px rgba(54, 107, 71, 0); }
     }
-    @keyframes folioCheckPop {
-      0% { transform: scale(0.6); }
-      55% { transform: scale(1.24); }
-      100% { transform: scale(1); }
-    }
-    @keyframes folioStrikeDraw {
-      from { background-size: 0% 1.5px; }
-      to { background-size: 100% 1.5px; }
-    }
-    @keyframes folioTodayPulse {
-      0% { box-shadow: 0 0 0 0 rgba(22, 119, 255, 0.55); transform: scale(0.97); }
-      45% { box-shadow: 0 0 0 8px rgba(22, 119, 255, 0.18); transform: scale(1.02); }
-      100% { box-shadow: 0 0 0 12px rgba(22, 119, 255, 0); transform: scale(1); }
-    }
+    .anim-fade-in { animation: folioFadeIn 0.28s cubic-bezier(0.22, 1, 0.36, 1) both; }
     .anim-slide-right { animation: folioSlideFromRight 0.28s cubic-bezier(0.22, 1, 0.36, 1) both; }
     .anim-slide-left { animation: folioSlideFromLeft 0.28s cubic-bezier(0.22, 1, 0.36, 1) both; }
-    .anim-sheet-up { animation: folioSheetUp 0.26s cubic-bezier(0.22, 1, 0.36, 1) both; }
+    .anim-sheet-up { animation: folioSheetUp 0.28s cubic-bezier(0.22, 1, 0.36, 1) both; }
     .anim-sheet-down { animation: folioSheetDown 0.25s cubic-bezier(0.22, 1, 0.36, 1) both; }
-    .anim-day-fade { animation: folioDayFade 0.22s cubic-bezier(0.22, 1, 0.36, 1) both; }
-    .anim-mode-pop { animation: folioModePop 0.24s cubic-bezier(0.22, 1, 0.36, 1) both; }
-    .anim-modal-pop { animation: folioModalPop 0.28s cubic-bezier(0.34, 1.35, 0.64, 1) both; }
+    .anim-day-fade { animation: folioDayFade 0.24s cubic-bezier(0.22, 1, 0.36, 1) both; }
+    .anim-mode-pop { animation: folioModePop 0.26s cubic-bezier(0.22, 1, 0.36, 1) both; }
+    .anim-modal-pop { animation: folioModalPop 0.28s cubic-bezier(0.34, 1.32, 0.64, 1) both; }
     .anim-backdrop-in { animation: folioBackdropFade 0.18s ease-out both; }
-    .anim-toast-drop { animation: folioToastDrop 0.28s cubic-bezier(0.34, 1.35, 0.64, 1) both; }
+    .anim-toast-drop { animation: folioToastDrop 0.32s cubic-bezier(0.34, 1.32, 0.64, 1) both; }
     .anim-expand-in { transform-origin: top center; animation: folioExpandIn 0.22s cubic-bezier(0.22, 1, 0.36, 1) both; }
     .anim-card-in { animation: folioCardCascade 0.24s cubic-bezier(0.22, 1, 0.36, 1) both; }
     .anim-live-glow { animation: folioLiveGlow 2.2s ease-in-out infinite; }
-    .anim-check-pop { animation: folioCheckPop 0.34s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
-    .anim-strike-draw {
-      display: inline;
-      text-decoration: none !important;
-      background-image: linear-gradient(currentColor, currentColor);
-      background-repeat: no-repeat;
-      background-position: left center;
-      background-size: 100% 1.5px;
-      animation: folioStrikeDraw 0.28s cubic-bezier(0.22, 1, 0.36, 1) both;
-    }
-    .anim-today-pulse { animation: folioTodayPulse 0.65s cubic-bezier(0.22, 1, 0.36, 1) both; }
     button, .day-tile, .soft-card-3d, .pill-thumb {
       transition: transform 0.18s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.2s ease, background-color 0.2s ease, opacity 0.2s ease;
     }
@@ -263,151 +294,158 @@
       transform: scale(0.96);
     }
 
-    /* Dark Mode Theme (ColorOS AMOLED Dark) */
+    /* Dark Mode Theme (Warm Apple Graphite) */
     html[data-theme="dark"] body {
-      background-color: #000000;
-      color: #F2F4F7;
+      background-color: #0E0E10;
+      color: #F4F2ED;
+    }
+    html[data-theme="dark"] #vellora-splash {
+      background: radial-gradient(circle at 30% 20%, #1F1E1C 0%, #141416 65%, #0D0D0F 100%);
+    }
+    html[data-theme="dark"] .vellora-toast {
+      background: rgba(34, 33, 36, 0.88);
+      color: #F4F2ED;
+      border-color: rgba(255, 255, 255, 0.12);
+      box-shadow: 0 20px 46px -10px rgba(0, 0, 0, 0.72), inset 0 1px 0 rgba(255, 255, 255, 0.08);
     }
     html[data-theme="dark"] .planner-cover {
-      background: #000000;
+      background: radial-gradient(circle at 20% 15%, #1D1C1A 0%, #131315 60%, #0C0C0E 100%);
     }
     html[data-theme="dark"] .planner-sheet {
-      background: #141416;
-      border-color: rgba(255, 255, 255, 0.08) !important;
-      box-shadow: 0 24px 54px -14px rgba(0, 0, 0, 0.85);
+      background: linear-gradient(180deg, #1A1A1D 0%, #151517 100%);
+      border-color: rgba(244, 242, 237, 0.08) !important;
+      box-shadow: 0 24px 54px -14px rgba(0, 0, 0, 0.74), inset 0 1px 0 rgba(244, 242, 237, 0.06);
     }
     html[data-theme="dark"] .index-tab {
-      background: #1C1C1E;
-      color: #8E95A2;
-      border-color: rgba(255, 255, 255, 0.06);
-      box-shadow: none;
+      background: linear-gradient(180deg, #242322 0%, #1C1C1E 100%);
+      color: #A29D95;
+      border-color: rgba(244, 242, 237, 0.07);
+      box-shadow: -3px 3px 10px -2px rgba(0, 0, 0, 0.45);
     }
     html[data-theme="dark"] .index-tab:hover {
-      background: #262629;
-      color: #F2F4F7;
+      background: linear-gradient(180deg, #2E2D2B 0%, #242322 100%);
+      color: #F4F2ED;
     }
     html[data-theme="dark"] .index-tab-active {
-      background: #1E1E22;
-      color: #4096FF;
-      box-shadow: -4px 4px 14px -2px rgba(0, 0, 0, 0.6);
+      background: linear-gradient(90deg, #282726 0%, #1F1F22 100%);
+      color: #FFFFFF;
+      box-shadow: -6px 4px 16px -2px rgba(0, 0, 0, 0.62), inset 1px 1px 0 rgba(244, 242, 237, 0.14);
     }
     html[data-theme="dark"] .day-tile {
-      background: #1C1C1E;
-      border-color: rgba(255, 255, 255, 0.07);
-      box-shadow: none;
+      background: linear-gradient(180deg, #222225 0%, #1C1C1F 100%);
+      border-color: rgba(244, 242, 237, 0.08);
+      box-shadow: 0 3px 10px -3px rgba(0, 0, 0, 0.42), inset 0 1px 0 rgba(244, 242, 237, 0.04);
     }
     html[data-theme="dark"] .day-tile:hover {
-      background: #242428;
-      border-color: rgba(255, 255, 255, 0.14);
+      background: linear-gradient(180deg, #2A2A2E 0%, #222226 100%);
+      border-color: rgba(244, 242, 237, 0.15);
     }
     html[data-theme="dark"] .day-tile-slot {
-      background-color: rgba(255, 255, 255, 0.02);
-      border-color: rgba(255, 255, 255, 0.06) !important;
+      background-color: rgba(244, 242, 237, 0.025);
+      border-color: rgba(244, 242, 237, 0.07) !important;
     }
     html[data-theme="dark"] .soft-card-3d {
-      background: #1C1C1E;
-      border-color: rgba(255, 255, 255, 0.08);
-      box-shadow: 0 8px 22px -6px rgba(0, 0, 0, 0.5);
+      background: linear-gradient(180deg, #232326 0%, #1C1C1F 100%);
+      border-color: rgba(244, 242, 237, 0.09);
+      box-shadow: 0 10px 26px -8px rgba(0, 0, 0, 0.54), inset 0 1px 0 rgba(244, 242, 237, 0.05);
     }
     html[data-theme="dark"] .pill-track {
-      background-color: #0C0C0E;
-      box-shadow: none;
+      background-color: #111113;
+      box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.6), 0 1px 0 rgba(244, 242, 237, 0.05);
     }
     html[data-theme="dark"] .pill-thumb {
-      background: #2C2C30;
-      color: #F2F4F7 !important;
-      box-shadow: 0 2px 8px -1px rgba(0, 0, 0, 0.45);
+      background: linear-gradient(180deg, #323236 0%, #262629 100%);
+      color: #F4F2ED !important;
+      box-shadow: 0 3px 8px -1px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(244, 242, 237, 0.10);
     }
     html[data-theme="dark"] .grid-hairline {
-      border-color: rgba(255, 255, 255, 0.08);
+      border-color: rgba(244, 242, 237, 0.09);
     }
     html[data-theme="dark"] .today-cell-frame {
-      background: linear-gradient(180deg, #17273D 0%, #132033 100%) !important;
-      border: 1px solid rgba(64, 150, 255, 0.42) !important;
-      box-shadow: 0 3px 12px -3px rgba(0, 0, 0, 0.5) !important;
+      background: linear-gradient(180deg, #342E24 0%, #2A241C 100%) !important;
+      border: 1px solid rgba(218, 194, 158, 0.36) !important;
+      box-shadow: 0 3px 12px -3px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(244, 242, 237, 0.12) !important;
     }
     html[data-theme="dark"] .selected-day-ring {
-      box-shadow: 0 0 0 2px #4096FF !important;
+      box-shadow: 0 0 0 2px #EAE2D3 !important;
     }
     html[data-theme="dark"] .paper-ruled {
-      background-image: repeating-linear-gradient(to bottom, transparent, transparent 35px, rgba(255, 255, 255, 0.08) 35px, rgba(255, 255, 255, 0.08) 36px);
+      background-image: repeating-linear-gradient(to bottom, transparent, transparent 35px, rgba(244, 242, 237, 0.08) 35px, rgba(244, 242, 237, 0.08) 36px);
     }
     html[data-theme="dark"] .paper-dots {
-      background-image: radial-gradient(rgba(255, 255, 255, 0.16) 1px, transparent 1px);
+      background-image: radial-gradient(rgba(244, 242, 237, 0.16) 1px, transparent 1px);
     }
     html[data-theme="dark"] .m3-fab-light {
-      background: #26262A;
-      color: #F2F4F7 !important;
-      border-color: rgba(255, 255, 255, 0.12) !important;
+      background: rgba(38, 38, 42, 0.9);
+      color: #F4F2ED !important;
+      border-color: rgba(244, 242, 237, 0.14) !important;
     }
     html[data-theme="dark"] .m3-fab-dark {
-      background: linear-gradient(135deg, #3B8EFF 0%, #1677FF 100%);
-      color: #FFFFFF !important;
-      box-shadow: 0 12px 26px -6px rgba(22, 119, 255, 0.45);
+      background: linear-gradient(180deg, #F4F2ED 0%, #DFDAD0 100%);
+      color: #161618 !important;
     }
     html[data-theme="dark"] .text-\[\#181512\],
-    html[data-theme="dark"] .text-\[\#231F1C\] { color: #F2F4F7 !important; }
+    html[data-theme="dark"] .text-\[\#231F1C\] { color: #F4F2ED !important; }
     html[data-theme="dark"] .text-\[\#2B2622\],
     html[data-theme="dark"] .text-\[\#38322D\],
     html[data-theme="dark"] .text-\[\#3D3833\],
     html[data-theme="dark"] .text-\[\#4A443E\],
-    html:not([data-theme="dark"]) .text-\[\#5C554D\],
-    html[data-theme="dark"] .text-\[\#5C554D\] { color: #C8CDD6 !important; }
+    html[data-theme="dark"] .text-\[\#5C554D\] { color: #D4CFC6 !important; }
     html[data-theme="dark"] .text-\[\#47413B\],
     html[data-theme="dark"] .text-\[\#59524A\],
     html[data-theme="dark"] .text-\[\#6E665E\],
     html[data-theme="dark"] .text-\[\#8C847A\],
-    html[data-theme="dark"] .text-\[\#968E83\] { color: #8E95A2 !important; }
-    html[data-theme="dark"] .text-\[\#2B5B84\] { color: #5CA8FF !important; }
-    html[data-theme="dark"] .text-\[\#B83B2E\] { color: #FF7875 !important; }
+    html[data-theme="dark"] .text-\[\#968E83\] { color: #9C968D !important; }
+    html[data-theme="dark"] .text-\[\#2B5B84\] { color: #7EB3E0 !important; }
+    html[data-theme="dark"] .text-\[\#B83B2E\] { color: #E57A6E !important; }
     html[data-theme="dark"] .text-\[\#224363\],
     html[data-theme="dark"] .text-\[\#3B5B7A\],
     html[data-theme="dark"] .text-\[\#4A6A8A\],
-    html[data-theme="dark"] .text-\[\#155EEF\] { color: #7CC0FF !important; }
+    html[data-theme="dark"] .text-\[\#155EEF\] { color: #94C2EC !important; }
     html[data-theme="dark"] .text-\[\#244E32\],
-    html[data-theme="dark"] .text-\[\#137333\] { color: #73D18E !important; }
+    html[data-theme="dark"] .text-\[\#137333\] { color: #84CE9C !important; }
     html[data-theme="dark"] .text-\[\#8C2D25\],
     html[data-theme="dark"] .text-\[\#7A271F\],
-    html[data-theme="dark"] .text-\[\#C62828\] { color: #FF8A80 !important; }
-    html[data-theme="dark"] .text-\[\#495057\] { color: #B8BEC8 !important; }
+    html[data-theme="dark"] .text-\[\#C62828\] { color: #F0988E !important; }
+    html[data-theme="dark"] .text-\[\#495057\] { color: #C2BDB5 !important; }
     html[data-theme="dark"] .bg-\[\#F9E4E2\],
     html[data-theme="dark"] .bg-\[\#F9E4E2\]\/70,
     html[data-theme="dark"] .bg-\[\#F9E7E5\],
     html[data-theme="dark"] .bg-\[\#FFECEB\] {
-      background-color: rgba(234, 67, 53, 0.18) !important;
-      border-color: rgba(234, 67, 53, 0.28) !important;
+      background-color: rgba(201, 64, 53, 0.18) !important;
+      border-color: rgba(201, 64, 53, 0.28) !important;
     }
     html[data-theme="dark"] .bg-\[\#E5EDF5\],
     html[data-theme="dark"] .bg-\[\#E8F2FF\] {
-      background-color: rgba(22, 119, 255, 0.18) !important;
-      border-color: rgba(22, 119, 255, 0.28) !important;
+      background-color: rgba(74, 134, 196, 0.18) !important;
+      border-color: rgba(74, 134, 196, 0.28) !important;
     }
     html[data-theme="dark"] .bg-\[\#E5EFE8\],
     html[data-theme="dark"] .bg-\[\#E5EFE8\]\/70,
     html[data-theme="dark"] .bg-\[\#E6F6EC\] {
-      background-color: rgba(30, 142, 62, 0.18) !important;
-      border-color: rgba(30, 142, 62, 0.28) !important;
+      background-color: rgba(72, 152, 98, 0.18) !important;
+      border-color: rgba(72, 152, 98, 0.28) !important;
     }
     html[data-theme="dark"] .bg-\[\#F0EDE8\],
     html[data-theme="dark"] .bg-\[\#F1F3F5\] {
-      background-color: rgba(134, 142, 150, 0.18) !important;
-      border-color: rgba(134, 142, 150, 0.24) !important;
+      background-color: rgba(180, 170, 155, 0.15) !important;
+      border-color: rgba(180, 170, 155, 0.22) !important;
     }
     html[data-theme="dark"] .from-\[\#EFF5FB\] {
-      --tw-gradient-from: #1A2533 var(--tw-gradient-from-position) !important;
-      --tw-gradient-to: #151E2A var(--tw-gradient-to-position) !important;
+      --tw-gradient-from: #1F2A36 var(--tw-gradient-from-position) !important;
+      --tw-gradient-to: #19222C var(--tw-gradient-to-position) !important;
       --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important;
-      border-color: rgba(64, 150, 255, 0.26) !important;
+      border-color: rgba(126, 179, 224, 0.26) !important;
     }
     html[data-theme="dark"] .from-\[\#F2E6CE\] {
-      --tw-gradient-from: #222B3A var(--tw-gradient-from-position) !important;
-      --tw-gradient-to: #1B2230 var(--tw-gradient-to-position) !important;
+      --tw-gradient-from: #3D3426 var(--tw-gradient-from-position) !important;
+      --tw-gradient-to: #2E271C var(--tw-gradient-to-position) !important;
       --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important;
-      color: #82C3FF !important;
+      color: #F3E3C3 !important;
     }
     html[data-theme="dark"] .bg-\[\#F2E6CE\] {
-      background-color: #1F2D40 !important;
-      color: #82C3FF !important;
+      background-color: #3D3426 !important;
+      color: #F3E3C3 !important;
     }
     html[data-theme="dark"] .bg-\[\#EFECE6\],
     html[data-theme="dark"] .bg-\[\#F4EFE7\],
@@ -415,13 +453,13 @@
     html[data-theme="dark"] .bg-\[\#EFEAE1\]\/80,
     html[data-theme="dark"] .bg-white\/90,
     html[data-theme="dark"] .bg-white\/80 {
-      background-color: #242428 !important;
-      color: #F2F4F7 !important;
+      background-color: #262527 !important;
+      color: #F4F2ED !important;
     }
     html[data-theme="dark"] .hover\:bg-\[\#EAE5DC\]:hover,
     html[data-theme="dark"] .hover\:bg-\[\#ECE5DA\]:hover,
     html[data-theme="dark"] .hover\:bg-\[\#E7E0D4\]:hover {
-      background-color: #2E2E34 !important;
+      background-color: #323135 !important;
     }
     html[data-theme="dark"] .border-\[\#E5DFD5\],
     html[data-theme="dark"] .border-\[\#D6D0C6\],
@@ -429,23 +467,55 @@
     html[data-theme="dark"] .border-\[\#C6DFCD\],
     html[data-theme="dark"] .border-white\/60,
     html[data-theme="dark"] .border-white\/70 {
-      border-color: rgba(255, 255, 255, 0.09) !important;
+      border-color: rgba(244, 242, 237, 0.11) !important;
     }
     html[data-theme="dark"] input,
     html[data-theme="dark"] textarea,
     html[data-theme="dark"] select {
-      color: #F2F4F7 !important;
+      color: #F4F2ED !important;
     }
     html[data-theme="dark"] input::placeholder,
     html[data-theme="dark"] textarea::placeholder {
-      color: #7D8491 !important;
+      color: #878279 !important;
     }
   </style>
+  <script>
+    (function(){
+      try {
+        var t = localStorage.getItem('folio_theme');
+        if (t === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
+      } catch (e) {}
+    })();
+  </script>
 </head>
-<body class="planner-cover text-[#231F1C] antialiased">
+<body class="planner-cover text-[#1D1D1F] antialiased">
+  <div id="vellora-splash" aria-label="Vellora 起動中">
+    <div class="flex flex-col items-center gap-4 anim-fade-in">
+      <div class="w-20 h-20 rounded-[24px] bg-white shadow-xl border border-black/5 flex items-center justify-center p-2">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" class="w-full h-full">
+          <rect x="0" y="0" width="64" height="64" rx="16" fill="#FFFFFF"/>
+          <rect x="19" y="13" width="28" height="38" rx="4.5" stroke="#161616" stroke-width="3.2" fill="none"/>
+          <path d="M14.5 23h6M14.5 32h6M14.5 41h6" stroke="#161616" stroke-width="3.2" stroke-linecap="round"/>
+          <path d="M34 14.5v13l3.5-2.6 3.5 2.6v-13z" fill="#D71920"/>
+          <path d="M25.5 35h13" stroke="#161616" stroke-width="2.6" stroke-linecap="round"/>
+          <path d="M25.5 41h8.5" stroke="#8E8982" stroke-width="2.6" stroke-linecap="round"/>
+          <circle cx="39.5" cy="41" r="1.7" fill="#8E8982"/>
+        </svg>
+      </div>
+      <div class="text-center">
+        <div class="font-brand text-4xl font-semibold tracking-[0.14em] text-[#1D1D1F]">Vellora</div>
+        <div class="text-[10px] tracking-[0.28em] uppercase text-[#6E665E] mt-1 font-medium">Digital Planner</div>
+      </div>
+      <div class="w-28 h-[2px] rounded-full bg-black/10 overflow-hidden mt-2">
+        <div class="w-1/2 h-full rounded-full bg-[#1D1D1F]/60 splash-progress-bar"></div>
+      </div>
+      <div id="splash-status" class="text-[11px] text-[#6E665E] tracking-wide">スケジュールを読み込んでいます...</div>
+    </div>
+  </div>
+
   <div id="app" class="flex h-[100dvh] w-full p-1.5 sm:p-2 md:p-4 overflow-hidden box-border"></div>
 
-    <script src="/s1.js"></script>
+  <script src="/s1.js"></script>
   <script src="/s2.js"></script>
   <script src="/s3.js"></script>
   <script src="/s4.js"></script>

@@ -333,6 +333,29 @@ ${ICONS.upload}
 <span class="text-[11px] text-[#47413B]">手動書き出し / 読み込み</span>
 </div>
 </div>
+<div class="pt-2 border-t grid-hairline">
+<div class="flex items-center justify-between mb-2">
+<span class="font-semibold text-[#38322D]">バージョン・アップデート</span>
+<span class="text-[11px] font-semibold text-[#47413B]">Vellora v${APP_VERSION}</span>
+</div>
+<div class="flex flex-wrap items-center gap-2">
+<button type="button" onclick="checkGitHubReleaseUpdate(true)"
+class="px-3 py-2 rounded-2xl pill-thumb text-[#231F1C] text-[11px] font-semibold hover:scale-105 transition">
+最新バージョンを確認
+</button>
+${state.latestRelease ? `
+<a href="${escapeHtml(state.latestRelease.url)}" target="_blank" rel="noopener noreferrer"
+class="px-3 py-2 rounded-2xl bg-[#E5EFE8] text-[#244E32] text-[11px] font-semibold hover:opacity-90 transition">
+v${escapeHtml(state.latestRelease.version)} をGitHubで開く
+</a>
+` : `
+<a href="https://github.com/${GITHUB_REPO}/releases" target="_blank" rel="noopener noreferrer"
+class="px-3 py-2 rounded-2xl bg-[#F4EFE7] text-[#38322D] text-[11px] font-semibold hover:opacity-90 transition">
+GitHubリリース一覧
+</a>
+`}
+</div>
+</div>
 </div>
 </div>
 </div>

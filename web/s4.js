@@ -308,6 +308,7 @@ state.aiBannerMessage = `Googleカレンダー（${gcalCount}件）を同期し�
 } else {
 state.aiBannerMessage = `Googleドライブを同期しました（カレンダー未同期: ${gcalError}）。`;
 }
+if (typeof sendOsNotification === 'function') sendOsNotification('Vellora 同期完了', state.aiBannerMessage);
 }
 } else {
 state.driveSyncStatus = 'error';
