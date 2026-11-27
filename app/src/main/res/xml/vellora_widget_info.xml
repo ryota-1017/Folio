@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    android:description="@string/widget_description"
+    android:initialLayout="@layout/widget_vellora_calendar"
+    android:minWidth="320dp"
+    android:minHeight="280dp"
+    android:minResizeWidth="240dp"
+    android:minResizeHeight="200dp"
+    android:resizeMode="horizontal|vertical"
+    android:targetCellWidth="6"
+    android:targetCellHeight="5"
+    android:updatePeriodMillis="1800000"
+    android:widgetCategory="home_screen" />

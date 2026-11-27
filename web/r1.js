@@ -315,8 +315,8 @@ ${WEEKDAY_HEADERS.map(h => `<div class="text-center text-[11px] font-semibold ${
 </div>
 <div class="flex-1 min-h-0 flex flex-col gap-1">${mobileRowsHtml}</div>
 </div>
-<div id="mobile-home-sheet" class="flex-1 min-h-0 flex flex-col pt-1 border-t grid-hairline overflow-hidden">
-<div ontouchstart="onBoundaryTouchStart(event)" ontouchmove="onBoundaryTouchMove(event)" ontouchend="onBoundaryTouchEnd(event, '${activeDay}')" class="shrink-0 select-none pb-1">
+<div id="mobile-home-sheet" ontouchstart="onBoundaryTouchStart(event)" ontouchmove="onBoundaryTouchMove(event, '${activeDay}')" ontouchend="onBoundaryTouchEnd(event, '${activeDay}')" class="flex-1 min-h-0 flex flex-col pt-1 border-t grid-hairline overflow-hidden rounded-t-[24px]">
+<div class="shrink-0 select-none pb-1">
 <div onclick="selectDate('${activeDay}')" title="上にスワイプまたはタップして全体表示" class="flex justify-center pb-1 cursor-pointer">
 <span class="w-10 h-1 rounded-full bg-[#B4ACA0]"></span>
 </div>

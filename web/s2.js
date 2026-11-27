@@ -545,35 +545,80 @@ document.documentElement.setAttribute('data-theme', state.theme);
 render();
 };
 let _boundaryStartY = 0;
-window.onBoundaryTouchStart = (e) => {
-if (e.touches && e.touches.length === 1) {
-_boundaryStartY = e.touches[0].clientY;
+let _boundaryStartTime = 0;
+let _boundaryActive = false;
+let _boundaryLaunched = false;
+function launchSheetToFull(activeDay) {
+if (_boundaryLaunched) return;
+_boundaryLaunched = true;
+_boundaryActive = false;
+const sheet = document.getElementById('mobile-home-sheet');
+const cal = document.getElementById('mobile-home-cal');
+const calH = cal ? cal.getBoundingClientRect().height : Math.round(window.innerHeight * 0.56);
+if (sheet) {
+sheet.style.position = 'relative';
+sheet.style.zIndex = '35';
+sheet.style.willChange = 'transform';
+sheet.style.transition = 'transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.24s ease';
+sheet.style.transform = `translateY(${-(calH + 8)}px)`;
 }
-};
-window.onBoundaryTouchMove = (e) => {
+if (cal) {
+cal.style.willChange = 'transform, opacity';
+cal.style.transition = 'transform 0.26s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.22s ease';
+cal.style.transform = 'scale(0.92)';
+cal.style.opacity = '0';
+}
+setTimeout(() => {
+_pendingSheetAnim = 'anim-fade-in';
+_boundaryLaunched = false;
+window.selectDate(activeDay);
+}, 240);
+}
+window.onBoundaryTouchStart = (e) => {
 if (!e.touches || e.touches.length !== 1) return;
+const scroller = e.target && e.target.closest ? e.target.closest('[data-scroll-key="mobile-day"]') : null;
+if (scroller && scroller.scrollTop > 2) {
+_boundaryActive = false;
+return;
+}
+_boundaryStartY = e.touches[0].clientY;
+_boundaryStartTime = Date.now();
+_boundaryActive = true;
+_boundaryLaunched = false;
+};
+window.onBoundaryTouchMove = (e, activeDay) => {
+if (!_boundaryActive || _boundaryLaunched || !e.touches || e.touches.length !== 1) return;
 const dy = e.touches[0].clientY - _boundaryStartY;
 const sheet = document.getElementById('mobile-home-sheet');
 const cal = document.getElementById('mobile-home-cal');
 if (dy < -4 && sheet) {
-const clamped = Math.max(dy, -150);
+const calH = cal ? cal.getBoundingClientRect().height : Math.round(window.innerHeight * 0.56);
+const autoThreshold = Math.min(132, Math.max(78, Math.round(calH * 0.28)));
+const progress = Math.min(1, Math.abs(dy) / Math.max(1, calH));
+sheet.style.position = 'relative';
+sheet.style.zIndex = '35';
 sheet.style.transition = 'none';
-sheet.style.transform = `translateY(${clamped * 0.65}px)`;
+sheet.style.transform = `translateY(${dy}px)`;
 if (cal) {
 cal.style.transition = 'none';
-cal.style.transform = `scale(${1 + clamped * 0.00025})`;
-cal.style.opacity = String(Math.max(0.65, 1 + clamped * 0.0022));
+cal.style.transform = `scale(${1 - progress * 0.06})`;
+cal.style.opacity = String(Math.max(0.35, 1 - progress * 0.65));
+}
+if (dy <= -autoThreshold && activeDay) {
+launchSheetToFull(activeDay);
 }
 }
 };
 window.onBoundaryTouchEnd = (e, activeDay) => {
-if (!e.changedTouches || e.changedTouches.length !== 1) return;
+if (!_boundaryActive || _boundaryLaunched || !e.changedTouches || e.changedTouches.length !== 1) return;
+_boundaryActive = false;
 const dy = e.changedTouches[0].clientY - _boundaryStartY;
+const dt = Math.max(1, Date.now() - _boundaryStartTime);
+const velocity = -dy / dt;
 const sheet = document.getElementById('mobile-home-sheet');
 const cal = document.getElementById('mobile-home-cal');
-if (dy < -32) {
-_pendingSheetAnim = 'anim-sheet-up';
-window.selectDate(activeDay);
+if (dy < -36 || (dy < -18 && velocity > 0.35)) {
+launchSheetToFull(activeDay);
 } else {
 if (sheet) {
 sheet.style.transition = 'transform 0.28s cubic-bezier(0.34, 1.4, 0.64, 1)';

@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Vellora</string>
+    <string name="widget_name">Vellora カレンダー (6×5)</string>
+    <string name="widget_description">月間カレンダーと今日の予定をひと目で確認できる6×5ウィジェット</string>
 </resources>

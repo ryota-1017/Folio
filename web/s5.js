@@ -52,6 +52,25 @@ localStorage.removeItem(TOKEN_EXP_STORAGE);
 lastScheduledPayload = buildSyncPayloadString();
 } catch (e) {}
 }
+function syncNativeWidget() {
+try {
+if (!window.VelloraNative || typeof window.VelloraNative.syncWidgetData !== 'function') return;
+const items = (state.items || [])
+.filter(it => it && it.date && !/睡眠/.test(it.title || ''))
+.map(it => ({
+date: it.date,
+title: it.title || '',
+startTime: it.startTime || '',
+endTime: it.endTime || '',
+category: it.category || 'personal'
+}));
+window.VelloraNative.syncWidgetData(JSON.stringify({
+today: TODAY_STR,
+theme: state.theme || 'light',
+items
+}));
+} catch (e) {}
+}
 function saveState() {
 try {
 localStorage.setItem(STORAGE_KEY, JSON.stringify({
@@ -65,6 +84,7 @@ categoryOverrides: state.categoryOverrides,
 customCategoryRules: state.customCategoryRules,
 paperStyle: state.paperStyle
 }));
+syncNativeWidget();
 scheduleDriveSync();
 } catch (e) {}
 }

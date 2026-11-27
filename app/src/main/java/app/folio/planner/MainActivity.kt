@@ -121,6 +121,8 @@ class MainActivity : AppCompatActivity() {
             userAgentString = buildCleanUserAgent(userAgentString)
         }
 
+        target.addJavascriptInterface(VelloraWidgetBridge(this), "VelloraNative")
+
         target.webViewClient = object : WebViewClient() {
             override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
                 val url = request?.url?.toString() ?: return false
