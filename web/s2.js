@@ -424,8 +424,8 @@ return id;
 }
 window.dismissSplash = () => {
 const el = document.getElementById('vellora-splash');
-if (!el || el.classList.contains('is-hidden')) return;
-el.classList.add('is-hidden');
+if (!el || el.classList.contains('splash-hidden')) return;
+el.classList.add('splash-hidden');
 setTimeout(() => { if (el && el.parentNode) el.style.display = 'none'; }, 520);
 };
 function sendOsNotification(title, body) {
