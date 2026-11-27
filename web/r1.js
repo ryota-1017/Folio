@@ -182,7 +182,10 @@ html: renderSchoolGroupCardHtml(classItems, targetDate)
 });
 }
 entries.sort((a, b) => a.sortMins - b.sortMins);
-return entries.map(e => e.html).join('');
+return entries.map((e, idx) => {
+const delay = Math.min(idx * 38, 228);
+return `<div class="anim-card-in" style="animation-delay:${delay}ms">${e.html}</div>`;
+}).join('');
 }
 
 function renderCalendarBody(isPortrait) {
@@ -190,6 +193,13 @@ let sheetBodyHtml = "";
 const sheetAnimClass = consumeSheetAnim();
 const todayPulse = consumeTodayHighlight();
 const filterFn = (it) => (state.categoryFilter === 'all' || it.category === state.categoryFilter) && !/睡眠/.test(it.title || '');
+const filteredByDate = new Map();
+state.items.forEach(it => {
+if (!it.date || !filterFn(it)) return;
+if (!filteredByDate.has(it.date)) filteredByDate.set(it.date, []);
+filteredByDate.get(it.date).push(it);
+});
+filteredByDate.forEach(list => list.sort((a, b) => timeToMinutes(a.startTime) - timeToMinutes(b.startTime)));
 
 if (!state.selectedDate) {
 const weeks = getCalendarWeeks(state.currentYear, state.currentMonth);
@@ -270,9 +280,7 @@ const cellsHtml = w.days.map((cell, cIdx) => {
 if (!cell.dateStr) {
 return `<div class="rounded-xl day-tile-slot"></div>`;
 }
-const dayItems = state.items
-.filter(it => it.date === cell.dateStr && filterFn(it))
-.sort((a, b) => timeToMinutes(a.startTime) - timeToMinutes(b.startTime));
+const dayItems = filteredByDate.get(cell.dateStr) || [];
 const cellChips = buildOrderedDayDisplayItems(dayItems, cell.dateStr, true);
 const isToday = cell.dateStr === TODAY_STR;
 const isSelected = cell.dateStr === activeDay;
@@ -302,20 +310,18 @@ ${cellChips.length > 2 ? `<div class="text-[8px] text-[#47413B] text-right leadi
 return `<div class="grid grid-cols-7 gap-1 flex-1 min-h-0">${cellsHtml}</div>`;
 }).join('');
 
-const activeItems = state.items
-.filter(it => it.date === activeDay && filterFn(it))
-.sort((a, b) => timeToMinutes(a.startTime) - timeToMinutes(b.startTime));
+const activeItems = filteredByDate.get(activeDay) || [];
 const dayPreviewAnim = consumeDayPreviewAnim();
 
 sheetBodyHtml = `
-<div class="flex-1 min-h-0 flex flex-col overflow-hidden px-3 pb-2 pt-0.5 gap-1.5">
+<div id="mobile-home-container" class="relative flex-1 min-h-0 flex flex-col overflow-hidden px-3 pb-2 pt-0.5 gap-1.5">
 <div id="mobile-home-cal" class="flex-[2.25] min-h-0 flex flex-col gap-1 ${sheetAnimClass}">
 <div class="grid grid-cols-7 gap-1 py-1 rounded-xl bg-[#EFEAE1]/70 border border-white/60 shadow-inner shrink-0">
 ${WEEKDAY_HEADERS.map(h => `<div class="text-center text-[11px] font-semibold ${h.color}">${h.ja}</div>`).join('')}
 </div>
 <div class="flex-1 min-h-0 flex flex-col gap-1">${mobileRowsHtml}</div>
 </div>
-<div id="mobile-home-sheet" ontouchstart="onBoundaryTouchStart(event)" ontouchmove="onBoundaryTouchMove(event, '${activeDay}')" ontouchend="onBoundaryTouchEnd(event, '${activeDay}')" class="flex-1 min-h-0 flex flex-col pt-1 border-t grid-hairline overflow-hidden rounded-t-[24px]">
+<div id="mobile-home-sheet" ontouchstart="onBoundaryTouchStart(event)" ontouchmove="onBoundaryTouchMove(event, '${activeDay}')" ontouchend="onBoundaryTouchEnd(event, '${activeDay}')" class="mobile-sheet-surface flex-1 min-h-0 flex flex-col pt-1 border-t grid-hairline overflow-hidden rounded-t-[24px]">
 <div class="shrink-0 select-none pb-1">
 <div onclick="selectDate('${activeDay}')" title="上にスワイプまたはタップして全体表示" class="flex justify-center pb-1 cursor-pointer">
 <span class="w-10 h-1 rounded-full bg-[#B4ACA0]"></span>
@@ -372,9 +378,7 @@ ${buildMiniMonthHtml(state.currentYear, state.currentMonth + 1, 1)}
 }
 if (canShowMiniCals && cIdx === 6) return '';
 if (!cell.dateStr) return `<div class="rounded-2xl day-tile-slot"></div>`;
-const dayItems = state.items
-.filter(it => it.date === cell.dateStr && filterFn(it))
-.sort((a, b) => timeToMinutes(a.startTime) - timeToMinutes(b.startTime));
+const dayItems = filteredByDate.get(cell.dateStr) || [];
 const monthDisplayItems = buildOrderedDayDisplayItems(dayItems, cell.dateStr, false);
 const hasNote = Boolean(state.notes[cell.dateStr] && state.notes[cell.dateStr].trim());
 const isToday = cell.dateStr === TODAY_STR;

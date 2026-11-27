@@ -514,10 +514,11 @@ if (!_dailySwipeCanDismiss || !e.touches || e.touches.length !== 1) return;
 const dy = e.touches[0].clientY - _dailySwipeStartY;
 const el = document.getElementById('mobile-daily-sheet');
 if (!el) return;
-if (dy > 4) {
+if (dy > 6) {
+if (e.cancelable) e.preventDefault();
 el.style.transition = 'none';
-el.style.transform = `translateY(${Math.min(dy * 0.85, 220)}px)`;
-el.style.opacity = String(Math.max(0.55, 1 - dy / 420));
+el.style.transform = `translateY(${Math.min(dy * 0.9, 260)}px) scale(${Math.max(0.94, 1 - dy * 0.00022)})`;
+el.style.opacity = String(Math.max(0.45, 1 - dy / 380));
 } else {
 el.style.transform = '';
 el.style.opacity = '';
@@ -527,14 +528,19 @@ window.onDailyTouchEnd = (e) => {
 if (!_dailySwipeCanDismiss || !e.changedTouches || e.changedTouches.length !== 1) return;
 const dy = e.changedTouches[0].clientY - _dailySwipeStartY;
 const el = document.getElementById('mobile-daily-sheet');
-if (dy > 58) {
+_dailySwipeCanDismiss = false;
+if (dy > 64 && el) {
+el.style.transition = 'transform 0.22s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.2s ease';
+el.style.transform = `translateY(${Math.min(window.innerHeight * 0.45, 320)}px) scale(0.95)`;
+el.style.opacity = '0';
+setTimeout(() => { window.closeDailyToHome(); }, 180);
+} else if (dy > 64) {
 window.closeDailyToHome();
 } else if (el) {
 el.style.transition = 'transform 0.28s cubic-bezier(0.34, 1.4, 0.64, 1), opacity 0.2s ease';
-el.style.transform = 'translateY(0)';
+el.style.transform = 'translateY(0) scale(1)';
 el.style.opacity = '1';
 }
-_dailySwipeCanDismiss = false;
 };
 window.setTheme = (mode) => {
 state.theme = mode === 'dark' ? 'dark' : 'light';
@@ -547,35 +553,80 @@ render();
 let _boundaryStartY = 0;
 let _boundaryStartTime = 0;
 let _boundaryActive = false;
+let _boundaryDragging = false;
 let _boundaryLaunched = false;
+let _boundaryStartTop = 0;
+function resetBoundarySheetStyle(sheet, cal) {
+if (sheet) {
+sheet.classList.remove('mobile-sheet-dragging');
+sheet.style.position = '';
+sheet.style.top = '';
+sheet.style.left = '';
+sheet.style.right = '';
+sheet.style.bottom = '';
+sheet.style.zIndex = '';
+sheet.style.paddingLeft = '';
+sheet.style.paddingRight = '';
+sheet.style.willChange = '';
+sheet.style.transition = '';
+sheet.style.transform = '';
+}
+if (cal) {
+cal.style.willChange = '';
+cal.style.transition = '';
+cal.style.transform = '';
+cal.style.opacity = '';
+}
+}
+function enterBoundaryDragMode(sheet) {
+const container = document.getElementById('mobile-home-container');
+if (!sheet || !container) return false;
+const cRect = container.getBoundingClientRect();
+const sRect = sheet.getBoundingClientRect();
+_boundaryStartTop = Math.max(40, sRect.top - cRect.top);
+sheet.classList.add('mobile-sheet-dragging');
+sheet.style.position = 'absolute';
+sheet.style.top = '0px';
+sheet.style.left = '0px';
+sheet.style.right = '0px';
+sheet.style.bottom = '0px';
+sheet.style.zIndex = '35';
+sheet.style.paddingLeft = '12px';
+sheet.style.paddingRight = '12px';
+sheet.style.willChange = 'transform';
+sheet.style.transition = 'none';
+sheet.style.transform = `translateY(${_boundaryStartTop}px)`;
+return true;
+}
 function launchSheetToFull(activeDay) {
 if (_boundaryLaunched) return;
 _boundaryLaunched = true;
 _boundaryActive = false;
 const sheet = document.getElementById('mobile-home-sheet');
 const cal = document.getElementById('mobile-home-cal');
-const calH = cal ? cal.getBoundingClientRect().height : Math.round(window.innerHeight * 0.56);
+if (sheet && !_boundaryDragging) {
+enterBoundaryDragMode(sheet);
+sheet.getBoundingClientRect();
+}
+_boundaryDragging = false;
 if (sheet) {
-sheet.style.position = 'relative';
-sheet.style.zIndex = '35';
-sheet.style.willChange = 'transform';
-sheet.style.transition = 'transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.24s ease';
-sheet.style.transform = `translateY(${-(calH + 8)}px)`;
+sheet.style.transition = 'transform 0.28s cubic-bezier(0.16, 1, 0.3, 1)';
+sheet.style.transform = 'translateY(0px)';
 }
 if (cal) {
 cal.style.willChange = 'transform, opacity';
 cal.style.transition = 'transform 0.26s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.22s ease';
-cal.style.transform = 'scale(0.92)';
+cal.style.transform = 'scale(0.93)';
 cal.style.opacity = '0';
 }
 setTimeout(() => {
-_pendingSheetAnim = 'anim-fade-in';
+_pendingSheetAnim = '';
 _boundaryLaunched = false;
 window.selectDate(activeDay);
-}, 240);
+}, 265);
 }
 window.onBoundaryTouchStart = (e) => {
-if (!e.touches || e.touches.length !== 1) return;
+if (!e.touches || e.touches.length !== 1 || _boundaryLaunched) return;
 const scroller = e.target && e.target.closest ? e.target.closest('[data-scroll-key="mobile-day"]') : null;
 if (scroller && scroller.scrollTop > 2) {
 _boundaryActive = false;
@@ -584,25 +635,27 @@ return;
 _boundaryStartY = e.touches[0].clientY;
 _boundaryStartTime = Date.now();
 _boundaryActive = true;
-_boundaryLaunched = false;
+_boundaryDragging = false;
 };
 window.onBoundaryTouchMove = (e, activeDay) => {
 if (!_boundaryActive || _boundaryLaunched || !e.touches || e.touches.length !== 1) return;
 const dy = e.touches[0].clientY - _boundaryStartY;
 const sheet = document.getElementById('mobile-home-sheet');
 const cal = document.getElementById('mobile-home-cal');
-if (dy < -4 && sheet) {
-const calH = cal ? cal.getBoundingClientRect().height : Math.round(window.innerHeight * 0.56);
-const autoThreshold = Math.min(132, Math.max(78, Math.round(calH * 0.28)));
-const progress = Math.min(1, Math.abs(dy) / Math.max(1, calH));
-sheet.style.position = 'relative';
-sheet.style.zIndex = '35';
+if (dy < -8 && sheet) {
+if (e.cancelable) e.preventDefault();
+if (!_boundaryDragging) {
+_boundaryDragging = enterBoundaryDragMode(sheet);
+}
+const currentY = Math.max(0, _boundaryStartTop + dy);
+const progress = Math.min(1, Math.abs(dy) / Math.max(1, _boundaryStartTop));
+const autoThreshold = Math.min(140, Math.max(84, Math.round(_boundaryStartTop * 0.30)));
 sheet.style.transition = 'none';
-sheet.style.transform = `translateY(${dy}px)`;
+sheet.style.transform = `translateY(${currentY}px)`;
 if (cal) {
 cal.style.transition = 'none';
 cal.style.transform = `scale(${1 - progress * 0.06})`;
-cal.style.opacity = String(Math.max(0.35, 1 - progress * 0.65));
+cal.style.opacity = String(Math.max(0.25, 1 - progress * 0.75));
 }
 if (dy <= -autoThreshold && activeDay) {
 launchSheetToFull(activeDay);
@@ -617,18 +670,22 @@ const dt = Math.max(1, Date.now() - _boundaryStartTime);
 const velocity = -dy / dt;
 const sheet = document.getElementById('mobile-home-sheet');
 const cal = document.getElementById('mobile-home-cal');
-if (dy < -36 || (dy < -18 && velocity > 0.35)) {
+if (dy < -38 || (dy < -18 && velocity > 0.35)) {
 launchSheetToFull(activeDay);
-} else {
+} else if (_boundaryDragging) {
+_boundaryDragging = false;
 if (sheet) {
-sheet.style.transition = 'transform 0.28s cubic-bezier(0.34, 1.4, 0.64, 1)';
-sheet.style.transform = 'translateY(0)';
+sheet.style.transition = 'transform 0.28s cubic-bezier(0.34, 1.32, 0.64, 1)';
+sheet.style.transform = `translateY(${_boundaryStartTop}px)`;
 }
 if (cal) {
-cal.style.transition = 'transform 0.28s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.25s ease';
+cal.style.transition = 'transform 0.26s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.24s ease';
 cal.style.transform = 'scale(1)';
 cal.style.opacity = '1';
 }
+setTimeout(() => {
+if (!_boundaryActive && !_boundaryLaunched) resetBoundarySheetStyle(sheet, cal);
+}, 290);
 }
 };
 window.setSelectedMobileDay = (dateStr) => { state.selectedMobileDay = dateStr; render(); };

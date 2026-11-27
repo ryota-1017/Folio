@@ -52,7 +52,11 @@ localStorage.removeItem(TOKEN_EXP_STORAGE);
 lastScheduledPayload = buildSyncPayloadString();
 } catch (e) {}
 }
+let _widgetSyncTimer = null;
+let _lastSavedStateJson = '';
 function syncNativeWidget() {
+clearTimeout(_widgetSyncTimer);
+_widgetSyncTimer = setTimeout(() => {
 try {
 if (!window.VelloraNative || typeof window.VelloraNative.syncWidgetData !== 'function') return;
 const items = (state.items || [])
@@ -70,10 +74,11 @@ theme: state.theme || 'light',
 items
 }));
 } catch (e) {}
+}, 400);
 }
 function saveState() {
 try {
-localStorage.setItem(STORAGE_KEY, JSON.stringify({
+const serialized = JSON.stringify({
 items: state.items,
 notes: state.notes,
 courses: state.courses,
@@ -82,8 +87,12 @@ trashItems: (state.trashItems || []).slice(0, 20),
 showCompletedDeadlines: state.showCompletedDeadlines,
 categoryOverrides: state.categoryOverrides,
 customCategoryRules: state.customCategoryRules,
-paperStyle: state.paperStyle
-}));
+paperStyle: state.paperStyle,
+theme: state.theme
+});
+if (serialized === _lastSavedStateJson) return;
+_lastSavedStateJson = serialized;
+localStorage.setItem(STORAGE_KEY, serialized);
 syncNativeWidget();
 scheduleDriveSync();
 } catch (e) {}

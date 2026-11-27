@@ -149,22 +149,22 @@ if (state.swUpdateReady) {
 return `
 <div class="vellora-toast fixed top-3 left-1/2 z-[60] max-w-[92vw] sm:max-w-md px-4 py-2 rounded-full flex items-center gap-2.5 text-xs font-semibold pointer-events-auto anim-toast-drop">
 <span class="truncate">新しい更新が準備できています</span>
-<button type="button" onclick="applySwUpdate()" class="px-2.5 py-1 rounded-full bg-white/15 hover:bg-white/25 text-[11px] font-bold shrink-0 transition">更新</button>
+<button type="button" onclick="applySwUpdate()" class="vellora-toast-btn px-2.5 py-1 rounded-full text-[11px] font-bold shrink-0 transition">更新</button>
 </div>`;
 }
 if (state.latestRelease) {
 return `
 <div class="vellora-toast fixed top-3 left-1/2 z-[60] max-w-[92vw] sm:max-w-md px-4 py-2 rounded-full flex items-center gap-2.5 text-xs font-semibold pointer-events-auto anim-toast-drop">
 <span class="truncate">新バージョン v${escapeHtml(state.latestRelease.version)} が公開されています</span>
-<a href="${escapeHtml(state.latestRelease.url)}" target="_blank" rel="noopener noreferrer" class="px-2.5 py-1 rounded-full bg-white/15 hover:bg-white/25 text-[11px] font-bold shrink-0 transition">GitHub</a>
-<button type="button" onclick="dismissLatestRelease()" title="閉じる" class="w-5 h-5 rounded-full hover:bg-white/15 flex items-center justify-center shrink-0">${ICONS.close}</button>
+<a href="${escapeHtml(state.latestRelease.url)}" target="_blank" rel="noopener noreferrer" class="vellora-toast-btn px-2.5 py-1 rounded-full text-[11px] font-bold shrink-0 transition">GitHub</a>
+<button type="button" onclick="dismissLatestRelease()" title="閉じる" class="w-5 h-5 rounded-full hover:bg-black/10 flex items-center justify-center shrink-0">${ICONS.close}</button>
 </div>`;
 }
 if (state.needsRelogin) {
 return `
 <div class="vellora-toast fixed top-3 left-1/2 z-[60] max-w-[92vw] sm:max-w-md px-4 py-2 rounded-full flex items-center gap-2.5 text-xs font-semibold pointer-events-auto anim-toast-drop">
 <span class="truncate">Googleのセッション期限が切れました</span>
-<button type="button" onclick="handleGoogleLoginClick()" class="px-2.5 py-1 rounded-full bg-white/15 hover:bg-white/25 text-[11px] font-bold shrink-0 transition">再ログイン</button>
+<button type="button" onclick="handleGoogleLoginClick()" class="vellora-toast-btn px-2.5 py-1 rounded-full text-[11px] font-bold shrink-0 transition">再ログイン</button>
 </div>`;
 }
 if (state.isOffline) {

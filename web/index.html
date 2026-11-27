@@ -178,8 +178,9 @@
 
     /* Floating Glass Notification Popup */
     .vellora-toast {
-      background: rgba(255, 255, 255, 0.88);
+      background: rgba(255, 255, 255, 0.90);
       color: #1D1D1F;
+      transform: translateX(-50%);
       backdrop-filter: blur(22px) saturate(180%);
       -webkit-backdrop-filter: blur(22px) saturate(180%);
       border: 1px solid rgba(29, 29, 31, 0.09);
@@ -187,6 +188,19 @@
         0 18px 42px -12px rgba(29, 29, 31, 0.22),
         0 4px 12px -2px rgba(29, 29, 31, 0.08),
         inset 0 1px 0 rgba(255, 255, 255, 0.95);
+    }
+    .vellora-toast-btn {
+      background: rgba(29, 29, 31, 0.08);
+      color: #1D1D1F;
+    }
+    .vellora-toast-btn:hover {
+      background: rgba(29, 29, 31, 0.14);
+    }
+    .mobile-sheet-surface {
+      background: linear-gradient(180deg, #FEFDFB 0%, #FAF8F4 100%);
+    }
+    .mobile-sheet-dragging {
+      box-shadow: 0 -18px 44px -10px rgba(29, 29, 31, 0.22), 0 -2px 8px rgba(29, 29, 31, 0.08);
     }
 
     /* Splash Start Screen */
@@ -274,18 +288,40 @@
       0%, 100% { box-shadow: 0 0 0 0 rgba(54, 107, 71, 0.35); }
       50% { box-shadow: 0 0 0 5px rgba(54, 107, 71, 0); }
     }
+    @keyframes folioTodayPulse {
+      0% { transform: scale(0.92); box-shadow: 0 0 0 0 rgba(138, 124, 102, 0.55); }
+      50% { transform: scale(1.04); box-shadow: 0 0 0 8px rgba(138, 124, 102, 0); }
+      100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(138, 124, 102, 0); }
+    }
+    @keyframes folioCheckPop {
+      0% { transform: scale(0.5); }
+      55% { transform: scale(1.25); }
+      100% { transform: scale(1); }
+    }
+    @keyframes folioStrikeDraw {
+      from { opacity: 1; text-decoration-color: transparent; }
+      to { opacity: 0.65; text-decoration: line-through; text-decoration-color: currentColor; }
+    }
+    @keyframes folioTilePop {
+      from { opacity: 0; transform: translateY(8px) scale(0.96); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
     .anim-fade-in { animation: folioFadeIn 0.28s cubic-bezier(0.22, 1, 0.36, 1) both; }
     .anim-slide-right { animation: folioSlideFromRight 0.28s cubic-bezier(0.22, 1, 0.36, 1) both; }
     .anim-slide-left { animation: folioSlideFromLeft 0.28s cubic-bezier(0.22, 1, 0.36, 1) both; }
-    .anim-sheet-up { animation: folioSheetUp 0.28s cubic-bezier(0.22, 1, 0.36, 1) both; }
-    .anim-sheet-down { animation: folioSheetDown 0.25s cubic-bezier(0.22, 1, 0.36, 1) both; }
+    .anim-sheet-up { animation: folioSheetUp 0.30s cubic-bezier(0.22, 1, 0.36, 1) both; }
+    .anim-sheet-down { animation: folioSheetDown 0.26s cubic-bezier(0.22, 1, 0.36, 1) both; }
     .anim-day-fade { animation: folioDayFade 0.24s cubic-bezier(0.22, 1, 0.36, 1) both; }
     .anim-mode-pop { animation: folioModePop 0.26s cubic-bezier(0.22, 1, 0.36, 1) both; }
-    .anim-modal-pop { animation: folioModalPop 0.28s cubic-bezier(0.34, 1.32, 0.64, 1) both; }
+    .anim-modal-pop { animation: folioModalPop 0.30s cubic-bezier(0.34, 1.32, 0.64, 1) both; }
     .anim-backdrop-in { animation: folioBackdropFade 0.18s ease-out both; }
     .anim-toast-drop { animation: folioToastDrop 0.32s cubic-bezier(0.34, 1.32, 0.64, 1) both; }
-    .anim-expand-in { transform-origin: top center; animation: folioExpandIn 0.22s cubic-bezier(0.22, 1, 0.36, 1) both; }
-    .anim-card-in { animation: folioCardCascade 0.24s cubic-bezier(0.22, 1, 0.36, 1) both; }
+    .anim-expand-in { transform-origin: top center; animation: folioExpandIn 0.24s cubic-bezier(0.22, 1, 0.36, 1) both; }
+    .anim-card-in { animation: folioCardCascade 0.28s cubic-bezier(0.22, 1, 0.36, 1) both; }
+    .anim-tile-pop { animation: folioTilePop 0.28s cubic-bezier(0.22, 1, 0.36, 1) both; }
+    .anim-today-pulse { animation: folioTodayPulse 0.58s cubic-bezier(0.22, 1, 0.36, 1) both; }
+    .anim-check-pop { animation: folioCheckPop 0.34s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+    .anim-strike-draw { text-decoration: line-through; animation: folioStrikeDraw 0.32s ease-out both; }
     .anim-live-glow { animation: folioLiveGlow 2.2s ease-in-out infinite; }
     button, .day-tile, .soft-card-3d, .pill-thumb {
       transition: transform 0.18s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.2s ease, background-color 0.2s ease, opacity 0.2s ease;
@@ -303,10 +339,23 @@
       background: radial-gradient(circle at 30% 20%, #1F1E1C 0%, #141416 65%, #0D0D0F 100%);
     }
     html[data-theme="dark"] .vellora-toast {
-      background: rgba(34, 33, 36, 0.88);
+      background: rgba(34, 33, 36, 0.90);
       color: #F4F2ED;
       border-color: rgba(255, 255, 255, 0.12);
       box-shadow: 0 20px 46px -10px rgba(0, 0, 0, 0.72), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    }
+    html[data-theme="dark"] .vellora-toast-btn {
+      background: rgba(255, 255, 255, 0.14);
+      color: #F4F2ED;
+    }
+    html[data-theme="dark"] .vellora-toast-btn:hover {
+      background: rgba(255, 255, 255, 0.22);
+    }
+    html[data-theme="dark"] .mobile-sheet-surface {
+      background: linear-gradient(180deg, #1A1A1D 0%, #151517 100%);
+    }
+    html[data-theme="dark"] .mobile-sheet-dragging {
+      box-shadow: 0 -18px 44px -8px rgba(0, 0, 0, 0.72), 0 -1px 0 rgba(255, 255, 255, 0.08);
     }
     html[data-theme="dark"] .planner-cover {
       background: radial-gradient(circle at 20% 15%, #1D1C1A 0%, #131315 60%, #0C0C0E 100%);
